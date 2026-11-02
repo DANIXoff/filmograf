@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Фильмограф</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🎬%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E">
 <style>
 :root{--bg:#f4f4f8;--card:#fff;--ink:#17152b;--mute:#6b6a80;--line:#e3e2ec;--red:#e5483a;--gold:#ffb300;--green:#8fd68a;--greenInk:#14301a;--navy:#2f3399;--chip:#e9e9f2;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
@@ -29,71 +29,120 @@ body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 "Trebuchet MS
 .btn.go{background:var(--green);color:var(--greenInk)}
 .btn.nav{background:var(--navy);color:#fff}
 .btn.red{background:var(--red);color:#fff}
+.btn.ghost{background:transparent;border:1px solid var(--line)}
+.btn.sm{padding:9px 10px;font-size:13px;margin-top:0}
+.btn[disabled]{opacity:.55;cursor:default}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.row .btn{margin-top:8px}
 .row3{grid-template-columns:repeat(3,1fr)}
 .code{width:100%;padding:16px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);font:800 28px/1 "Courier New",monospace;letter-spacing:6px;text-align:center;text-transform:uppercase}
 .code.bad{border-color:var(--red);animation:sh .3s}
 @keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .err{background:rgba(229,72,58,.12);border:1px solid var(--red);border-radius:12px;padding:12px;margin-top:10px;font-size:14px}
-.poster{aspect-ratio:2/3;max-height:340px;margin:0 auto 14px;border-radius:12px;display:flex;align-items:flex-end;padding:18px;color:#fff;font:900 30px/1 Impact,"Arial Black",sans-serif;text-transform:uppercase;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+.poster{aspect-ratio:2/3;max-height:340px;margin:0 auto 14px;border-radius:12px;display:flex;align-items:flex-end;padding:18px;color:#fff;font:900 30px/1 Impact,"Arial Black",sans-serif;text-transform:uppercase;box-shadow:0 10px 30px rgba(0,0,0,.3);background-size:cover;background-position:center}
 .facts{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:12px 0;font-size:15px}.facts dt{color:var(--mute)}.facts dd{margin:0;font-weight:600}
 .rate{display:inline-block;background:var(--gold);color:#2a1d00;font-weight:800;border-radius:8px;padding:2px 9px}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:9}
+.rate.u{background:var(--green);color:var(--greenInk)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;z-index:9;max-width:90vw;text-align:center}
 .hist{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.hist button{border:0;background:var(--chip);color:var(--ink);border-radius:999px;padding:6px 12px;font:700 13px "Courier New",monospace;cursor:pointer}
 .promo{display:inline-block;background:var(--gold);color:#2a1d00;font-weight:800;border-radius:6px;padding:1px 8px}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{flex:1;border:0;border-radius:12px;padding:12px 8px;font:700 14px inherit;background:var(--chip);color:var(--ink);cursor:pointer}
+.tabs button.on{background:var(--navy);color:#fff}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.filters button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:7px 12px;font:600 13px inherit;cursor:pointer}
+.filters button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.flist{display:flex;flex-direction:column;gap:10px}
+.fcard{display:flex;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;cursor:pointer;text-align:left}
+.fcard .th{width:52px;height:78px;border-radius:8px;flex:none;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:#fff;font:800 11px Impact,sans-serif;text-align:center}
+.fcard .info{flex:1;min-width:0}
+.fcard .ttl{font-weight:700;font-size:14px;margin:0 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fcard .mt{font-size:12px;color:var(--mute);margin:0 0 4px}
+.badge{display:inline-block;border-radius:7px;padding:1px 7px;font-size:12px;font-weight:700}
+.badge.want{background:#ffe3a6;color:#5a3c00}
+.badge.watched{background:var(--green);color:var(--greenInk)}
+.scorepick{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:12px 0}
+.scorepick button{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 0;font:800 16px inherit;color:var(--ink);cursor:pointer}
+.scorepick button.on,.scorepick button:active{background:var(--gold);color:#2a1d00;border-color:var(--gold)}
+.spin{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--navy);border-radius:50%;margin:30px auto;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.linklist{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.linklist a{display:block;background:var(--chip);color:var(--ink);border-radius:10px;padding:10px 12px;text-decoration:none;font-weight:600;font-size:14px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <div id="app"></div>
 <script>
-/* ===== НАСТРОЙКИ: замените на свои ===== */
+/* ===== НАСТРОЙКА: впишите свои данные из Supabase (Project Settings -> API) ===== */
 var CONFIG={
-  channelUrl:"https://t.me/filmograffff",
-  social:{YouTube:"https://www.youtube.com/",TikTok:"https://www.tiktok.com/",Instagram:"https://www.instagram.com/"},
-  cinemas:[["КиноПоиск","https://www.kinopoisk.ru/"],["Premier","https://premier.one/"],["Start","https://start.ru/"],["Иви","https://www.ivi.ru/"]],
-  promo:"ФИЛЬМОГРАФ",
-  api:"" /* URL вашего сервера: GET {api}/check-sub?initData=... -> {ok:true}. Пусто = демо-режим */
+  supabaseUrl:"https://futrffdubpboojcirqss.supabase.co",
+  supabaseAnonKey:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1dHJmZmR1YnBib29qY2lycXNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM2Mzk4ODcsImV4cCI6MjEwOTIxNTg4N30.PK_YeNT-o9gC8MwZmUAArI9e0hktLh4l5G-rap8sRxI",
+  promoFallback:"ФИЛЬМОГРАФ"
 };
-/* Демо-база. T0001 взят из бота, остальное для проверки логики. Код = буква жанра + 4 цифры */
-var FILMS={
- T0001:{title:"Сноуден (Snowden)",desc:"Ярый патриот становится врагом государства. Триллер Оливера Стоуна по биографии самого известного агента ЦРУ.",rating:"7.2",genre:"триллер, драма",year:2016,country:"США",c:["#2a1a2e","#7a1f2b"]},
- D0001:{title:"Побег из Шоушенка (The Shawshank Redemption)",desc:"Банкир попадает в тюрьму за убийство, которого не совершал, и находит там надежду.",rating:"9.1",genre:"драма",year:1994,country:"США",c:["#1d2b3a","#c98a3b"]},
- D0002:{title:"Бойцовский клуб (Fight Club)",desc:"Офисный сотрудник с бессонницей знакомится с харизматичным торговцем мылом.",rating:"8.7",genre:"драма, триллер",year:1999,country:"США",c:["#1a1a1a","#d4513a"]},
- T0002:{title:"Начало (Inception)",desc:"Вор, крадущий идеи из снов, получает задание внедрить мысль в чужой разум.",rating:"8.7",genre:"фантастика, триллер",year:2010,country:"США",c:["#0f2438","#5f8fb0"]},
- F0001:{title:"Интерстеллар (Interstellar)",desc:"Экипаж отправляется через червоточину искать новый дом для человечества.",rating:"8.6",genre:"фантастика, драма",year:2014,country:"США",c:["#0b1020","#b4752c"]}
-};
+var sb=supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
+
 /* ===== Telegram ===== */
 var tg=(window.Telegram&&window.Telegram.WebApp)||null;
 if(tg){try{tg.ready();tg.expand();}catch(e){}}
 function haptic(t){try{tg&&tg.HapticFeedback&&tg.HapticFeedback.impactOccurred(t||"light")}catch(e){}}
 function openUrl(u){try{if(tg&&/t\.me\//.test(u)&&tg.openTelegramLink){tg.openTelegramLink(u)}else if(tg&&tg.openLink){tg.openLink(u)}else{window.open(u,"_blank","noopener")}}catch(e){window.open(u,"_blank","noopener")}}
-var userName=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user&&tg.initDataUnsafe.user.first_name)||"друг";
+var tgUser=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user)||null;
+var TG_ID=tgUser?tgUser.id:0; /* 0 = запуск вне Телеграма (для отладки в браузере) */
+var userName=(tgUser&&tgUser.first_name)||"друг";
+
 /* ===== Состояние ===== */
 function lsGet(k,d){try{var v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
-var S={subscribed:lsGet("fg_sub",false),clickedSub:false,history:lsGet("fg_hist",[]),stack:[],cur:{n:"welcome"},err:""};
+var S={history:lsGet("fg_hist",[]),stack:[],cur:{n:"welcome"},err:"",
+  films:{},            /* code -> film data (+ user_avg, user_cnt) */
+  my:{},               /* code -> {status,score,updated_at} */
+  settings:null,
+  loaded:false,
+  cabTab:"want",        /* want | watched */
+  sort:{want:{key:"date",dir:-1},watched:{key:"date",dir:-1}},
+  genreFilter:{want:"",watched:""}
+};
 var app=document.getElementById("app");
-function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function go(n,p){S.stack.push(S.cur);S.cur={n:n,p:p||{}};S.err="";haptic();render()}
 function back(){if(S.stack.length){S.cur=S.stack.pop();S.err="";render()}}
 function menu(){S.stack=[];S.cur={n:"menu"};S.err="";haptic();render()}
 function toast(t){var d=document.createElement("div");d.className="toast";d.setAttribute("role","status");d.textContent=t;document.body.appendChild(d);setTimeout(function(){d.remove()},2200)}
 function syncBack(){if(!tg||!tg.BackButton)return;try{S.stack.length?tg.BackButton.show():tg.BackButton.hide()}catch(e){}}
 if(tg&&tg.BackButton){try{tg.BackButton.onClick(back)}catch(e){}}
-/* ===== Подписка ===== */
-function checkSub(){
-  if(CONFIG.api){
-    return fetch(CONFIG.api+"/check-sub?initData="+encodeURIComponent(tg?tg.initData:"")).then(function(r){return r.json()}).then(function(j){return !!j.ok}).catch(function(){return false});
-  }
-  return Promise.resolve(S.clickedSub); /* демо: считаем подписанным, если нажали «Подписаться» */
+
+/* ===== Загрузка данных из Supabase ===== */
+function loadAll(){
+  return Promise.all([
+    sb.from("films_with_stats").select("*"),
+    sb.from("settings").select("value").eq("key","app").maybeSingle(),
+    TG_ID ? sb.rpc("upsert_user",{p_tg:TG_ID,p_name:(tgUser&&tgUser.first_name)||"",p_username:(tgUser&&tgUser.username)||""}) : Promise.resolve(),
+    TG_ID ? sb.rpc("get_my_films",{p_tg:TG_ID}) : Promise.resolve({data:[]})
+  ]).then(function(res){
+    var filmsRes=res[0], setRes=res[1], myRes=res[3];
+    S.films={};
+    (filmsRes.data||[]).forEach(function(f){S.films[f.code]=f});
+    S.settings=(setRes.data&&setRes.data.value)||null;
+    S.my={};
+    (myRes.data||[]).forEach(function(r){S.my[r.code]={status:r.status,score:r.score,updated_at:r.updated_at}});
+    S.loaded=true;
+  }).catch(function(e){console.error(e);S.loadError=true;S.loaded=true});
 }
-/* ===== Логика ===== */
+
+function cfgSocial(){return (S.settings&&S.settings.social)||{}}
+function cfgCinemas(){return (S.settings&&S.settings.cinemas)||[]}
+function cfgPromo(){return (S.settings&&S.settings.promo)||CONFIG.promoFallback}
+function cfgInstruction(){return (S.settings&&S.settings.instruction)||""}
+function cfgChannelUrl(){return (S.settings&&S.settings.social&&S.settings.social.Telegram)||""}
+function cfgButtons(){return (S.settings&&S.settings.buttons)||[]}
+
+/* ===== Логика поиска по коду ===== */
 function normalize(v){return v.trim().toUpperCase().replace(/^КОД\s*/,"")}
 function find(){
   var inp=document.getElementById("code");var v=normalize(inp.value);
-  if(!/^[A-Z]\d{4}$/.test(v)||!FILMS[v]){S.err="Такого кода нет или вы ввели неправильно";render();haptic("heavy");
+  if(!/^[A-Z]\d{4}$/.test(v)||!S.films[v]){S.err="Такого кода нет или вы ввели неправильно";render();haptic("heavy");
     var i=document.getElementById("code");i.classList.add("bad");i.value=inp.value;i.focus();return}
   show(v)
 }
@@ -101,56 +150,170 @@ function show(code){
   S.history=[code].concat(S.history.filter(function(c){return c!==code})).slice(0,6);lsSet("fg_hist",S.history);
   S.cur.n==="film"?(S.cur={n:"film",p:{code:code}},render()):go("film",{code:code});
 }
-function lucky(){var k=Object.keys(FILMS);show(k[Math.floor(Math.random()*k.length)])}
+function lucky(){var k=Object.keys(S.films);if(!k.length)return;show(k[Math.floor(Math.random()*k.length)])}
 function similar(code){
-  var g=FILMS[code].genre.split(", ");var k=Object.keys(FILMS).filter(function(c){return c!==code});
-  var m=k.filter(function(c){return FILMS[c].genre.split(", ").some(function(x){return g.indexOf(x)>-1})});
-  var pool=m.length?m:k;show(pool[Math.floor(Math.random()*pool.length)])
+  var all=S.films, g=(all[code].genre||"").split(",").map(function(x){return x.trim()}).filter(Boolean);
+  var k=Object.keys(all).filter(function(c){return c!==code});
+  var m=k.filter(function(c){return (all[c].genre||"").split(",").map(function(x){return x.trim()}).some(function(x){return g.indexOf(x)>-1})});
+  var pool=m.length?m:k;if(!pool.length)return;show(pool[Math.floor(Math.random()*pool.length)])
 }
-/* ===== Экраны ===== */
-function B(label,act,cls){return '<button class="btn '+(cls||"")+'" data-a="'+act+'">'+label+'</button>'}
-function socials(){return '<div class="row row3">'+Object.keys(CONFIG.social).map(function(k){return B(k,"url:"+CONFIG.social[k])}).join("")+'</div>'}
+
+/* ===== Личный кабинет: отметки "хочу/посмотрел" и оценка ===== */
+function setStatus(code,status,score){
+  if(!TG_ID){toast("Откройте приложение в Телеграме, чтобы сохранять отметки");return Promise.resolve()}
+  return sb.rpc("set_film_status",{p_tg:TG_ID,p_code:code,p_status:status,p_score:score==null?null:score}).then(function(r){
+    if(r.error){toast("Ошибка сохранения");console.error(r.error);return}
+    if(status==null){delete S.my[code]}else{S.my[code]={status:status,score:score==null?null:score,updated_at:new Date().toISOString()}}
+    haptic("medium");render()
+  })
+}
+function markWant(code){setStatus(code,"want",null)}
+function markWatched(code){go("rate",{code:code})}
+function saveScore(code,score){setStatus(code,"watched",score).then(function(){toast("Оценка сохранена");back();back()})}
+function skipScore(code){setStatus(code,"watched",null).then(function(){back();back()})}
+function removeMark(code){setStatus(code,null,null)}
+
+/* ===== Рендер экранов ===== */
+function B(label,act,cls,extra){return '<button class="btn '+(cls||"")+'" data-a="'+act+'" '+(extra||"")+'>'+label+'</button>'}
+function socials(){var s=cfgSocial();return '<div class="row row3">'+Object.keys(s).filter(function(k){return s[k]}).map(function(k){return B(k,"url:"+s[k])}).join("")+'</div>'}
 var hero='<div class="hero"><p>Ищи название фильма</p><h1>ФИЛЬМОГРАФ</h1><p><b>по коду</b> из нарезки</p></div>';
+
+function posterStyle(f){
+  if(f.poster_url){return 'background-image:url(\''+f.poster_url+'\')'}
+  return 'background:linear-gradient(160deg,#2a1a2e,#7a1f2b)'
+}
+function filmBadge(code){
+  var m=S.my[code];if(!m)return"";
+  return m.status==="want" ? '<span class="badge want">Хочу посмотреть</span>' : '<span class="badge watched">Просмотрено'+(m.score?(' · '+m.score+'/10'):'')+'</span>'
+}
+
 var V={
-welcome:function(){return hero+'<div class="panel"><p><b>Привет, '+esc(userName)+'!</b></p><p>Этот помощник найдёт нужный фильм или сериал, момент из которого ты видел в TikTok, YouTube Shorts или Instagram Reels.</p><p class="muted">Жми «Далее» и переходи к поиску. Если ещё не выбрал, что смотреть, заходи в TikTok, YouTube или Instagram и выбирай по интересным моментам.</p></div>'+B("Далее","next","go")+socials()},
-gate:function(){return hero+'<div class="panel"><p>⚠️ Чтобы продолжить, подпишись на канал «Фильмограф». Там публикуются все обновления и новые поступления фильмов и сериалов.</p><p class="muted">Когда подпишешься, нажми «Проверить подписку».</p></div>'+
-  (S.err?'<div class="err" role="alert">🚫 Вы не подписались на канал 😔</div>':"")+B("Подписаться","sub")+B("✅ Проверить подписку","check","go")},
-menu:function(){return hero+'<div class="panel"><b>🎬 Меню</b></div>'+B("🔍 Найти фильм по коду","code","go")+B("📋 Инструкция","instr","nav")+B("Онлайн-кинотеатры","cinemas","nav")+
-  '<div class="row">'+B("Telegram","url:"+CONFIG.channelUrl)+Object.keys(CONFIG.social).map(function(k){return B(k,"url:"+CONFIG.social[k])}).join("")+'</div>'+B("✨ Испытай удачу ✨","lucky")},
+welcome:function(){return hero+'<div class="panel"><p><b>Привет, '+esc(userName)+'!</b></p><p>Этот помощник найдёт нужный фильм или сериал, момент из которого ты видел в TikTok, YouTube Shorts или Instagram Reels.</p><p class="muted">Жми «Далее» и переходи к поиску.</p></div>'+B("Далее","next","go")+socials()},
+menu:function(){return hero+'<div class="panel"><b>🎬 Меню</b></div>'+
+  B("🔍 Найти фильм по коду","code","go")+
+  B("👤 Личный кабинет","cabinet","nav")+
+  B("📋 Инструкция","instr","nav")+
+  B("Онлайн-кинотеатры","cinemas","nav")+
+  (cfgButtons().length?'<div class="row">'+cfgButtons().map(function(b){return B(esc(b.label||b.l),"url:"+(b.url||b.u))}).join("")+'</div>':"")+
+  '<div class="row">'+(cfgChannelUrl()?B("Telegram","url:"+cfgChannelUrl()):"")+Object.keys(cfgSocial()).filter(function(k){return cfgSocial()[k]}).map(function(k){return B(k,"url:"+cfgSocial()[k])}).join("")+'</div>'+
+  B("✨ Испытай удачу ✨","lucky")},
 code:function(){return '<div class="panel"><p>🔍 <b>Введите код фильма, который хотите найти:</b></p><input id="code" class="code'+(S.err?" bad":"")+'" maxlength="8" inputmode="text" autocomplete="off" autocapitalize="characters" placeholder="D0002" aria-label="Код фильма">'+
-  (S.err?'<div class="err" role="alert">⛔ '+S.err+'<br><span class="muted">Код состоит из английской буквы-жанра и четырёх цифр, например D0002. Слово «Код» вводить не надо.</span></div>':"")+
+  (S.err?'<div class="err" role="alert">⛔ '+esc(S.err)+'<br><span class="muted">Код состоит из английской буквы-жанра и четырёх цифр, например D0002. Слово «Код» вводить не надо.</span></div>':"")+
   '</div>'+B("Найти","find","go")+
   (S.history.length?'<div class="muted" style="margin-top:14px">Недавние коды</div><div class="hist">'+S.history.map(function(c){return '<button data-a="hist:'+c+'">'+c+'</button>'}).join("")+'</div>':"")+
   B("📋 Инструкция","instr")+B("⬅️ Назад","back","go")},
-film:function(){var c=S.cur.p.code,f=FILMS[c];
-  return '<div class="panel"><div class="poster" style="background:linear-gradient(160deg,'+f.c[0]+','+f.c[1]+')" role="img" aria-label="Постер: '+esc(f.title)+'">'+esc(f.title.split(" (")[0])+'</div>'+
-  '<p><b style="font-size:20px">'+esc(f.title)+'</b> <span class="muted">'+c+'</span></p><p>'+esc(f.desc)+'</p>'+
-  '<dl class="facts"><dt>Оценка</dt><dd><span class="rate">'+f.rating+'</span> /10</dd><dt>Жанр</dt><dd>'+esc(f.genre)+'</dd><dt>Год выхода</dt><dd>'+f.year+'</dd><dt>Страна</dt><dd>'+esc(f.country)+'</dd></dl>'+
+film:function(){var c=S.cur.p.code,f=S.films[c];
+  if(!f){return '<div class="panel"><p>Фильм не найден.</p></div>'+B("⬅️ Назад","back","go")}
+  var mine=S.my[c];
+  return '<div class="panel"><div class="poster" style="'+posterStyle(f)+'" role="img" aria-label="Постер: '+esc(f.title)+'">'+(f.poster_url?'':esc((f.title||"").split(" (")[0]))+'</div>'+
+  '<p><b style="font-size:20px">'+esc(f.title)+'</b> <span class="muted">'+c+'</span></p>'+
+  '<p style="margin-bottom:6px">'+filmBadge(c)+'</p>'+
+  '<p>'+esc(f.description)+'</p>'+
+  '<dl class="facts">'+
+    (f.kp_rating?'<dt>Оценка КП</dt><dd><span class="rate">'+f.kp_rating+'</span> /10</dd>':"")+
+    (f.user_cnt?'<dt>Оценка пользователей</dt><dd><span class="rate u">'+f.user_avg+'</span> /10 ('+f.user_cnt+')</dd>':"")+
+    (f.genre?'<dt>Жанр</dt><dd>'+esc(f.genre)+'</dd>':"")+
+    (f.year?'<dt>Год выхода</dt><dd>'+f.year+'</dd>':"")+
+    (f.country?'<dt>Страна</dt><dd>'+esc(f.country)+'</dd>':"")+
+  '</dl>'+
   '<p class="muted">Посмотреть этот фильм можно на следующих площадках:</p></div>'+
-  B("КиноПоиск","url:https://www.kinopoisk.ru/index.php?kp_query="+encodeURIComponent(f.title.split(" (")[0]))+B("Похожий фильм","sim:"+c,"nav")+
-  '<div class="row">'+B("⬅️ Назад","back","go")+B("🎬 Меню","menu","red")+'</div>'+B("✨ Испытай удачу ✨","lucky")},
-cinemas:function(){return '<div class="panel"><p>📺 Здесь собраны онлайн-кинотеатры, где можно посмотреть любой интересный фильм или сериал.</p><p>По промокоду <span class="promo">'+CONFIG.promo+'</span> на этих сервисах скидки и бесплатные дни пользования!</p></div>'+
-  '<div class="row">'+CONFIG.cinemas.map(function(x){return B(x[0],"url:"+x[1])}).join("")+'</div>'+B("⬅️ Назад","back","go")},
-instr:function(){return '<div class="panel"><p><b>📋 Как найти фильм</b></p><p>1. В нарезке (TikTok, Shorts, Reels) найди код: английская буква и четыре цифры, например <b>D0002</b>.</p><p>2. Нажми «Найти фильм по коду» и введи его. Слово «Код» писать не надо.</p><p>3. Получишь название, описание, оценку и ссылки, где смотреть.</p><p class="muted">Буква показывает жанр, цифры — номер фильма в библиотеке. Текст инструкции замените на свой.</p></div>'+B("⬅️ Назад","back","go")}
+  '<div class="linklist">'+(f.links||[]).map(function(l){return '<a href="#" data-a="url:'+esc(l.url||l.u)+'">'+esc(l.label||l.l)+'</a>'}).join("")+'</div>'+
+  '<div class="row" style="margin-top:12px">'+
+    B("⭐ Хочу посмотреть","want:"+c,mine&&mine.status==="want"?"go":"")+
+    B("✅ Уже посмотрел","watched:"+c,mine&&mine.status==="watched"?"go":"")+
+  '</div>'+
+  (mine?B("✖️ Убрать отметку","unmark:"+c,"ghost sm"):"")+
+  B("Похожий фильм","sim:"+c,"nav")+
+  '<div class="row">'+B("⬅️ Назад","back","go")+B("🎬 Меню","menu","red")+'</div>'+
+  B("✨ Испытай удачу ✨","lucky")},
+rate:function(){var c=S.cur.p.code,f=S.films[c]||{};
+  return '<div class="panel"><p><b>Оцените «'+esc(f.title||c)+'»</b></p><p class="muted">Поставьте оценку по 10-балльной шкале, или пропустите этот шаг.</p>'+
+  '<div class="scorepick">'+[1,2,3,4,5,6,7,8,9,10].map(function(n){return '<button data-a="score:'+n+'">'+n+'</button>'}).join("")+'</div>'+
+  '</div>'+B("Пропустить","skipscore","ghost")+B("⬅️ Отмена","back","go")},
+cinemas:function(){return '<div class="panel"><p>📺 Здесь собраны онлайн-кинотеатры, где можно посмотреть любой интересный фильм или сериал.</p><p>По промокоду <span class="promo">'+esc(cfgPromo())+'</span> на этих сервисах скидки и бесплатные дни пользования!</p></div>'+
+  '<div class="row">'+cfgCinemas().map(function(x){return B(esc(x.l||x[0]),"url:"+(x.u||x[1]))}).join("")+'</div>'+B("⬅️ Назад","back","go")},
+instr:function(){return '<div class="panel"><p><b>📋 Как найти фильм</b></p>'+
+  (cfgInstruction()? cfgInstruction().split("\n").map(function(l){return l?'<p>'+esc(l)+'</p>':""}).join("") :
+  '<p>1. В нарезке (TikTok, Shorts, Reels) найди код: английская буква и четыре цифры, например <b>D0002</b>.</p><p>2. Нажми «Найти фильм по коду» и введи его. Слово «Код» писать не надо.</p><p>3. Получишь название, описание, оценку и ссылки, где смотреть.</p>')+
+  '</div>'+B("⬅️ Назад","back","go")},
+cabinet:function(){return hero+'<div class="panel"><b>👤 Личный кабинет</b><p class="muted" style="margin-top:6px">'+esc(userName)+(tgUser&&tgUser.username?' · @'+esc(tgUser.username):'')+'</p></div>'+
+  '<div class="tabs">'+
+    '<button class="'+(S.cabTab==="want"?"on":"")+'" data-a="cabtab:want">⭐ Хочу посмотреть</button>'+
+    '<button class="'+(S.cabTab==="watched"?"on":"")+'" data-a="cabtab:watched">✅ Оценённое</button>'+
+  '</div>'+
+  cabinetList()+
+  B("⬅️ Назад","back","go")}
 };
+
+function cabinetList(){
+  var tab=S.cabTab;
+  var items=Object.keys(S.my).filter(function(c){return S.my[c].status===tab}).map(function(c){
+    var f=S.films[c]||{};return {code:c,f:f,m:S.my[c]}
+  });
+  if(!items.length){return '<div class="panel muted">'+(tab==="want"?"Список пуст. Отмечайте фильмы кнопкой «Хочу посмотреть».":"Вы ещё не оценили ни одного фильма.")+'</div>'}
+  var genres=Array.from(new Set(items.map(function(x){return (x.f.genre||"").split(",")[0].trim()}).filter(Boolean)));
+  var gf=S.genreFilter[tab];
+  if(gf){items=items.filter(function(x){return (x.f.genre||"").toLowerCase().indexOf(gf.toLowerCase())>-1})}
+  var sort=S.sort[tab];
+  items.sort(function(a,b){
+    var va,vb;
+    if(sort.key==="date"){va=new Date(a.m.updated_at).getTime();vb=new Date(b.m.updated_at).getTime()}
+    else if(sort.key==="score"){va=a.m.score||0;vb=b.m.score||0}
+    else {va=0;vb=0}
+    return (va-vb)*sort.dir
+  });
+  var filters='<div class="filters">'+
+    '<button class="'+(sort.key==="date"?"on":"")+'" data-a="sort:'+tab+':date">По дате '+(sort.key==="date"?(sort.dir===-1?"↓":"↑"):"")+'</button>'+
+    (tab==="watched"?('<button class="'+(sort.key==="score"?"on":"")+'" data-a="sort:'+tab+':score">По оценке '+(sort.key==="score"?(sort.dir===-1?"↓":"↑"):"")+'</button>'):"")+
+    '</div>';
+  var genreChips = genres.length ? ('<div class="filters">'+
+    '<button class="'+(!gf?"on":"")+'" data-a="genref:'+tab+':">Все жанры</button>'+
+    genres.map(function(g){return '<button class="'+(gf===g?"on":"")+'" data-a="genref:'+tab+':'+esc(g)+'">'+esc(g)+'</button>'}).join("")+
+    '</div>') : "";
+  return filters+genreChips+'<div class="flist">'+items.map(function(x){
+    var f=x.f;
+    return '<button class="fcard" data-a="open:'+x.code+'">'+
+      '<div class="th" style="'+posterStyle(f)+'">'+(f.poster_url?'':(f.title||"?").slice(0,1))+'</div>'+
+      '<div class="info">'+
+        '<p class="ttl">'+esc(f.title||x.code)+'</p>'+
+        '<p class="mt">'+(f.genre?esc(f.genre):'')+(f.year?' · '+f.year:'')+'</p>'+
+        (tab==="watched" ? (x.m.score?('<span class="badge watched">Оценка: '+x.m.score+'/10</span>') : '<span class="badge watched">Без оценки</span>') : '<span class="badge want">В списке</span>')+
+      '</div>'+
+    '</button>'
+  }).join("")+'</div>'
+}
+
 function render(){
+  if(!S.loaded){app.innerHTML='<div class="spin"></div>';return}
+  if(S.loadError){app.innerHTML='<div class="panel"><p>⚠️ Не удалось загрузить данные. Проверьте подключение и адрес Supabase в настройках приложения.</p></div>';return}
   app.innerHTML=V[S.cur.n]();syncBack();
   var i=document.getElementById("code");
   if(i){i.addEventListener("keydown",function(e){if(e.key==="Enter")find()});if(!S.err)setTimeout(function(){i.focus()},50)}
   window.scrollTo(0,0)
 }
+
 app.addEventListener("click",function(e){
-  var b=e.target.closest("[data-a]");if(!b)return;var a=b.getAttribute("data-a");
+  var b=e.target.closest("[data-a]");if(!b)return;e.preventDefault();var a=b.getAttribute("data-a");
   if(a.indexOf("url:")===0){haptic();return openUrl(a.slice(4))}
   if(a.indexOf("hist:")===0){return show(a.slice(5))}
   if(a.indexOf("sim:")===0){return similar(a.slice(4))}
-  if(a==="next"){return S.subscribed?go("menu"):go("gate")}
-  if(a==="sub"){S.clickedSub=true;return openUrl(CONFIG.channelUrl)}
-  if(a==="check"){return checkSub().then(function(ok){if(ok){S.subscribed=true;lsSet("fg_sub",true);S.stack=[];S.cur={n:"menu"};S.err="";haptic("medium");render()}else{S.err="1";render();haptic("heavy")}})}
-  if(a==="code")return go("code");if(a==="instr")return go("instr");if(a==="cinemas")return go("cinemas");
+  if(a.indexOf("open:")===0){return show(a.slice(5))}
+  if(a.indexOf("want:")===0){return markWant(a.slice(5))}
+  if(a.indexOf("watched:")===0){return markWatched(a.slice(8))}
+  if(a.indexOf("unmark:")===0){return removeMark(a.slice(7))}
+  if(a.indexOf("score:")===0){return saveScore(S.cur.p.code, parseInt(a.slice(6),10))}
+  if(a==="skipscore"){return skipScore(S.cur.p.code)}
+  if(a.indexOf("cabtab:")===0){S.cabTab=a.slice(7);return render()}
+  if(a.indexOf("sort:")===0){var parts=a.split(":");var tab=parts[1],key=parts[2];
+    var s=S.sort[tab];if(s.key===key){s.dir=-s.dir}else{s.key=key;s.dir=-1}return render()}
+  if(a.indexOf("genref:")===0){var p2=a.split(":");S.genreFilter[p2[1]]=p2.slice(2).join(":");return render()}
+  if(a==="next")return menu();
+  if(a==="code")return go("code");if(a==="instr")return go("instr");if(a==="cinemas")return go("cinemas");if(a==="cabinet")return go("cabinet");
   if(a==="find")return find();if(a==="lucky")return lucky();if(a==="back")return back();if(a==="menu")return menu();
 });
-render();
+
+app.innerHTML='<div class="spin"></div>';
+loadAll().then(render);
 </script>
 </body>
 </html>
