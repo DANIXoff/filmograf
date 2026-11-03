@@ -57,8 +57,8 @@ async function upload(file,dir){
 }
 async function loadAll(){
   var r=await Promise.all([sb.from("genres").select("*").order("sort"),sb.from("providers").select("*").order("name"),
-    sb.from("titles").select("id,kind,code,title,status,poster_url,year_start,year_end").order("id",{ascending:false})]);
-  G.genres=r[0].data||[];G.providers=r[1].data||[];G.titles=r[2].data||[];
+    sb.from("titles").select("id,kind,code,title,status,poster_url,year_start,year_end").order("id",{ascending:false}),sb.from("collections").select("*").order("sort").order("id")]);
+  G.genres=r[0].data||[];G.providers=r[1].data||[];G.titles=r[2].data||[];G.colls=r[3].data||[];
 }
 async function boot(){
   var s=await sb.auth.getSession();
@@ -76,11 +76,11 @@ var V={
 login:function(){return '<div class="card" style="max-width:380px;margin:60px auto"><h1>Фильмограф · админка</h1><label>Почта<input id="em" type="email" autocomplete="username"></label><label>Пароль<input id="pw" type="password" autocomplete="current-password"></label><button class="btn pri" data-a="login" style="width:100%">Войти</button></div>'},
 list:function(){
   var k=G.tab,rows=G.titles.filter(function(t){return t.kind===k});
-  return '<div class="bar"><h1 style="margin:0">Контент</h1><span class="sp"></span><button class="btn sm" data-a="provcat">Кинотеатры</button><button class="btn sm" data-a="logout">Выйти</button></div>'+
+  return nav("list")+
   '<div class="bar"><div class="tabs"><button class="'+(k==="movie"?"on":"")+'" data-a="tab:movie">Фильмы</button><button class="'+(k==="series"?"on":"")+'" data-a="tab:series">Сериалы</button></div><span class="sp"></span><button class="btn pri" data-a="new">+ Добавить</button></div>'+
   (rows.length?rows.map(function(t){return '<button class="item" data-a="edit:'+t.id+'">'+(t.poster_url?'<img src="'+esc(t.poster_url)+'" alt="">':'<span class="ph"></span>')+'<span><b>'+esc(t.title)+'</b><small>'+esc(t.code||"без кода")+' · '+(t.year_start||"—")+(t.kind==="series"?"–"+(t.year_end||""):"")+'</small></span><span class="badge '+(t.status==="published"?"pub":"")+'">'+(t.status==="published"?"опубликовано":"черновик")+'</span></button>'}).join(""):'<div class="card mute">Здесь пока пусто. Нажмите «+ Добавить».</div>')},
 provcat:function(){
-  return '<div class="bar"><button class="btn sm" data-a="back">← Назад</button><h1 style="margin:0">Онлайн-кинотеатры</h1></div>'+
+  return nav("provcat")+'<h1>Онлайн-кинотеатры</h1>'+
   G.providers.map(function(p){return '<div class="item" style="cursor:default">'+(p.icon_url?'<img src="'+esc(p.icon_url)+'" alt="" style="width:42px;height:42px;border-radius:50%">':'<span class="ph" style="height:42px;border-radius:50%"></span>')+'<b>'+esc(p.name)+'</b><button class="btn red sm" style="margin-left:auto" data-a="delprov:'+p.id+'">Удалить</button></div>'}).join("")+
   '<div class="card"><h2>Добавить кинотеатр</h2><div class="row"><label>Название<input id="pn"></label><label>Иконка (квадратная)<input id="pi" type="file" accept="image/*"></label><button class="btn pri" data-a="addprov">Добавить</button></div></div>'},
 ed:function(){
@@ -108,6 +108,56 @@ ed:function(){
   h+='<div class="bar"><button class="btn pri" data-a="save">Сохранить</button><button class="btn" data-a="back">Отмена</button><span class="sp"></span>'+(E.id?'<button class="btn red" data-a="del">Удалить</button>':"")+'</div>';
   return h}
 };
+
+/* ---------- подборки и главная ---------- */
+function nav(cur){var it=[["list","Контент"],["colls","Подборки"],["home","Главная"],["provcat","Кинотеатры"]];
+  return '<div class="bar"><div class="tabs">'+it.map(function(x){return '<button class="'+(cur===x[0]?"on":"")+'" data-a="sec:'+x[0]+'">'+x[1]+'</button>'}).join("")+'</div><span class="sp"></span><button class="btn sm" data-a="logout">Выйти</button></div>'}
+function kindTabs(){return '<div class="tabs">'+["movie","series"].map(function(k){return '<button class="'+(G.tab===k?"on":"")+'" data-a="tab:'+k+'">'+(k==="movie"?"Фильмы":"Сериалы")+'</button>'}).join("")+'</div>'}
+function tname(id){var t=G.titles.find(function(x){return x.id===id});return t?t.title+(t.status==="published"?"":" (черновик)"):"#"+id}
+V.colls=function(){
+  var rows=G.colls.filter(function(c){return c.kind===G.tab});
+  return nav("colls")+'<div class="bar">'+kindTabs()+'<span class="sp"></span><button class="btn pri" data-a="newcoll">+ Подборка</button></div>'+
+  (rows.length?rows.map(function(c){return '<button class="item" data-a="editcoll:'+c.id+'"><span class="ph" style="display:grid;place-items:center;font-size:22px;height:42px">'+esc(c.emoji||"📁")+'</span><span><b>'+esc(c.title)+'</b><small>'+(c.genre_id?"по жанру, автоматически":"вручную")+'</small></span><span class="badge '+(c.is_active?"pub":"")+'">'+(c.is_active?"активна":"скрыта")+'</span></button>'}).join(""):'<div class="card mute">Подборок пока нет. Нажмите «+ Подборка».</div>')};
+V.colled=function(){
+  var k=E.kind,gs=G.genres.filter(function(g){return g.kind===k}),h='<div class="bar"><button class="btn sm" data-a="sec:colls">← Назад</button><h1 style="margin:0">'+(E.id?"Подборка":"Новая подборка")+(k==="movie"?" · фильмы":" · сериалы")+'</h1></div>';
+  h+='<div class="card"><div class="row">'+fld("Название","title",E.title)+fld("Эмодзи на плитке","emoji",E.emoji,'maxlength="4" placeholder="🎃"')+'</div>'+fld("Подзаголовок (необязательно)","subtitle",E.subtitle)+
+   '<label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" data-p="is_active" style="width:auto;margin:0"'+(E.is_active?" checked":"")+'> Показывать в приложении</label></div>';
+  h+='<div class="card"><h2>Состав</h2><label>Как собирать<select data-p="mode" data-re="1"><option value="manual"'+(E.mode==="manual"?" selected":"")+'>Вручную: я выбираю '+(k==="movie"?"фильмы":"сериалы")+'</option><option value="genre"'+(E.mode==="genre"?" selected":"")+'>Автоматически по жанру</option></select></label>';
+  if(E.mode==="genre"){h+='<label>Жанр<select data-p="genre_id" data-n="1"><option value="">выберите</option>'+gs.map(function(g){return '<option value="'+g.id+'"'+(E.genre_id===g.id?" selected":"")+'>'+esc(g.emoji)+" "+esc(g.name)+'</option>'}).join("")+'</select></label><div class="mute">В подборку попадут все опубликованные тайтлы с этим жанром.</div>'}
+  else{
+    h+=E.items.map(function(id,i){return '<div class="item" style="cursor:default"><b style="flex:1">'+(i+1)+'. '+esc(tname(id))+'</b><button class="btn sm" data-a="cmv:'+i+':-1">↑</button><button class="btn sm" data-a="cmv:'+i+':1">↓</button><button class="btn red sm" data-a="crm:'+i+'">✕</button></div>'}).join("")||'<div class="mute" style="margin-bottom:8px">Пока пусто.</div>';
+    h+='<div class="row"><label style="margin:0">Добавить<select id="ci"><option value="">выберите</option>'+G.titles.filter(function(t){return t.kind===k&&E.items.indexOf(t.id)<0}).map(function(t){return '<option value="'+t.id+'">'+esc(t.title)+(t.status==="published"?"":" (черновик)")+'</option>'}).join("")+'</select></label><button class="btn" data-a="ci">+ Добавить</button></div>'}
+  h+='</div><div class="bar"><button class="btn pri" data-a="csave">Сохранить</button><button class="btn" data-a="sec:colls">Отмена</button><span class="sp"></span>'+(E.id?'<button class="btn red" data-a="cdel">Удалить</button>':"")+'</div>';
+  return h};
+V.home=function(){
+  var cs=G.colls.filter(function(c){return c.kind===G.tab}),L={slider:"Слайдер",collection:"Плитка-подборка",random:"Плитка «Рандом»"};
+  return nav("home")+'<div class="bar">'+kindTabs()+'<span class="sp"></span><button class="btn pri" data-a="hsave">Сохранить</button></div><div class="card mute">Блоки идут на главной сверху вниз. Слайдер берёт тайтлы из выбранной подборки (например, «Новинки»).</div>'+
+  (E.blocks.length?E.blocks.map(function(b,i){
+    return '<div class="card"><div class="row"><b style="flex:none;align-self:center">'+(i+1)+'. '+L[b.block_type]+'</b>'+
+    (b.block_type==="random"?'<label style="margin:0;flex:0 0 70px">Эмодзи<input data-p="blocks.'+i+'.emoji" value="'+esc(b.emoji)+'" maxlength="4"></label>'+fld("Название","blocks."+i+".title",b.title).replace("<label>",'<label style="margin:0">'):
+     '<label style="margin:0">Подборка<select data-p="blocks.'+i+'.collection_id" data-n="1"><option value="">выберите</option>'+cs.map(function(c){return '<option value="'+c.id+'"'+(b.collection_id===c.id?" selected":"")+'>'+esc((c.emoji||"")+" "+c.title)+(c.is_active?"":" (скрыта)")+'</option>'}).join("")+'</select></label>')+
+    '<button class="btn sm" data-a="hmv:'+i+':-1">↑</button><button class="btn sm" data-a="hmv:'+i+':1">↓</button><button class="btn red sm" data-a="hrm:'+i+'">✕</button></div>'+
+    '<label style="display:flex;gap:8px;align-items:center;color:var(--ink);margin:10px 0 0"><input type="checkbox" data-p="blocks.'+i+'.is_active" style="width:auto;margin:0"'+(b.is_active?" checked":"")+'> Показывать</label></div>'}).join(""):'<div class="card mute">На главной пока ничего нет.</div>')+
+  '<div class="bar"><button class="btn sm" data-a="hadd:slider">+ Слайдер</button><button class="btn sm" data-a="hadd:collection">+ Плитка-подборка</button><button class="btn sm" data-a="hadd:random">+ Плитка «Рандом»</button></div>'};
+async function loadHome(){
+  var r=await sb.from("home_blocks").select("*").eq("page",G.tab).order("sort");
+  E={blocks:(r.data||[]).map(function(b){return{block_type:b.block_type,collection_id:b.collection_id,title:b.title||"",emoji:b.emoji||"",is_active:b.is_active}})};render()}
+async function saveHome(){
+  for(var i=0;i<E.blocks.length;i++){var b=E.blocks[i];if(b.block_type!=="random"&&!b.collection_id)return toast("В блоке "+(i+1)+" выберите подборку")}
+  var d=await sb.from("home_blocks").delete().eq("page",G.tab);if(d.error)return toast("Ошибка: "+d.error.message);
+  if(E.blocks.length){var x=await sb.from("home_blocks").insert(E.blocks.map(function(b,i){return{page:G.tab,block_type:b.block_type,collection_id:b.block_type==="random"?null:b.collection_id,title:nz(b.title),emoji:nz(b.emoji),is_active:b.is_active,sort:i}}));if(x.error)return toast("Ошибка: "+x.error.message)}
+  toast("Главная сохранена ✓")}
+async function saveColl(){
+  if(!E.title.trim())return toast("Укажите название");
+  if(E.mode==="genre"&&!E.genre_id)return toast("Выберите жанр");
+  var row={kind:E.kind,title:E.title.trim(),subtitle:nz(E.subtitle),emoji:nz(E.emoji),genre_id:E.mode==="genre"?E.genre_id:null,is_active:E.is_active,sort:E.sort||0};
+  var r=E.id?await sb.from("collections").update(row).eq("id",E.id).select("id").single():await sb.from("collections").insert(row).select("id").single();
+  if(r.error)return toast("Ошибка: "+r.error.message);
+  var d=await sb.from("collection_items").delete().eq("collection_id",r.data.id);if(d.error)return toast("Ошибка: "+d.error.message);
+  if(E.mode==="manual"&&E.items.length){var x=await sb.from("collection_items").insert(E.items.map(function(t,i){return{collection_id:r.data.id,title_id:t,sort:i}}));if(x.error)return toast("Ошибка: "+x.error.message)}
+  await loadAll();G.view="colls";toast("Подборка сохранена ✓");render()}
+function swap(a,i,d){var j=i+d;if(j<0||j>=a.length)return;var t=a[i];a[i]=a[j];a[j]=t}
+
 function render(){var y=window.scrollY;app.innerHTML=V[G.view]();if(G.view==="ed")window.scrollTo(0,y)}
 
 /* ---------- сохранение ---------- */
@@ -167,7 +217,7 @@ app.addEventListener("click",async function(e){
       var ad=await sb.rpc("is_admin");if(ad.data!==true){await sb.auth.signOut();return toast("У этого аккаунта нет прав администратора")}
       await loadAll();G.view="list";return render();
     case"logout":await sb.auth.signOut();G.view="login";return render();
-    case"tab":G.tab=a[1];return render();
+    case"tab":G.tab=a[1];if(G.view==="home")return loadHome();return render();
     case"new":return openEd(null);
     case"edit":return openEd(Number(a[1]));
     case"back":G.view="list";return render();
@@ -190,6 +240,20 @@ app.addEventListener("click",async function(e){
       if(gi.error)return toast(/duplicate|unique/i.test(gi.error.message)?"Такой жанр уже есть":"Ошибка: "+gi.error.message);
       G.genres=(await sb.from("genres").select("*").order("sort")).data||[];
       gi.data.forEach(function(g){if(g.kind===E.kind&&E.genre_ids.indexOf(g.id)<0)E.genre_ids.push(g.id)});toast("Жанр добавлен и выбран");return render();
+    case"sec":G.view=a[1];if(a[1]==="home")return loadHome();return render();
+    case"newcoll":E={id:null,kind:G.tab,title:"",subtitle:"",emoji:"",mode:"manual",genre_id:null,is_active:true,sort:G.colls.reduce(function(m,c){return Math.max(m,c.sort||0)},0)+1,items:[]};G.view="colled";return render();
+    case"editcoll":var cc=G.colls.find(function(x){return x.id===Number(a[1])});var cit=await sb.from("collection_items").select("title_id").eq("collection_id",cc.id).order("sort");
+      E=Object.assign({},cc,{subtitle:cc.subtitle||"",emoji:cc.emoji||"",mode:cc.genre_id?"genre":"manual",items:(cit.data||[]).map(function(x){return x.title_id})});G.view="colled";return render();
+    case"ci":var civ=Number(document.getElementById("ci").value);if(civ&&E.items.indexOf(civ)<0){E.items.push(civ);render()}return;
+    case"cmv":swap(E.items,Number(a[1]),Number(a[2]));return render();
+    case"crm":E.items.splice(Number(a[1]),1);return render();
+    case"csave":return saveColl();
+    case"cdel":if(!confirm("Удалить подборку «"+E.title+"»? Она пропадёт и с главной."))return;
+      var cd=await sb.from("collections").delete().eq("id",E.id);if(cd.error)return toast("Не удалось удалить");await loadAll();G.view="colls";toast("Удалено");return render();
+    case"hadd":E.blocks.push({block_type:a[1],collection_id:null,title:a[1]==="random"?"Рандомный фильм":"",emoji:a[1]==="random"?"🎲":"",is_active:true});return render();
+    case"hmv":swap(E.blocks,Number(a[1]),Number(a[2]));return render();
+    case"hrm":E.blocks.splice(Number(a[1]),1);return render();
+    case"hsave":return saveHome();
     case"save":return save();
     case"del":if(!confirm("Удалить «"+E.title+"» навсегда вместе с оценками пользователей?"))return;
       var d=await sb.from("titles").delete().eq("id",E.id);if(d.error)return toast("Не удалось удалить");
