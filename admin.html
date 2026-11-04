@@ -50,6 +50,8 @@ function sel(p,o,v,bl){return '<select data-p="'+p+'" data-n="1"><option value="
 function fmtRt(m){if(!m)return"";var h=Math.floor(m/60),r=m%60;return"В приложении: "+(h?h+" ч ":"")+(r?r+" мин":"")}
 function blank(kind){return{id:null,kind:kind,code:"",title:"",original_title:"",description_short:"",description_full:"",description_short_en:"",description_full_en:"",trailer_bg_url:null,sticker:null,year_start:null,year_end:null,runtime_min:null,poster_url:null,trailer_url:"",comments_url:"",kp_url:"",imdb_url:"",rt_url:"",rating_kp:null,rating_imdb:null,rating_rt:null,has_watch:false,status:"draft",coming_soon:false,release_day:null,release_month:null,release_year:null,series_status:"airing",on_home:false,home_image_url:null,genre_ids:[],providers:[],seasons:[]}}
 
+async function toJpeg(f){try{var b=await createImageBitmap(f),c=document.createElement("canvas");c.width=b.width;c.height=b.height;var g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(b,0,0);
+  var bl=await new Promise(function(r){c.toBlob(r,"image/jpeg",.9)});return bl?new File([bl],"poster.jpg",{type:"image/jpeg"}):f}catch(e){return f}}
 async function upload(file,dir){
   var ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"");
   var path=dir+"/"+Date.now()+"-"+Math.random().toString(36).slice(2,8)+"."+ext;
@@ -239,7 +241,7 @@ app.addEventListener("input",function(e){var t=e.target,p=t.dataset.p;if(t.id===
   var v=t.type==="checkbox"?t.checked:t.value;if(t.dataset.n)v=v===""?null:Number(String(v).replace(",","."));
   setP(E,p,v);if(p==="runtime_min"){var h=document.getElementById("rth");if(h)h.textContent=fmtRt(v)}if(t.dataset.re)render()});
 app.addEventListener("change",async function(e){var t=e.target;
-  try{if(t.id==="poster"&&t.files[0]){E.poster_url=await upload(t.files[0],"posters");render()}if(t.id==="promoimg"&&t.files[0]){E.image_url=await upload(t.files[0],"promo");render()}if(t.id==="tbg"&&t.files[0]){E.trailer_bg_url=await upload(t.files[0],"trailers");render()}if(t.id==="homeimg"&&t.files[0]){E.home_image_url=await upload(t.files[0],"slides");render()}}catch(err){toast("Не удалось загрузить: "+err.message)}});
+  try{if(t.id==="poster"&&t.files[0]){E.poster_url=await upload(await toJpeg(t.files[0]),"posters");render()}if(t.id==="promoimg"&&t.files[0]){E.image_url=await upload(t.files[0],"promo");render()}if(t.id==="tbg"&&t.files[0]){E.trailer_bg_url=await upload(t.files[0],"trailers");render()}if(t.id==="homeimg"&&t.files[0]){E.home_image_url=await upload(t.files[0],"slides");render()}}catch(err){toast("Не удалось загрузить: "+err.message)}});
 app.addEventListener("click",async function(e){
   var b=e.target.closest("[data-a]");if(!b)return;var a=b.dataset.a.split(":"),i,j;
   try{switch(a[0]){
