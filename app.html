@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Want Watch</title>
+<style>
+:root{--bg:#fff;--s1:#f3f3f6;--s2:#e8e8ee;--ink:#111114;--mute:#7b7b86;--acc:#6f5cff;--accInk:#fff;--line:#e6e6ec;--glass:rgba(255,255,255,.72);--red:#e5484d;color-scheme:light}
+[data-theme=dark]{--bg:#0b0b0e;--s1:#17171c;--s2:#24242b;--ink:#f4f4f7;--mute:#8e8e99;--line:#26262d;--glass:rgba(40,40,48,.62);color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,"SF Pro Text","Segoe UI",system-ui,sans-serif}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
+#app{max-width:520px;margin:0 auto;min-height:100vh;padding:calc(env(safe-area-inset-top,0px) + 10px) 0 calc(env(safe-area-inset-bottom,0px) + 110px)}
+.pad{padding:0 16px}
+.top{display:flex;align-items:center;justify-content:space-between;padding:6px 16px 14px}
+.logo{font-weight:800;letter-spacing:.14em;font-size:15px}
+.ib{width:40px;height:40px;border-radius:50%;background:var(--s1);display:grid;place-items:center;flex:none}
+.ib.ph{visibility:hidden}
+h1{font-size:22px;line-height:1.2;margin:0 0 6px}h2{font-size:18px;margin:22px 16px 10px}
+.mute{color:var(--mute)}.sm{font-size:13px}
+.slider{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 16px;scrollbar-width:none}.slider::-webkit-scrollbar{display:none}
+.slide{flex:0 0 86%;aspect-ratio:16/9;border-radius:20px;position:relative;overflow:hidden;scroll-snap-align:center;background:var(--s2)}
+.slide.one{flex-basis:100%}
+.slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sov{position:absolute;inset:auto 0 0 0;padding:34px 16px 14px;background:linear-gradient(transparent,rgba(0,0,0,.78));color:#fff;display:flex;flex-direction:column;gap:4px}
+.sov b{font-size:19px}.sov span{font-size:13px;opacity:.85}
+.sbtn{align-self:flex-start;margin-top:6px;background:#fff;color:#111;border-radius:999px;padding:7px 14px;font-weight:600;font-size:13px}
+.dots{display:flex;justify-content:center;gap:6px;margin:10px 0 4px}.dots i{width:6px;height:6px;border-radius:50%;background:var(--s2)}.dots i.on{background:var(--ink)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 16px}
+.tile{background:var(--s1);border-radius:20px;aspect-ratio:1/1.05;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:12px;font-weight:600}
+.tile .em{font-size:44px;line-height:1}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:0 16px}
+.pc{text-align:left;display:flex;flex-direction:column;gap:4px;font-size:13px;min-width:0}.pc b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pimg{aspect-ratio:2/3;border-radius:12px;background:var(--s2);object-fit:cover;width:100%;display:block}
+.hs{display:flex;gap:12px;overflow-x:auto;padding:0 16px;scrollbar-width:none}.hs::-webkit-scrollbar{display:none}.hs .pc{flex:0 0 112px}
+.head{display:flex;gap:16px;padding:0 16px}.head .pimg{width:112px;flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px;padding:14px 16px 0}
+.chip{background:var(--s1);border-radius:999px;padding:7px 13px;font-size:13px;font-weight:500}
+.desc{padding:14px 16px 0;position:relative}
+.sqb{display:inline-grid;place-items:center;width:26px;height:22px;border-radius:6px;background:var(--s2);font-weight:700;vertical-align:middle;margin:0 4px;line-height:1}
+.pills{display:flex;gap:10px;padding:16px 16px 6px}.pill{flex:1;background:var(--s1);border-radius:999px;padding:15px 8px;font-weight:600;text-align:center}.pill.on{background:var(--ink);color:var(--bg)}
+.row{display:flex;align-items:center;gap:14px;padding:16px;border-top:1px solid var(--line);width:100%;text-align:left}.row:first-of-type{border-top:0}
+.row .grow{flex:1;min-width:0}.row small{display:block;color:var(--mute);font-size:13px}.row.red{color:var(--red)}
+.rb{width:42px;height:42px;border-radius:12px;background:var(--s2);display:grid;place-items:center;flex:none}
+.grp{background:var(--s1);border-radius:20px;margin:0 16px 14px;overflow:hidden}.grp .row:first-child{border-top:0}
+.cap{margin:20px 20px 8px;color:var(--mute);font-weight:600;font-size:14px}
+.stack{display:flex}.stack img,.stack i{width:26px;height:26px;border-radius:50%;border:2px solid var(--s1);margin-left:-8px;object-fit:cover;background:var(--s2)}
+.nav{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 14px);display:flex;justify-content:center;gap:10px;z-index:20;pointer-events:none}
+.pillnav{display:flex;gap:4px;padding:6px;border-radius:999px;background:var(--glass);backdrop-filter:blur(22px) saturate(1.6);-webkit-backdrop-filter:blur(22px) saturate(1.6);box-shadow:0 6px 24px rgba(0,0,0,.14);pointer-events:auto}
+.nb{width:64px;height:52px;border-radius:999px;display:grid;place-items:center;color:var(--mute)}.nb.on{background:var(--s2);color:var(--ink)}
+.sbub{width:64px;height:64px;border-radius:50%;background:var(--glass);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);box-shadow:0 6px 24px rgba(0,0,0,.14);display:grid;place-items:center;pointer-events:auto;align-self:center}
+.ov{position:fixed;inset:0;background:var(--bg);z-index:40;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 20px;overflow-y:auto}
+.sbar{display:flex;gap:10px;align-items:center}.sbar input{flex:1;height:46px;border-radius:999px;border:0;background:var(--s1);color:var(--ink);padding:0 18px;font:inherit;outline:0}
+.sheetbg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:flex;align-items:flex-end}
+.sheet{background:var(--bg);width:100%;max-width:520px;margin:0 auto;border-radius:24px 24px 0 0;padding:10px 0 calc(env(safe-area-inset-bottom,0px) + 14px);max-height:80vh;overflow-y:auto}
+.sheet:before{content:"";display:block;width:40px;height:4px;border-radius:2px;background:var(--s2);margin:0 auto 6px}
+.ico{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--s2);flex:none}
+.av{width:84px;height:84px;border-radius:50%;background:var(--s2);object-fit:cover;display:grid;place-items:center;font-size:32px;font-weight:700;margin:0 auto 10px}
+.center{text-align:center;padding:60px 24px}
+.tabs{display:flex;gap:8px;padding:14px 0}.tabs button{flex:1;padding:11px;border-radius:12px;background:var(--s1);font-weight:600}.tabs .on{background:var(--ink);color:var(--bg)}
+.toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;z-index:99;font-size:14px}
+</style>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+var SB_URL="https://rixjsfvweagsqrvoiymj.supabase.co",SB_KEY="sb_publishable_XlyUk5LlVt3Cdt20laz6fw_HyjKJH1y";
+var CFG={botApp:""}; /* для ссылок «Поделиться»: имя бота и приложения, например "wantwatch_bot/app" */
+var tg=window.Telegram&&window.Telegram.WebApp;if(tg){try{tg.ready();tg.expand()}catch(e){}}
+var sb=window.supabase.createClient(SB_URL,SB_KEY),app=document.getElementById("app");
+function ls(k,d){try{var v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}}
+function lss(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function toast(m){var d=document.createElement("div");d.className="toast";d.textContent=m;document.body.appendChild(d);setTimeout(function(){d.remove()},2400)}
+function hap(){try{tg&&tg.HapticFeedback&&tg.HapticFeedback.impactOccurred("light")}catch(e){}}
+function ic(p,s){return'<svg viewBox="0 0 24 24" width="'+(s||22)+'" height="'+(s||22)+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'}
+var I={send:'<path d="M21 3 3 10.5l7 2.5 2.5 7z"/>',sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/>',moon:'<path d="M20 13.5A8.5 8.5 0 1 1 10.5 4 7 7 0 0 0 20 13.5z"/>',back:'<path d="M15 5l-7 7 7 7"/>',play:'<path d="M8 5v14l11-7z"/>',share:'<path d="M12 15V4m0 0L8 8m4-4 4 4M5 12v7h14v-7"/>',film:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M10 9l5 3-5 3z"/>',tv:'<rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>',search:'<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',chev:'<path d="M9 5l7 7-7 7"/>',globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',chat:'<path d="M4 5h16v11H9l-5 4z"/>',plus:'<path d="M12 5v14M5 12h14"/>',heart:'<path d="M12 20s-8-5-8-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5C20 15 12 20 12 20z"/>',mega:'<path d="M4 10v4l9 4V6zM13 8c3 0 5 2 5 4s-2 4-5 4"/>',trash:'<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/>',home:'<path d="M4 11 12 4l8 7v9H4z"/>'};
+
+/* ---------- язык ---------- */
+var T={ru:{movies:"Фильмы",series:"Сериалы",profile:"Профиль",search:"Поиск",details:"Подробнее",will:"Посмотрю",watching:"Смотрю",watched:"Посмотрел",online:"Смотреть онлайн",send:"Отправить другу",similar:"Похожие",soon:"Скоро",rndM:"Рандомный фильм",rndS:"Рандомный сериал",ph:"Название или код",noCode:"Такого кода нет или вы ввели неправильно",noRes:"Ничего не найдено",ratings:"Рейтинги",users:"Want Watch",links:"Связь и поддержка",feedback:"Обратная связь",feedbackS:"Сообщить о проблеме или предложить идею",suggest:"Добавьте фильм",suggestS:"Предложить фильм или сериал",donate:"Поддержать проект",donateS:"Заранее спасибо",ads:"Реклама",adsS:"Медиа-кит и сотрудничество",chan:"Telegram-канал",chanS:"Новости и новые поступления",settings:"Настройки",lang:"Язык",theme:"Тема",light:"Светлая",dark:"Тёмная",account:"Аккаунт",del:"Удалить аккаунт",delS:"Удалятся все отметки. Восстановить не получится",delQ:"Удалить аккаунт и все ваши отметки навсегда?",home:"На главный экран",homeS:"Быстрый доступ к Want Watch",fail:"Не удалось войти",retry:"Повторить",banned:"Доступ к аккаунту ограничен",openTg:"Откройте приложение в Telegram",st_airing:"Выходит",st_ended:"Завершён",st_pending:"Решается судьба",st_canceled:"Закрыт",rate:"оценок",empty:"Пока здесь пусто",h:"ч",m:"мин",monN:["январь","февраль","март","апрель","май","июнь","июль","август","сентябрь","октябрь","ноябрь","декабрь"],mon:["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"]},
+en:{movies:"Movies",series:"Series",profile:"Profile",search:"Search",details:"Details",will:"Will watch",watching:"Watching",watched:"Watched",online:"Watch online",send:"Send to a friend",similar:"Similar",soon:"Coming soon",rndM:"Random movie",rndS:"Random series",ph:"Title or code",noCode:"No such code, please check it",noRes:"Nothing found",ratings:"Ratings",users:"Want Watch",links:"Support",feedback:"Feedback",feedbackS:"Report a problem or suggest an idea",suggest:"Suggest a title",suggestS:"Suggest a movie or series",donate:"Support the project",donateS:"Thank you in advance",ads:"Advertising",adsS:"Media kit and partnerships",chan:"Telegram channel",chanS:"News and new releases",settings:"Settings",lang:"Language",theme:"Theme",light:"Light",dark:"Dark",account:"Account",del:"Delete account",delS:"All your marks will be removed. This cannot be undone",delQ:"Delete your account and all marks permanently?",home:"Add to Home Screen",homeS:"Quick access to Want Watch",fail:"Sign-in failed",retry:"Retry",banned:"Access to this account is restricted",openTg:"Please open the app in Telegram",st_airing:"Airing",st_ended:"Ended",st_pending:"Fate pending",st_canceled:"Canceled",rate:"ratings",empty:"Nothing here yet",h:"h",m:"min",monN:["January","February","March","April","May","June","July","August","September","October","November","December"],mon:["January","February","March","April","May","June","July","August","September","October","November","December"]}};
+function detLang(){var l=ls("ww_lang",null);if(l)return l;var c=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user&&tg.initDataUnsafe.user.language_code)||navigator.language||"en";return/^(ru|uk|be|kk)/i.test(c)?"ru":"en"}
+var LANG=detLang();function t(k){return T[LANG][k]||T.ru[k]||k}
+function setTheme(th){document.documentElement.dataset.theme=th;lss("ww_theme",th);try{tg&&tg.setHeaderColor&&tg.setHeaderColor(th==="dark"?"#0b0b0e":"#ffffff")}catch(e){}}
+setTheme(ls("ww_theme",null)||(tg&&tg.colorScheme)||(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));
+
+/* ---------- данные ---------- */
+var DB={titles:[],genres:[],tg:[],cols:[],ci:[],blocks:[],stats:{},links:{}},D={},MY={},ME={},UID=null;
+var S={tab:"movies",stack:[],search:false,sheet:null,full:false,sq:"",sres:[],res:null};
+function T_(id){return DB.titles.find(function(x){return x.id===id})}
+function nm(x){return LANG==="en"&&x.original_title?x.original_title:x.title}
+function hue(id){return(id*47)%360}
+function poster(x,cls){return x.poster_url?'<img class="'+(cls||"pimg")+'" loading="lazy" src="'+esc(x.poster_url)+'" alt="">':'<div class="'+(cls||"pimg")+'" style="background:linear-gradient(160deg,hsl('+hue(x.id)+',30%,28%),hsl('+(hue(x.id)+40)+',40%,42%))"></div>'}
+function dur(m){if(!m)return"";var h=Math.floor(m/60),r=m%60;return(h?h+" "+t("h")+(r?" ":""):"")+(r?r+" "+t("m"):"")}
+function when(x){
+  if(x.coming_soon){var p=[];if(x.release_day)p.push(x.release_day);if(x.release_month)p.push(x.release_day?t("mon")[x.release_month-1]:t("monN")[x.release_month-1]);if(x.release_year)p.push(x.release_year);return t("soon")+(p.length?" · "+p.join(" "):"")}
+  if(x.kind==="movie")return x.year_start?String(x.year_start):"";
+  return x.year_start?x.year_start+"–"+(x.year_end||""):""}
+function genresOf(id){return DB.tg.filter(function(g){return g.title_id===id}).map(function(g){return DB.genres.find(function(q){return q.id===g.genre_id})}).filter(Boolean)}
+function stat(id){var s=DB.stats[id];return s&&s.ratings_count>0?Number(s.avg_score).toFixed(1):""}
+async function load(){
+  var r=await Promise.all([sb.from("titles").select("id,kind,code,title,original_title,poster_url,year_start,year_end,runtime_min,series_status,coming_soon,release_day,release_month,release_year,on_home,home_image_url,home_pinned_at").eq("status","published"),
+    sb.from("genres").select("*").order("sort"),sb.from("title_genres").select("*"),sb.from("collections").select("*").eq("is_active",true).order("sort"),sb.from("collection_items").select("*").order("sort"),
+    sb.from("home_blocks").select("*").eq("is_active",true).order("sort"),sb.from("title_stats").select("title_id,avg_score,ratings_count"),
+    sb.from("user_titles").select("title_id,status"),sb.from("app_settings").select("*").eq("key","links").maybeSingle(),sb.from("profiles").select("*").eq("id",UID).maybeSingle()]);
+  if(r[0].error)throw r[0].error;
+  DB.titles=r[0].data||[];DB.genres=r[1].data||[];DB.tg=r[2].data||[];DB.cols=r[3].data||[];DB.ci=r[4].data||[];DB.blocks=r[5].data||[];
+  DB.stats={};(r[6].data||[]).forEach(function(s){DB.stats[s.title_id]=s});MY={};(r[7].data||[]).forEach(function(u){MY[u.title_id]=u.status});
+  DB.links=(r[8].data&&r[8].data.value)||{};ME=r[9].data||{};
+}
+function track(ev,x){if(!UID)return;var o={user_id:UID,event:ev};if(x)for(var k in x)o[k]=x[k];sb.from("events").insert(o).then(function(){},function(){})}
+async function loadTitle(id){
+  var c=D[id];
+  var r=await Promise.all([c?null:sb.from("titles").select("*").eq("id",id).single(),c?null:sb.from("title_providers").select("*, providers(*)").eq("title_id",id).order("sort"),sb.rpc("similar_titles",{p_title:id,p_limit:12})]);
+  if(!c){if(r[0].error)return;D[id]=Object.assign({},r[0].data,{prov:r[1].data||[]})}
+  D[id].sim=(r[2].data||[]).map(function(x){return x.id});render()}
+
+/* ---------- навигация ---------- */
+function page(){return S.stack.length?S.stack[S.stack.length-1]:{n:S.tab}}
+function push(p){S.stack.push(p);S.full=false;S.sheet=null;hap();render()}
+function pop(){if(S.search){S.search=false;return render()}if(S.sheet){S.sheet=null;return render()}S.stack.pop();render()}
+function openTitle(id){track("open_title",{title_id:id});push({n:"title",id:id});loadTitle(id)}
+function tab(x){S.tab=x;S.stack=[];S.sheet=null;hap();render()}
+if(tg&&tg.BackButton){try{tg.BackButton.onClick(pop)}catch(e){}}
+
+/* ---------- экраны ---------- */
+function topbar(){return'<div class="top"><button class="ib" data-a="chan" aria-label="Telegram">'+ic(I.send)+'</button><div class="logo">WANT WATCH</div><button class="ib" data-a="theme" aria-label="Theme">'+ic(document.documentElement.dataset.theme==="dark"?I.sun:I.moon)+'</button></div>'}
+function bar(mid,right){return'<div class="top"><button class="ib" data-a="back" aria-label="Back">'+ic(I.back)+'</button>'+(mid||'<span class="ib ph"></span>')+(right||'<span class="ib ph"></span>')+'</div>'}
+function slider(kind){
+  var it=DB.titles.filter(function(x){return x.kind===kind&&x.on_home&&x.home_image_url}).sort(function(a,b){return new Date(b.home_pinned_at)-new Date(a.home_pinned_at)});
+  if(!it.length)return"";
+  return'<div class="slider" id="sl">'+it.map(function(x){var g=genresOf(x.id).slice(0,2).map(function(q){return q.name}).join(", "),r=stat(x.id);
+    return'<div class="slide'+(it.length===1?" one":"")+'" data-a="open:'+x.id+'"><img src="'+esc(x.home_image_url)+'" alt=""><div class="sov"><b>'+esc(nm(x))+'</b><span>'+[r?"★ "+r:"",when(x),g].filter(Boolean).join(" · ")+'</span><button class="sbtn">'+t("details")+'</button></div></div>'}).join("")+'</div>'+
+    (it.length>1?'<div class="dots">'+it.map(function(_,i){return'<i class="'+(i?"":"on")+'"></i>'}).join("")+'</div>':"")}
+function tile(em,tx,a){return'<button class="tile" data-a="'+a+'"><span class="em">'+esc(em)+'</span><span>'+esc(tx)+'</span></button>'}
+function homePage(kind){
+  var bl=DB.blocks.filter(function(b){return b.page===kind}),parts=[],tl=[];
+  if(!bl.length)bl=[{block_type:"slider"}].concat(DB.cols.filter(function(c){return c.kind===kind}).map(function(c){return{block_type:"collection",collection_id:c.id}}));
+  function fl(){if(tl.length){parts.push('<div class="tiles">'+tl.join("")+'</div>');tl=[]}}
+  bl.forEach(function(b){
+    if(b.block_type==="slider"){fl();parts.push(slider(kind))}
+    else if(b.block_type==="random")tl.push(tile(b.emoji||"🎲",LANG==="ru"&&b.title?b.title:t(kind==="movie"?"rndM":"rndS"),"rnd:"+kind));
+    else{var c=DB.cols.find(function(x){return x.id===b.collection_id});if(c&&c.kind===kind)tl.push(tile(c.emoji||"📁",c.title,"col:"+c.id))}});
+  fl();return topbar()+parts.join("")+(parts.length?"":'<div class="center mute">'+t("empty")+'</div>')}
+function colIds(c){var ids=c.genre_id?DB.tg.filter(function(g){return g.genre_id===c.genre_id}).map(function(g){return g.title_id}):DB.ci.filter(function(x){return x.collection_id===c.id}).map(function(x){return x.title_id});
+  return ids.filter(function(id){return T_(id)})}
+function grid(ids){return ids.length?'<div class="grid3">'+ids.map(function(id){var x=T_(id);return'<button class="pc" data-a="open:'+id+'">'+poster(x)+'<b>'+esc(nm(x))+'</b><span class="mute">'+esc(when(x))+'</span></button>'}).join("")+'</div>':'<div class="center mute">'+t("empty")+'</div>'}
+function listPage(p){return bar('<b style="flex:1;text-align:center">'+esc(p.title)+'</b>')+grid(p.ids)}
+function rows(ids){return ids.map(function(id){var x=T_(id);return x?'<button class="row" data-a="open:'+id+'">'+poster(x,"ico")+'<span class="grow"><b>'+esc(nm(x))+'</b><small>'+esc(when(x))+'</small></span></button>':""}).join("")}
+function resultsPage(p){var k=p.tab,ids=(k==="movie"?p.movies:p.series);
+  return bar('<b style="flex:1;text-align:center">'+esc(p.q)+'</b>')+'<div class="pad"><div class="tabs"><button class="'+(k==="movie"?"on":"")+'" data-a="rt:movie">'+t("movies")+' · '+p.movies.length+'</button><button class="'+(k==="series"?"on":"")+'" data-a="rt:series">'+t("series")+' · '+p.series.length+'</button></div></div>'+(ids.length?rows(ids):'<div class="center mute">'+t("noRes")+'</div>')}
+function titlePage(id){
+  var x=D[id],b=T_(id)||{};
+  if(!x)return bar()+'<div class="center mute">…</div>';
+  var r=stat(id),gs=genresOf(id),pv=x.prov||[],desc;
+  if(S.full&&x.description_full)desc='<button class="sqb" data-a="short">'+ic(I.back,14)+'</button>'+esc(x.description_full);
+  else desc=esc(x.description_short)+(x.description_full?' <button class="sqb" data-a="full">…</button>':"");
+  var chips=[when(x),x.runtime_min?dur(x.runtime_min):"",x.kind==="series"&&!x.coming_soon&&x.series_status?t("st_"+x.series_status):""].filter(Boolean).map(function(c){return'<span class="chip">'+esc(c)+'</span>'}).join("")+
+    gs.map(function(g){return'<button class="chip" data-a="gen:'+g.id+'">'+esc(g.emoji)+" "+esc(g.name)+'</button>'}).join("");
+  var pl=[["will_watch","will"]].concat(x.kind==="series"?[["watching","watching"]]:[]).concat([["watched","watched"]]);
+  var sim=(x.sim||[]).filter(function(i){return T_(i)});
+  return bar(x.trailer_url?'<button class="ib" data-a="trailer" aria-label="Trailer">'+ic(I.play)+'</button>':null,'<button class="ib" data-a="share" aria-label="Share">'+ic(I.share)+'</button>')+
+  '<div class="head">'+poster(x)+'<div><h1>'+esc(nm(x))+'</h1><button data-a="rsheet" class="chip" style="display:inline-flex;gap:6px;margin-top:4px">★ '+(r||"—")+' '+ic(I.chev,12)+'</button></div></div>'+
+  '<div class="chips">'+chips+'</div><div class="desc">'+desc+'</div>'+
+  '<div class="pills">'+pl.map(function(s){return'<button class="pill'+(MY[id]===s[0]?" on":"")+'" data-a="st:'+s[0]+'">'+t(s[1])+'</button>'}).join("")+'</div>'+
+  '<div style="margin-top:8px">'+(x.has_watch&&pv.length?'<button class="row" data-a="onl"><span class="rb">'+ic(I.play)+'</span><span class="grow">'+t("online")+'</span><span class="stack">'+pv.slice(0,3).map(function(q){return q.providers&&q.providers.icon_url?'<img src="'+esc(q.providers.icon_url)+'" alt="">':'<i></i>'}).join("")+'</span>'+ic(I.chev,18)+'</button>':"")+
+  '<button class="row" data-a="share"><span class="rb">'+ic(I.share)+'</span><span class="grow">'+t("send")+'</span>'+ic(I.chev,18)+'</button></div>'+
+  (sim.length?'<h2>'+t("similar")+'</h2><div class="hs">'+sim.map(function(i){var q=T_(i);return'<button class="pc" data-a="open:'+i+'">'+poster(q)+'<b>'+esc(nm(q))+'</b></button>'}).join("")+'</div>':"")}
+function sheet(){
+  var s=S.sheet;if(!s)return"";var x=D[s.id]||{},h="";
+  if(s.n==="onl")h=(x.prov||[]).map(function(q){var p=q.providers||{};return'<button class="row" data-a="prov:'+q.provider_id+'">'+(p.icon_url?'<img class="ico" src="'+esc(p.icon_url)+'" alt="">':'<span class="ico"></span>')+'<span class="grow">'+esc(p.name)+(q.note?'<small>'+esc(q.note)+'</small>':"")+'</span></button>'}).join("");
+  else{var st=DB.stats[s.id],lk=function(n,v,u){return v?'<button class="row" data-a="'+(u?"lnk:"+u:"x")+'"><span class="grow">'+n+'</span><b>'+v+'</b></button>':""};
+    h=lk(t("users"),st&&st.ratings_count>0?"★ "+Number(st.avg_score).toFixed(1)+" · "+st.ratings_count+" "+t("rate"):"—","")+lk("IMDb",x.rating_imdb,"imdb")+lk("Rotten Tomatoes",x.rating_rt!=null?x.rating_rt+"%":"","rt")+lk("КиноПоиск",x.rating_kp,"kp")}
+  return'<div class="sheetbg" data-a="sclose"><div class="sheet" data-a="x">'+h+'</div></div>'}
+function profilePage(){
+  var u=tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user||{},name=[ME.first_name||u.first_name,ME.last_name||u.last_name].filter(Boolean).join(" ")||"Want Watch",L=DB.links;
+  function R(ico,a,tt,ss,cls){return'<button class="row '+(cls||"")+'" data-a="'+a+'"><span class="rb">'+ic(ico)+'</span><span class="grow">'+tt+(ss?'<small>'+ss+'</small>':"")+'</span>'+ic(I.chev,18)+'</button>'}
+  var photo=ME.photo_url||u.photo_url;
+  return'<div class="top"><span class="ib ph"></span><div class="logo">'+t("profile").toUpperCase()+'</div><button class="ib" data-a="theme">'+ic(document.documentElement.dataset.theme==="dark"?I.sun:I.moon)+'</button></div>'+
+  '<div class="center" style="padding:6px 0 18px">'+(photo?'<img class="av" src="'+esc(photo)+'" alt="">':'<div class="av">'+esc(name.charAt(0))+'</div>')+'<h1>'+esc(name)+'</h1><div class="mute">'+(ME.username||u.username?"@"+esc(ME.username||u.username):"")+'</div></div>'+
+  (tg&&tg.addToHomeScreen?'<div class="grp">'+R(I.plus,"addhome",t("home"),t("homeS"))+'</div>':"")+
+  '<div class="cap">'+t("links")+'</div><div class="grp">'+(L.support?R(I.chat,"lnk:support",t("feedback"),t("feedbackS")):"")+(L.suggest?R(I.plus,"lnk:suggest",t("suggest"),t("suggestS")):"")+(L.donate?R(I.heart,"lnk:donate",t("donate"),t("donateS")):"")+(L.ads_bot?R(I.mega,"lnk:ads_bot",t("ads"),t("adsS")):"")+(L.channel?R(I.send,"lnk:channel",t("chan"),t("chanS")):"")+'</div>'+
+  '<div class="cap">'+t("settings")+'</div><div class="grp">'+R(I.globe,"lang",t("lang"),LANG==="ru"?"Русский":"English")+R(I.sun,"theme",t("theme"),document.documentElement.dataset.theme==="dark"?t("dark"):t("light"))+'</div>'+
+  '<div class="cap">'+t("account")+'</div><div class="grp">'+R(I.trash,"del",t("del"),t("delS"),"red")+'</div>'}
+function searchOv(){return'<div class="ov"><div class="sbar"><input id="q" value="'+esc(S.sq)+'" placeholder="'+t("ph")+'" autocomplete="off" autocapitalize="off" enterkeyhint="search"><button class="ib" data-a="sgo" aria-label="Go">'+ic(I.arrow)+'</button><button class="ib" data-a="sx" aria-label="Close">'+ic(I.x)+'</button></div><div id="sres" style="margin:10px -16px">'+sresHtml()+'</div></div>'}
+function sresHtml(){return S.sres.length?S.sres.map(function(r){return'<button class="row" data-a="open:'+r.id+'">'+poster(r,"ico")+'<span class="grow"><b>'+esc(nm(r))+'</b><small>'+(r.kind==="movie"?t("movies"):t("series"))+" · "+esc(when(r))+'</small></span></button>'}).join(""):""}
+function nav(){var T3=[["movies",I.film],["series",I.tv],["profile",I.user]];
+  return'<div class="nav"><div class="pillnav">'+T3.map(function(x){return'<button class="nb'+(S.tab===x[0]&&!S.stack.length?" on":"")+'" data-a="tab:'+x[0]+'" aria-label="'+t(x[0])+'">'+ic(x[1],24)+'</button>'}).join("")+'</div><button class="sbub" data-a="so" aria-label="'+t("search")+'">'+ic(I.search,24)+'</button></div>'}
+function render(){
+  var p=page(),h;
+  if(p.n==="movies")h=homePage("movie");else if(p.n==="series")h=homePage("series");else if(p.n==="profile")h=profilePage();
+  else if(p.n==="title")h=titlePage(p.id);else if(p.n==="list")h=listPage(p);else h=resultsPage(p);
+  app.innerHTML=h+nav()+sheet()+(S.search?searchOv():"");
+  if(tg&&tg.BackButton){try{(S.stack.length||S.search||S.sheet)?tg.BackButton.show():tg.BackButton.hide()}catch(e){}}
+  var sl=document.getElementById("sl");if(sl){sl.onscroll=function(){var f=sl.firstChild,w=f.offsetWidth+10,i=Math.round(sl.scrollLeft/w),d=document.querySelectorAll(".dots i");d.forEach(function(e,j){e.className=j===i?"on":""})}}
+  if(S.search){var q=document.getElementById("q");if(q&&!S.focused){q.focus();S.focused=1}}
+}
+
+/* ---------- поиск ---------- */
+var stm=null;
+app.addEventListener("input",function(e){if(e.target.id!=="q")return;S.sq=e.target.value;clearTimeout(stm);stm=setTimeout(async function(){var v=S.sq.trim();if(!v){S.sres=[];document.getElementById("sres").innerHTML="";return}
+  var r=await sb.rpc("search_titles",{p_query:v,p_limit:8});S.sres=r.data||[];var b=document.getElementById("sres");if(b&&S.sq.trim()===v)b.innerHTML=sresHtml()},180)});
+app.addEventListener("keydown",function(e){if(e.target.id==="q"&&e.key==="Enter")goSearch()});
+async function goSearch(){
+  var v=S.sq.trim();if(!v)return;
+  var c=v.toUpperCase().replace(/[АВЕКМНОРСТХ]/g,function(ch){return"ABEKMHOPCTX"["АВЕКМНОРСТХ".indexOf(ch)]});
+  if(/^[A-Z]\d{4,}$/.test(c)){var x=DB.titles.find(function(q){return q.code===c});if(!x){toast(t("noCode"));return}S.search=false;S.focused=0;return openTitle(x.id)}
+  var r=await sb.rpc("search_titles",{p_query:v,p_limit:50}),a=r.data||[];
+  var mv=a.filter(function(q){return q.kind==="movie"}).map(function(q){return q.id}),sr=a.filter(function(q){return q.kind==="series"}).map(function(q){return q.id});
+  S.search=false;S.focused=0;push({n:"results",q:v,movies:mv,series:sr,tab:mv.length||!sr.length?"movie":"series"})}
+
+/* ---------- действия ---------- */
+function shareLink(id){return CFG.botApp?"https://t.me/"+CFG.botApp+"?startapp=t"+id:location.origin+location.pathname+"?t="+id}
+async function setStatus(id,st){
+  try{if(MY[id]===st){var d=await sb.from("user_titles").delete().eq("user_id",UID).eq("title_id",id);if(d.error)throw d.error;delete MY[id]}
+  else{var u=await sb.from("user_titles").upsert({user_id:UID,title_id:id,status:st},{onConflict:"user_id,title_id"});if(u.error)throw u.error;MY[id]=st}
+  hap();render()}catch(e){toast("Не удалось сохранить / Could not save")}}
+function ext(u){if(!u)return;try{if(tg&&/t\.me\//.test(u)&&tg.openTelegramLink)tg.openTelegramLink(u);else if(tg&&tg.openLink)tg.openLink(u);else window.open(u,"_blank","noopener")}catch(e){window.open(u,"_blank","noopener")}}
+app.addEventListener("click",async function(e){
+  var b=e.target.closest("[data-a]");if(!b)return;var a=b.dataset.a,p=a.split(":"),pg=page();
+  switch(p[0]){
+    case"x":return;
+    case"tab":return tab(p[1]);
+    case"back":return pop();
+    case"open":S.search=false;S.focused=0;return openTitle(Number(p[1]));
+    case"chan":return ext(DB.links.channel);
+    case"theme":setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");return render();
+    case"lang":LANG=LANG==="ru"?"en":"ru";lss("ww_lang",LANG);return render();
+    case"col":var c=DB.cols.find(function(x){return x.id===Number(p[1])});return push({n:"list",title:c.title,ids:colIds(c)});
+    case"rnd":var k=DB.titles.filter(function(x){return x.kind===p[1]});if(!k.length)return toast(t("empty"));return openTitle(k[Math.floor(Math.random()*k.length)].id);
+    case"gen":var g=DB.genres.find(function(x){return x.id===Number(p[1])});return push({n:"list",title:g.emoji+" "+g.name,ids:DB.tg.filter(function(q){return q.genre_id===g.id}).map(function(q){return q.title_id}).filter(function(i){return T_(i)})});
+    case"full":S.full=true;return render();case"short":S.full=false;return render();
+    case"st":return setStatus(pg.id,p[1]);
+    case"trailer":return ext(D[pg.id].trailer_url);
+    case"share":var nmx=nm(D[pg.id]);return ext("https://t.me/share/url?url="+encodeURIComponent(shareLink(pg.id))+"&text="+encodeURIComponent(nmx));
+    case"onl":S.sheet={n:"onl",id:pg.id};track("open_providers",{title_id:pg.id});return render();
+    case"rsheet":S.sheet={n:"rat",id:pg.id};return render();
+    case"sclose":S.sheet=null;return render();
+    case"prov":track("click_provider",{title_id:pg.id,provider_id:Number(p[1])});var q=(D[pg.id].prov||[]).find(function(z){return z.provider_id===Number(p[1])});return ext(q&&q.url);
+    case"lnk":var u=DB.links[p[1]]||(D[pg.id]&&D[pg.id][p[1]+"_url"]);return ext(u);
+    case"rt":pg.tab=p[1];return render();
+    case"so":S.search=true;S.focused=0;return render();
+    case"sx":S.search=false;S.focused=0;return render();
+    case"sgo":return goSearch();
+    case"addhome":try{tg.addToHomeScreen()}catch(err){}return;
+    case"del":if(!confirm(t("delQ")))return;var r=await sb.rpc("delete_my_account");if(r.error)return toast("Error");await sb.auth.signOut();if(tg&&tg.close)tg.close();return;
+  }});
+
+/* ---------- старт и вход ---------- */
+function fail(code){app.innerHTML='<div class="center"><h1>'+t("fail")+'</h1><p class="mute">'+(code==="banned"?t("banned"):code==="no_tg"?t("openTg"):"")+'</p><p class="mute sm">'+esc(code)+'</p>'+(code==="banned"?"":'<button class="pill on" style="padding:14px 28px" onclick="boot()">'+t("retry")+'</button>')+'</div>'}
+async function boot(){
+  app.innerHTML='<div class="center mute">…</div>';
+  try{
+    if(tg&&tg.initData){
+      var r=await fetch(SB_URL+"/functions/v1/telegram-auth",{method:"POST",headers:{"Content-Type":"application/json",apikey:SB_KEY},body:JSON.stringify({initData:tg.initData})}),j=await r.json().catch(function(){return{}});
+      if(!r.ok)return fail(j.error||"http_"+r.status);
+      var ss=await sb.auth.setSession({access_token:j.access_token,refresh_token:j.refresh_token});if(ss.error)return fail("session");
+    }
+    var s=await sb.auth.getSession();if(!s.data.session)return fail("no_tg");
+    UID=s.data.session.user.id;await load();
+    var sp=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.start_param)||"",qp=new URLSearchParams(location.search).get("t"),tid=/^t(\d+)$/.exec(sp);tid=tid?Number(tid[1]):(qp?Number(qp):null);
+    render();if(tid&&T_(tid))openTitle(tid);
+  }catch(err){console.error(err);fail(String(err&&err.message||err).slice(0,80))}
+}
+boot();
+</script>
+</body>
+</html>
