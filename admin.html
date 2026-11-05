@@ -48,7 +48,7 @@ function setP(o,p,v){var k=p.split(".");for(var i=0;i<k.length-1;i++)o=o[k[i]];o
 var MON=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"],STAT=[["airing","Выходит"],["ended","Завершён"],["pending","Решается судьба"],["canceled","Закрыт"]];
 function sel(p,o,v,bl){return '<select data-p="'+p+'" data-n="1"><option value="">'+bl+'</option>'+o.map(function(x){return '<option value="'+x[0]+'"'+(v===x[0]?" selected":"")+'>'+x[1]+'</option>'}).join("")+'</select>'}
 function fmtRt(m){if(!m)return"";var h=Math.floor(m/60),r=m%60;return"В приложении: "+(h?h+" ч ":"")+(r?r+" мин":"")}
-function blank(kind){return{id:null,kind:kind,code:"",title:"",original_title:"",description_short:"",description_full:"",description_short_en:"",description_full_en:"",trailer_bg_url:null,sticker:null,trailer_alt_kind:"",trailer_alt_url:"",year_start:null,year_end:null,runtime_min:null,poster_url:null,trailer_url:"",comments_url:"",kp_url:"",imdb_url:"",rt_url:"",rating_kp:null,rating_imdb:null,rating_rt:null,has_watch:false,status:"draft",coming_soon:false,release_day:null,release_month:null,release_year:null,series_status:"airing",on_home:false,home_image_url:null,genre_ids:[],providers:[],seasons:[]}}
+function blank(kind){return{id:null,kind:kind,code:"",title:"",original_title:"",description_short:"",description_full:"",description_short_en:"",description_full_en:"",trailer_bg_url:null,sticker:null,trailer_alt_kind:"",trailer_alt_url:"",credits:[],year_start:null,year_end:null,runtime_min:null,poster_url:null,trailer_url:"",comments_url:"",kp_url:"",imdb_url:"",rt_url:"",rating_kp:null,rating_imdb:null,rating_rt:null,has_watch:false,status:"draft",coming_soon:false,release_day:null,release_month:null,release_year:null,series_status:"airing",on_home:false,home_image_url:null,genre_ids:[],providers:[],seasons:[]}}
 
 async function toJpeg(f){try{var b=await createImageBitmap(f),c=document.createElement("canvas");c.width=b.width;c.height=b.height;var g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(b,0,0);
   var bl=await new Promise(function(r){c.toBlob(r,"image/jpeg",.9)});return bl?new File([bl],"poster.jpg",{type:"image/jpeg"}):f}catch(e){return f}}
@@ -110,6 +110,13 @@ ed:function(){
   if(E.has_watch){h+=E.providers.map(function(p,i){return '<div class="row" style="margin-bottom:8px"><label style="margin:0">Кинотеатр<select data-p="providers.'+i+'.provider_id" data-n="1"><option value="">выберите</option>'+G.providers.map(function(x){return '<option value="'+x.id+'"'+(p.provider_id===x.id?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</select></label>'+fld("Ссылка","providers."+i+".url",p.url).replace("<label>",'<label style="margin:0">')+fld("Пометка под названием","providers."+i+".note",p.note,'placeholder="Подписка"').replace("<label>",'<label style="margin:0">')+'<button class="btn red sm" data-a="delpv:'+i+'">✕</button></div>'}).join("")+
    '<button class="btn sm" data-a="addpv">+ Кинотеатр</button>'+(G.providers.length?"":' <span class="mute">Сначала добавьте кинотеатры в каталоге.</span>')}
   h+='</div>';
+  h+='<div class="card"><h2>Актёры и съёмочная команда</h2><div class="mute" style="margin-bottom:10px">В приложении идут слайдером в этом порядке. Одного и того же человека в разных фильмах пишите одинаково — фото подтянется само.</div>'+E.credits.map(function(c,i){
+    return '<div class="sub"><div class="row" style="align-items:flex-end">'+(c.photo_url?'<img src="'+esc(c.photo_url)+'" alt="" style="width:52px;max-width:52px;height:52px;border-radius:50%;object-fit:cover;flex:0 0 52px">':'<span style="width:52px;max-width:52px;height:52px;border-radius:50%;flex:0 0 52px;background:var(--line)"></span>')+
+    '<label style="margin:0;flex:0 0 150px">Кто<select data-p="credits.'+i+'.kind" data-re="1">'+[["director","Режиссёр"],["actor","Актёр"],["crew","Съёмочная группа"]].map(function(o){return'<option value="'+o[0]+'"'+(c.kind===o[0]?" selected":"")+'>'+o[1]+'</option>'}).join("")+'</select></label>'+
+    fld("Имя и фамилия","credits."+i+".name",c.name).replace("<label>",'<label style="margin:0">')+fld("Имя по-английски","credits."+i+".name_en",c.name_en).replace("<label>",'<label style="margin:0">')+
+    (c.kind!=="director"?fld(c.kind==="actor"?"Роль":"Должность (Оператор, Композитор…)","credits."+i+".character",c.character).replace("<label>",'<label style="margin:0">'):"")+'</div>'+
+    '<div class="row" style="margin-top:8px;align-items:center"><label style="margin:0">Фото (лучше квадратное)<input id="cph-'+i+'" type="file" accept="image/*"></label><span class="sp"></span><button class="btn sm" style="flex:none" data-a="cmv:'+i+':-1">↑</button><button class="btn sm" style="flex:none" data-a="cmv:'+i+':1">↓</button><button class="btn red sm" style="flex:none" data-a="cdel:'+i+'">✕</button></div></div>'}).join("")+
+    '<button class="btn sm" data-a="addcr">+ Человек</button></div>';
   if(k==="series"){
     h+='<div class="card"><h2>Сезоны и серии</h2>'+E.seasons.map(function(s,i){
       return '<div class="sub"><div class="row"><b style="flex:none;align-self:center">Сезон '+(i+1)+'</b>'+fld("Название (необязательно)","seasons."+i+".name",s.name).replace("<label>",'<label style="margin:0">')+'<button class="btn sm" data-a="bulk:'+i+'">Создать N серий</button><button class="btn red sm" data-a="delseason:'+i+'">Удалить сезон</button></div><div style="margin-top:10px">'+
@@ -183,10 +190,24 @@ V.promo=function(){
   fld("Ссылка для перехода","url",P.url,'placeholder="https://t.me/wantwatchnow"')+
   '<label style="margin-top:10px">Фоновая картинка (кликабельная, на весь экран)<input id="promoimg" type="file" accept="image/*"></label>'+
   (P.image_url?'<img class="prev" src="'+esc(P.image_url)+'" alt="Реклама" style="max-height:340px;width:auto"><div class="bar" style="margin-top:8px"><button class="btn red sm" data-a="rmpromo">Убрать картинку</button></div>':'<div class="mute">Без картинки покажется стандартное окно с логотипом и кнопкой.</div>')+
-  '<div class="mute" style="margin-top:8px">Лучше всего вертикальная картинка 9:16 (например, 1080×1920). Нажатие на неё откроет ссылку, крестик закрывает окно.</div></div>'};
+  '<div class="mute" style="margin-top:8px">Лучше всего вертикальная картинка 9:16 (например, 1080×1920). Нажатие на неё откроет ссылку, крестик закрывает окно.</div></div>'+
+  '<div class="bar" style="margin-top:22px"><h1 style="margin:0">Баннеры на странице фильма</h1><span class="sp"></span><button class="btn pri" data-a="bsave">Сохранить баннеры</button></div>'+
+  '<div class="card mute">Показываются на странице фильма или сериала над «Похожими». Если активных несколько, каждый раз выбирается случайный. Лучше всего горизонтальная картинка 3:1 (например, 1200×400). Для английского интерфейса можно загрузить свою картинку, иначе покажется русская.</div>'+
+  (P.bn||[]).map(function(b,i){return '<div class="card"><div class="row">'+fld("Название (видно только вам)","bn."+i+".name",b.name).replace("<label>",'<label style="margin:0">')+fld("Ссылка","bn."+i+".link_url",b.link_url,'placeholder="https://t.me/…"').replace("<label>",'<label style="margin:0">')+'</div>'+
+    '<div class="row" style="margin-top:10px"><label style="margin:0">Картинка (рус.)<input id="bnr-'+i+'" type="file" accept="image/*"></label><label style="margin:0">Картинка (англ.)<input id="bne-'+i+'" type="file" accept="image/*"></label></div>'+
+    '<div class="row" style="margin-top:8px">'+(b.image_url?'<img class="prev" src="'+esc(b.image_url)+'" alt="" style="max-height:120px;width:auto">':"")+(b.image_url_en?'<img class="prev" src="'+esc(b.image_url_en)+'" alt="" style="max-height:120px;width:auto">':"")+'</div>'+
+    '<div class="row" style="margin-top:10px;align-items:center"><label style="display:flex;gap:8px;align-items:center;color:var(--ink);margin:0"><input type="checkbox" data-p="bn.'+i+'.is_active" style="width:auto;margin:0"'+(b.is_active?" checked":"")+'> Показывать</label><span class="sp"></span><button class="btn red sm" data-a="bdel:'+i+'">Удалить</button></div></div>'}).join("")+
+  '<div class="bar"><button class="btn sm" data-a="badd">+ Баннер</button></div>'};
 async function loadPromo(){
   var r=await sb.from("app_settings").select("*").eq("key","promo").maybeSingle();
-  var v=(r.data&&r.data.value)||{};E={enabled:v.enabled!==false,url:v.url||"https://t.me/wantwatchnow",image_url:v.image_url||null};render()}
+  var v=(r.data&&r.data.value)||{};E={enabled:v.enabled!==false,url:v.url||"https://t.me/wantwatchnow",image_url:v.image_url||null,bn:[],bdel:[]};
+  var b=await sb.from("banners").select("*").eq("placement","title").order("sort").order("id");E.bn=(b.data||[]).map(function(x){return{id:x.id,name:x.name||"",link_url:x.link_url||"",image_url:x.image_url,image_url_en:x.image_url_en||null,is_active:x.is_active}});render()}
+async function saveBanners(){
+  for(var i=0;i<E.bn.length;i++)if(!E.bn[i].image_url)return toast("У баннера "+(i+1)+" нет русской картинки");
+  try{for(var k=0;k<E.bdel.length;k++){var d=await sb.from("banners").delete().eq("id",E.bdel[k]);if(d.error)throw d.error}E.bdel=[];
+    for(i=0;i<E.bn.length;i++){var b=E.bn[i],row={name:(b.name||"").trim()||("Баннер "+(i+1)),placement:"title",image_url:b.image_url,image_url_en:b.image_url_en||null,link_url:nz((b.link_url||"").trim()),is_active:!!b.is_active,sort:i};
+      var r=b.id?await sb.from("banners").update(row).eq("id",b.id):await sb.from("banners").insert(row).select("id").single();if(r.error)throw r.error;if(!b.id)b.id=r.data.id}
+    toast("Баннеры сохранены ✓");render()}catch(e){toast("Ошибка: "+(e.message||e))}}
 async function savePromo(){
   var u=(E.url||"").trim();if(u&&!/^https?:\/\//.test(u))return toast("Ссылка должна начинаться с https://");
   var r=await sb.from("app_settings").upsert({key:"promo",value:{enabled:!!E.enabled,url:u,image_url:E.image_url||null,v:Date.now()}});
@@ -210,6 +231,16 @@ async function save(){
     x=await sb.from("title_providers").delete().eq("title_id",id);if(x.error)throw x.error;
     var seen={},pv=E.has_watch?E.providers.filter(function(p){if(!p.provider_id||!p.url||seen[p.provider_id])return false;seen[p.provider_id]=1;return true}).map(function(p,i){return{title_id:id,provider_id:p.provider_id,url:p.url,note:nz(p.note),sort:i}}):[];
     if(pv.length){x=await sb.from("title_providers").insert(pv);if(x.error)throw x.error}
+    // Команда: человек ищется по имени, чтобы фото и имя были общими для всех фильмов
+    x=await sb.from("credits").delete().eq("title_id",id);if(x.error)throw x.error;
+    var cr=[],ci=0;
+    for(var q=0;q<E.credits.length;q++){var c=E.credits[q],nm=(c.name||"").trim();if(!nm)continue;
+      var pid=c.person_id&&nm===c.orig?c.person_id:null;
+      if(!pid){var f=await sb.from("people").select("id,photo_url").ilike("name",nm.replace(/[%_\\]/g,"\\$&")).limit(1);if(f.error)throw f.error;if(f.data&&f.data.length)pid=f.data[0].id}
+      if(pid){var upd={name:nm};if(c.name_en)upd.name_original=c.name_en.trim();if(c.photo_url)upd.photo_url=c.photo_url;x=await sb.from("people").update(upd).eq("id",pid);if(x.error)throw x.error}
+      else{var ins=await sb.from("people").insert({name:nm,name_original:nz((c.name_en||"").trim()),photo_url:c.photo_url||null}).select("id").single();if(ins.error)throw ins.error;pid=ins.data.id}
+      cr.push({title_id:id,person_id:pid,kind:c.kind||"actor",character:c.kind==="director"?null:nz((c.character||"").trim()),sort:ci++})}
+    if(cr.length){x=await sb.from("credits").insert(cr);if(x.error)throw x.error}
     if(E.kind==="series"){
       // Сезоны и серии обновляем «по номеру», а не пересоздаём: так не теряются отметки пользователей
       for(var i=0;i<E.seasons.length;i++){
@@ -226,11 +257,12 @@ async function save(){
 async function openEd(id){
   if(!id){E=blank(G.tab);G.view="ed";return render()}
   var r=await Promise.all([sb.from("titles").select("*").eq("id",id).single(),sb.from("title_genres").select("genre_id").eq("title_id",id),
-    sb.from("title_providers").select("*").eq("title_id",id).order("sort"),sb.from("seasons").select("*, episodes(*)").eq("title_id",id).order("number")]);
+    sb.from("title_providers").select("*").eq("title_id",id).order("sort"),sb.from("seasons").select("*, episodes(*)").eq("title_id",id).order("number"),sb.from("credits").select("kind,character,sort,people(id,name,name_original,photo_url)").eq("title_id",id).order("sort")]);
   if(r[0].error)return toast("Не удалось открыть");
   E=Object.assign(blank(r[0].data.kind),r[0].data,{
     genre_ids:(r[1].data||[]).map(function(x){return x.genre_id}),
     providers:(r[2].data||[]).map(function(x){return{provider_id:x.provider_id,url:x.url,note:x.note||""}}),
+    credits:(r[4].data||[]).map(function(c){var p=c.people||{};return{kind:c.kind,character:c.character||"",name:p.name||"",name_en:p.name_original||"",photo_url:p.photo_url||null,person_id:p.id||null,orig:p.name||""}}),
     seasons:(r[3].data||[]).map(function(s){return{name:s.name||"",episodes:(s.episodes||[]).sort(function(a,b){return a.number-b.number}).map(function(e){return{name:e.name,description:e.description}})}})});
   ["code","original_title","trailer_url","trailer_alt_url","trailer_alt_kind","comments_url","kp_url","imdb_url","rt_url","description_short","description_full","description_short_en","description_full_en"].forEach(function(f){if(E[f]==null)E[f]=""});
   G.view="ed";render();
@@ -241,7 +273,9 @@ app.addEventListener("input",function(e){var t=e.target,p=t.dataset.p;if(t.id===
   var v=t.type==="checkbox"?t.checked:t.value;if(t.dataset.n)v=v===""?null:Number(String(v).replace(",","."));
   setP(E,p,v);if(p==="runtime_min"){var h=document.getElementById("rth");if(h)h.textContent=fmtRt(v)}if(t.dataset.re)render()});
 app.addEventListener("change",async function(e){var t=e.target;
-  try{if(t.id==="poster"&&t.files[0]){E.poster_url=await upload(await toJpeg(t.files[0]),"posters");render()}if(t.id==="promoimg"&&t.files[0]){E.image_url=await upload(t.files[0],"promo");render()}if(t.id==="tbg"&&t.files[0]){E.trailer_bg_url=await upload(t.files[0],"trailers");render()}if(t.id==="homeimg"&&t.files[0]){E.home_image_url=await upload(t.files[0],"slides");render()}}catch(err){toast("Не удалось загрузить: "+err.message)}});
+  try{var cm=/^cph-(\d+)$/.exec(t.id||"");if(cm&&t.files[0]){E.credits[Number(cm[1])].photo_url=await upload(await toJpeg(t.files[0]),"people");render()}
+  var bm=/^bn([re])-(\d+)$/.exec(t.id||"");if(bm&&t.files[0]){var url=await upload(t.files[0],"banners");E.bn[Number(bm[2])][bm[1]==="r"?"image_url":"image_url_en"]=url;render()}
+  if(t.id==="poster"&&t.files[0]){E.poster_url=await upload(await toJpeg(t.files[0]),"posters");render()}if(t.id==="promoimg"&&t.files[0]){E.image_url=await upload(t.files[0],"promo");render()}if(t.id==="tbg"&&t.files[0]){E.trailer_bg_url=await upload(t.files[0],"trailers");render()}if(t.id==="homeimg"&&t.files[0]){E.home_image_url=await upload(t.files[0],"slides");render()}}catch(err){toast("Не удалось загрузить: "+err.message)}});
 app.addEventListener("click",async function(e){
   var b=e.target.closest("[data-a]");if(!b)return;var a=b.dataset.a.split(":"),i,j;
   try{switch(a[0]){
@@ -260,6 +294,9 @@ app.addEventListener("click",async function(e){
     case"next":var l=(document.getElementById("let").value||"").toUpperCase().charAt(0);if(!/[A-Z]/.test(l))return toast("Введите английскую букву жанра, например D");
       var mx=0;G.titles.forEach(function(t){if(t.code&&t.code.charAt(0)===l)mx=Math.max(mx,parseInt(t.code.slice(1),10))});
       E.code=l+String(mx+1).padStart(4,"0");return render();
+    case"addcr":E.credits.push({kind:"actor",name:"",name_en:"",character:"",photo_url:null,person_id:null,orig:""});return render();
+    case"cdel":E.credits.splice(Number(a[1]),1);return render();
+    case"cmv":i=Number(a[1]);j=i+Number(a[2]);if(j<0||j>=E.credits.length)return;var tmp=E.credits[i];E.credits[i]=E.credits[j];E.credits[j]=tmp;return render();
     case"addpv":E.providers.push({provider_id:null,url:"",note:""});return render();
     case"delpv":E.providers.splice(Number(a[1]),1);return render();
     case"addseason":E.seasons.push({name:"",episodes:[]});return render();
@@ -289,6 +326,9 @@ app.addEventListener("click",async function(e){
     case"hsave":return saveHome();
     case"unpin":var up2=await sb.from("titles").update({on_home:false}).eq("id",Number(a[1]));if(up2.error)return toast("Ошибка: "+up2.error.message);await loadAll();toast("Снято с главной");return render();
     case"psave":return savePromo();
+    case"bsave":return saveBanners();
+    case"badd":E.bn.push({id:null,name:"",link_url:"",image_url:null,image_url_en:null,is_active:true});return render();
+    case"bdel":var bx=E.bn.splice(Number(a[1]),1)[0];if(bx&&bx.id)E.bdel.push(bx.id);return render();
     case"rmpromo":E.image_url=null;return render();
     case"rmtbg":E.trailer_bg_url=null;return render();
     case"save":return save();
