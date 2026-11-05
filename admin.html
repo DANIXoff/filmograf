@@ -43,6 +43,8 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 .uav.big{width:72px;height:72px;max-width:72px;font-size:26px}
 .kv{display:grid;grid-template-columns:160px 1fr;gap:6px 12px;font-size:14px}.kv span{color:var(--mute)}
 .badge.ban{background:var(--red);color:#fff}
+.ntprev{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:12px 14px;border-radius:14px;font-size:14px;line-height:1.4;font-weight:600}.ntprev svg{flex:none;margin-top:-1px}
+.nt-red{background:#fde8e7;color:#b42318}.nt-yellow{background:#fff3cf;color:#8a5a00}.nt-blue{background:#e5f0ff;color:#1d5bd8}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 </head>
@@ -161,7 +163,7 @@ V.colled=function(){
   return h};
 V.home=function(){
   var cs=G.colls.filter(function(c){return c.kind===G.tab}),L={slider:"Слайдер",collection:"Плитка-подборка",random:"Плитка «Рандом»"};
-  return nav("home")+'<div class="bar">'+kindTabs()+'<span class="sp"></span><button class="btn pri" data-a="hsave">Сохранить</button></div><div class="card mute">Блоки идут на главной сверху вниз. Слайдер сам собирается из тайтлов с галочкой «На главную».</div>'+
+  return nav("home")+ntCard()+'<div class="bar">'+kindTabs()+'<span class="sp"></span><button class="btn pri" data-a="hsave">Сохранить</button></div><div class="card mute">Блоки идут на главной сверху вниз. Слайдер сам собирается из тайтлов с галочкой «На главную».</div>'+
   (E.blocks.length?E.blocks.map(function(b,i){
     return '<div class="card"><div class="row"><b style="flex:none;align-self:center">'+(i+1)+'. '+L[b.block_type]+'</b>'+
     (b.block_type==="slider"?'<span class="mute" style="align-self:center">Автоматически: тайтлы с галочкой «На главную» (до 10)</span>':b.block_type==="random"?'<label style="margin:0;flex:0 0 70px">Эмодзи<input data-p="blocks.'+i+'.emoji" value="'+esc(b.emoji)+'" maxlength="4"></label>'+fld("Название","blocks."+i+".title",b.title).replace("<label>",'<label style="margin:0">'):
@@ -169,7 +171,21 @@ V.home=function(){
     '<button class="btn sm" data-a="hmv:'+i+':-1">↑</button><button class="btn sm" data-a="hmv:'+i+':1">↓</button><button class="btn red sm" data-a="hrm:'+i+'">✕</button></div>'+
     '<label style="display:flex;gap:8px;align-items:center;color:var(--ink);margin:10px 0 0"><input type="checkbox" data-p="blocks.'+i+'.is_active" style="width:auto;margin:0"'+(b.is_active?" checked":"")+'> Показывать</label></div>'}).join(""):'<div class="card mute">На главной пока ничего нет.</div>')+
   '<div class="bar"><button class="btn sm" data-a="hadd:slider">+ Слайдер</button><button class="btn sm" data-a="hadd:collection">+ Плитка-подборка</button><button class="btn sm" data-a="hadd:random">+ Плитка «Рандом»</button></div>'};
-async function loadHome(){
+function ntCard(){var n=G.nt||{};
+  return'<div class="card"><div class="bar" style="margin-bottom:6px"><h2 style="margin:0">Плашка-уведомление</h2><span class="sp"></span><button class="btn pri sm" data-a="ntsave">Сохранить плашку</button></div>'+
+  '<div class="mute" style="margin-bottom:10px">Текстовая плашка под логотипом на главной. Например: «Сегодня ночью — технические работы».</div>'+
+  '<label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" data-nt="enabled" style="width:auto;margin:0"'+(n.enabled?" checked":"")+'> Показывать</label>'+
+  '<div class="row" style="margin-top:8px"><label>Текст<textarea data-nt="text" style="min-height:64px">'+esc(n.text||"")+'</textarea></label><label>Текст по-английски (необязательно)<textarea data-nt="text_en" style="min-height:64px">'+esc(n.text_en||"")+'</textarea></label></div>'+
+  '<div class="row"><label>Цвет<select data-nt="color" data-re="1">'+[["red","Красный"],["yellow","Жёлтый"],["blue","Голубой"]].map(function(c){return'<option value="'+c[0]+'"'+(n.color===c[0]?" selected":"")+'>'+c[1]+'</option>'}).join("")+'</select></label>'+
+  '<label>Где показывать<select data-nt="where">'+[["both","Фильмы и сериалы"],["movie","Только фильмы"],["series","Только сериалы"]].map(function(c){return'<option value="'+c[0]+'"'+((n.where||"both")===c[0]?" selected":"")+'>'+c[1]+'</option>'}).join("")+'</select></label>'+
+  '<label>Ссылка по нажатию (необязательно)<input data-nt="url" value="'+esc(n.url||"")+'" placeholder="https://t.me/…"></label></div>'+
+  (n.text?'<div class="ntprev nt-'+(n.color||"blue")+'">'+NTI+'<span>'+esc(n.text)+'</span></div>':"")+'</div>'}
+var NTI='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 7.2v6.2"/><path d="M12 16.9v.1"/></svg>';
+async function loadNotice(){var r=await sb.from("app_settings").select("*").eq("key","notice").maybeSingle();G.nt=Object.assign({enabled:false,text:"",text_en:"",color:"blue",where:"both",url:""},(r.data&&r.data.value)||{})}
+async function saveNotice(){var n=G.nt||{};if(n.enabled&&!(n.text||"").trim())return toast("Введите текст плашки");if(n.url&&!/^https?:\/\//.test(n.url.trim()))return toast("Ссылка должна начинаться с https://");
+  var r=await sb.from("app_settings").upsert({key:"notice",value:{enabled:!!n.enabled,text:(n.text||"").trim(),text_en:(n.text_en||"").trim(),color:n.color||"blue",where:n.where||"both",url:(n.url||"").trim()}});
+  if(r.error)return toast("Ошибка: "+r.error.message);toast("Плашка сохранена ✓")}
+async function loadHome(){if(!G.nt)await loadNotice();
   var r=await sb.from("home_blocks").select("*").eq("page",G.tab).order("sort");
   E={blocks:(r.data||[]).map(function(b){return{block_type:b.block_type,collection_id:b.collection_id,title:b.title||"",emoji:b.emoji||"",is_active:b.is_active}})};render()}
 async function saveHome(){
@@ -394,7 +410,7 @@ async function openEd(id){
 }
 
 /* ---------- события ---------- */
-app.addEventListener("input",function(e){var t=e.target,p=t.dataset.p;if(t.id==="cq"){pickList(t.value);return}if(t.id==="aq"){pickAch(t.value);return}if(t.id==="uq"){G.uq=t.value;G.uqFocus=true;clearTimeout(G.uqT);G.uqT=setTimeout(function(){loadUsers(false)},350);return}if(!p)return;
+app.addEventListener("input",function(e){var t=e.target,p=t.dataset.p;if(t.dataset.nt){G.nt=G.nt||{};G.nt[t.dataset.nt]=t.type==="checkbox"?t.checked:t.value;if(t.dataset.re||t.dataset.nt==="text"){var pv=document.querySelector(".ntprev");if(t.dataset.re||!pv)return render();pv.querySelector("span").textContent=t.value}return}if(t.id==="cq"){pickList(t.value);return}if(t.id==="aq"){pickAch(t.value);return}if(t.id==="uq"){G.uq=t.value;G.uqFocus=true;clearTimeout(G.uqT);G.uqT=setTimeout(function(){loadUsers(false)},350);return}if(!p)return;
   var v=t.type==="checkbox"?t.checked:t.value;if(t.dataset.n)v=v===""?null:Number(String(v).replace(",","."));
   setP(E,p,v);if(p==="runtime_min"){var h=document.getElementById("rth");if(h)h.textContent=fmtRt(v)}if(t.dataset.re)render()});
 app.addEventListener("change",async function(e){var t=e.target;
@@ -453,6 +469,7 @@ app.addEventListener("click",async function(e){
     case"hsave":return saveHome();
     case"unpin":var up2=await sb.from("titles").update({on_home:false}).eq("id",Number(a[1]));if(up2.error)return toast("Ошибка: "+up2.error.message);await loadAll();toast("Снято с главной");return render();
     case"psave":return savePromo();
+    case"ntsave":return saveNotice();
     case"uf":G.uf=a[1];G.uqFocus=false;return loadUsers(false);
     case"umore":return loadUsers(true);
     case"user":return openUser(a[1]+(a.length>2?":"+a.slice(2).join(":"):""));

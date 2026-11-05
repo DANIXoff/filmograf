@@ -187,6 +187,10 @@ h1{font-size:22px;line-height:1.2;margin:0 0 6px}h2{font-size:18px;margin:22px 1
 .ept small{display:block;color:var(--mute);font-size:13px;line-height:1.45;margin-top:4px;font-weight:400}
 .epall{width:100%;margin-top:8px;padding:12px;border-radius:14px;background:var(--bg);font-weight:600;font-size:14px}
 .epdone{margin-top:10px;padding:14px;border-radius:16px;background:var(--bg);text-align:center}.epdone b{display:block;margin-bottom:10px}.epdone button{width:100%;padding:13px;border-radius:999px;background:var(--ink);color:var(--bg);font-weight:700}
+.ntb{display:flex;gap:10px;align-items:flex-start;margin:0 16px 14px;width:calc(100% - 32px);padding:12px 14px;border-radius:16px;font-size:14px;line-height:1.4;font-weight:600;text-align:left}
+.ntb svg{flex:none;margin-top:-1px}.ntb span{white-space:pre-line}
+.nt-red{background:#fde8e7;color:#b42318}.nt-yellow{background:#fff3cf;color:#8a5a00}.nt-blue{background:#e5f0ff;color:#1d5bd8}
+[data-theme=dark] .nt-red{background:rgba(240,68,56,.16);color:#ff8a80}[data-theme=dark] .nt-yellow{background:rgba(245,180,0,.15);color:#ffd166}[data-theme=dark] .nt-blue{background:rgba(64,140,255,.16);color:#8cb8ff}
 </style>
 </head>
 <body>
@@ -197,7 +201,7 @@ h1{font-size:22px;line-height:1.2;margin:0 0 6px}h2{font-size:18px;margin:22px 1
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 var SB_URL="https://rixjsfvweagsqrvoiymj.supabase.co",SB_KEY="sb_publishable_XlyUk5LlVt3Cdt20laz6fw_HyjKJH1y";
-var VER="13.0";
+var VER="14.0";
 var CFG={botApp:"wantwatch_bot/wwnow",inlineTrailer:false,prepShare:true}; /* inlineTrailer: true включает плеер YouTube внутри приложения; prepShare: красивое сообщение «Поделиться» через функцию share-message */ /* для ссылок «Поделиться»: имя бота и приложения, например "wantwatch_bot/app" */
 var tg0;function insets(){var tg=window.Telegram&&window.Telegram.WebApp;var a=(tg&&tg.safeAreaInset)||{},c=(tg&&tg.contentSafeAreaInset)||{},v=(a.top||0)+(c.top||0);if(tg&&tg.isFullscreen&&v<20)v=96;document.documentElement.style.setProperty("--tgt",v+"px")}
 insets();try{["safeAreaChanged","contentSafeAreaChanged","fullscreenChanged"].forEach(function(e){window.Telegram.WebApp.onEvent(e,insets)})}catch(e){}
@@ -286,6 +290,9 @@ function nextCeleb(){var id=ACHQ.shift();if(id==null)return;var a=(DB.ach||[]).f
   d.innerHTML='<div class="cc">'+aIcon(a,"aic big got")+'<small>'+t("achNew")+'</small><b>'+esc(aName(a))+'</b><p>'+esc(aDesc(a))+'</p><button>'+t("achCool")+'</button></div>';
   d.onclick=function(e){if(e.target===d||e.target.closest("button")){d.remove();setTimeout(nextCeleb,250)}};
   document.body.appendChild(d);try{tg&&tg.HapticFeedback&&tg.HapticFeedback.notificationOccurred("success")}catch(e){}}
+function noticeBar(kind){var n=DB.notice;if(!n||!n.enabled)return"";var tx=LANG==="en"&&n.text_en?n.text_en:n.text;if(!tx)return"";
+  if(n.where&&n.where!=="both"&&n.where!==kind)return"";
+  return'<'+(n.url?'button data-a="ntgo"':'div')+' class="ntb nt-'+esc(n.color||"blue")+'"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 7.2v6.2"/><path d="M12 16.9v.1"/></svg><span>'+esc(tx)+'</span></'+(n.url?"button":"div")+'>'}
 function pickBanner(){var n=Date.now(),a=(DB.banners||[]).filter(function(b){return(!b.starts_at||new Date(b.starts_at)<=n)&&(!b.ends_at||new Date(b.ends_at)>=n)});return a.length?a[Math.floor(Math.random()*a.length)]:null}
 function pname(p){return LANG==="en"&&p.name_original?p.name_original:p.name}
 var MYT={};
@@ -312,13 +319,13 @@ async function load(){
   var r=await Promise.all([sb.from("titles").select("id,kind,code,title,original_title,poster_url,year_start,year_end,runtime_min,series_status,coming_soon,release_day,release_month,release_year,on_home,home_image_url,home_pinned_at,trailer_url,trailer_bg_url,sticker,trailer_alt_url,trailer_alt_kind").eq("status","published"),
     sb.from("genres").select("*").order("sort"),sb.from("title_genres").select("*"),sb.from("collections").select("*").eq("is_active",true).order("sort"),sb.from("collection_items").select("*").order("sort"),
     sb.from("home_blocks").select("*").eq("is_active",true).order("sort"),sb.from("title_stats").select("title_id,avg_score,ratings_count"),
-    sb.from("user_titles").select("title_id,status,updated_at"),sb.from("app_settings").select("*").eq("key","links").maybeSingle(),sb.from("profiles").select("*").eq("id",UID).maybeSingle(),sb.from("providers").select("name,icon_url"),sb.from("app_settings").select("*").eq("key","promo").maybeSingle(),sb.from("ratings").select("title_id,score,liked,act1,act2,act3,seasons").eq("user_id",UID),sb.from("banners").select("id,image_url,image_url_en,link_url,starts_at,ends_at").eq("placement","title").eq("is_active",true).order("sort"),sb.from("achievements").select("*").eq("is_active",true).order("id"),sb.from("user_achievements").select("achievement_id,earned_at").eq("user_id",UID),sb.from("achievement_titles").select("achievement_id,title_id"),sb.rpc("my_progress")]);
+    sb.from("user_titles").select("title_id,status,updated_at"),sb.from("app_settings").select("*").eq("key","links").maybeSingle(),sb.from("profiles").select("*").eq("id",UID).maybeSingle(),sb.from("providers").select("name,icon_url"),sb.from("app_settings").select("*").eq("key","promo").maybeSingle(),sb.from("ratings").select("title_id,score,liked,act1,act2,act3,seasons").eq("user_id",UID),sb.from("banners").select("id,image_url,image_url_en,link_url,starts_at,ends_at").eq("placement","title").eq("is_active",true).order("sort"),sb.from("achievements").select("*").eq("is_active",true).order("id"),sb.from("user_achievements").select("achievement_id,earned_at").eq("user_id",UID),sb.from("achievement_titles").select("achievement_id,title_id"),sb.rpc("my_progress"),sb.from("app_settings").select("*").eq("key","notice").maybeSingle()]);
   if(r[0].error)throw r[0].error;
   DB.titles=r[0].data||[];DB.genres=r[1].data||[];DB.tg=r[2].data||[];DB.cols=r[3].data||[];DB.ci=r[4].data||[];DB.blocks=r[5].data||[];
   DB.stats={};(r[6].data||[]).forEach(function(s){DB.stats[s.title_id]=s});MY={};MYT={};(r[7].data||[]).forEach(function(u){(MY[u.title_id]||(MY[u.title_id]={}))[u.status]=true;(MYT[u.title_id]||(MYT[u.title_id]={}))[u.status]=u.updated_at});
   DB.links=(r[8].data&&r[8].data.value)||{};ME=r[9].data||{};
   var kp=(r[10].data||[]).find(function(p){return/кинопоиск|kinopoisk/i.test(p.name)});DB.kpIcon=kp&&kp.icon_url||null;DB.promo=(r[11]&&r[11].data&&r[11].data.value)||null;
-  DB.banners=(r[13]&&r[13].data)||[];DB.ach=(r[14]&&r[14].data)||[];DB.ua={};((r[15]&&r[15].data)||[]).forEach(function(q){DB.ua[q.achievement_id]=q.earned_at});PRG={};((r[17]&&r[17].data)||[]).forEach(function(q){PRG[q.title_id]=q});DB.atl={};((r[16]&&r[16].data)||[]).forEach(function(q){(DB.atl[q.achievement_id]||(DB.atl[q.achievement_id]=[])).push(q.title_id)});
+  DB.banners=(r[13]&&r[13].data)||[];DB.ach=(r[14]&&r[14].data)||[];DB.ua={};((r[15]&&r[15].data)||[]).forEach(function(q){DB.ua[q.achievement_id]=q.earned_at});DB.notice=(r[18]&&r[18].data&&r[18].data.value)||null;PRG={};((r[17]&&r[17].data)||[]).forEach(function(q){PRG[q.title_id]=q});DB.atl={};((r[16]&&r[16].data)||[]).forEach(function(q){(DB.atl[q.achievement_id]||(DB.atl[q.achievement_id]=[])).push(q.title_id)});
   RT={};((r[12]&&r[12].data)||[]).forEach(function(q){q.liked=q.liked||[];q.seasons=q.seasons||{};RT[q.title_id]=q});
 }
 function track(ev,x){if(!UID)return;var o={user_id:UID,event:ev};if(x)for(var k in x)o[k]=x[k];sb.from("events").insert(o).then(function(){},function(){})}
@@ -435,7 +442,7 @@ function homePage(kind){
     if(b.block_type==="slider"){fl();parts.push(slider(kind))}
     else if(b.block_type==="random"){var ct=(b.title||"").trim(),isDef=!ct||/^Рандомный (фильм|сериал)$/.test(ct);tl.push(tile(b.emoji||"🎲",(LANG==="ru"&&!isDef)?ct:t(kind==="movie"?"rndM":"rndS"),"rnd:"+kind,true))}
     else{var c=DB.cols.find(function(x){return x.id===b.collection_id});if(c&&c.kind===kind)tl.push(tile(c.emoji||"📁",ctitle(c),"col:"+c.id))}});
-  fl();return topbar()+parts.join("")+(parts.length?"":'<div class="center mute">'+t("empty")+'</div>')}
+  fl();return topbar()+noticeBar(kind)+parts.join("")+(parts.length?"":'<div class="center mute">'+t("empty")+'</div>')}
 function colIds(c){var ids=c.genre_id?DB.tg.filter(function(g){return g.genre_id===c.genre_id}).map(function(g){return g.title_id}):DB.ci.filter(function(x){return x.collection_id===c.id}).map(function(x){return x.title_id});
   return ids.filter(function(id){return T_(id)})}
 function grid(ids){return ids.length?'<div class="grid3">'+ids.map(function(id){var x=T_(id);return'<button class="pc" data-a="open:'+id+'">'+poster(x)+'<b>'+esc(nm(x))+'</b><span class="mute">'+esc(when(x))+'</span></button>'}).join("")+'</div>':'<div class="center mute">'+t("empty")+'</div>'}
@@ -611,6 +618,7 @@ app.addEventListener("click",async function(e){
     case"epo":S.epo=S.epo===Number(p[1])?null:Number(p[1]);return render();
     case"ep":return toggleEp(pg.id,Number(p[1]));
     case"epseas":var sq=((D[pg.id]||{}).seasons||[]).find(function(q){return q.id===Number(p[1])});if(!sq)return;var se=sq.episodes.map(function(e){return e.id}),sall=se.every(function(e){return EM[e]});return setMarks(pg.id,sall?se:se.filter(function(e){return!EM[e]}),!sall);
+    case"ntgo":return ext(DB.notice&&DB.notice.url);
     case"rfclose":S.rf=null;hap();return render();
     case"rcom":return ext((D[pg.id]||{}).comments_url);
     case"unwatch":var uid0=pg.id;return ask(t("unwatchQ"),function(){unwatch(uid0)});
