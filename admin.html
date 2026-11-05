@@ -142,7 +142,7 @@ ed:function(){
 };
 
 /* ---------- подборки и главная ---------- */
-function nav(cur){var it=[["dash","Дашборд"],["list","Контент"],["colls","Подборки"],["home","Главная"],["provcat","Кинотеатры"],["promo","Реклама"],["ach","Достижения"],["users","Пользователи"]];
+function nav(cur){var it=[["dash","Дашборд"],["list","Контент"],["colls","Подборки"],["home","Главная"],["provcat","Кинотеатры"],["promo","Реклама"],["ach","Достижения"],["users","Пользователи"],["notif","Уведомления"],["onb","Приветствие"]];
   return '<div class="bar"><div class="tabs">'+it.map(function(x){return '<button class="'+(cur===x[0]?"on":"")+'" data-a="sec:'+x[0]+'">'+x[1]+'</button>'}).join("")+'</div><span class="sp"></span><button class="btn sm" data-a="logout">Выйти</button></div>'}
 function kindTabs(){return '<div class="tabs">'+["movie","series"].map(function(k){return '<button class="'+(G.tab===k?"on":"")+'" data-a="tab:'+k+'">'+(k==="movie"?"Фильмы":"Сериалы")+'</button>'}).join("")+'</div>'}
 function tname(id){var t=G.titles.find(function(x){return x.id===id});return t?t.title+(t.status==="published"?"":" (черновик)"):"#"+id}
@@ -353,6 +353,53 @@ async function openUser(id){var u=(G.users&&G.users.rows||[]).find(function(x){r
   var r=await Promise.all([sb.from("ratings").select("title_id,score,updated_at").eq("user_id",id).order("updated_at",{ascending:false}).limit(15),sb.from("user_achievements").select("achievement_id,earned_at,source").eq("user_id",id),sb.from("achievements").select("id,title,icon,rule_type").order("id")]);
   G.u=u;G.uRat=r[0].data||[];G.uAch=r[1].data||[];G.uAll=r[2].data||[];G.view="user";render();window.scrollTo(0,0)}
 async function refreshUser(){var r=await sb.rpc("admin_users",{p_q:String(G.u.tg_id),p_filter:"all",p_limit:1,p_offset:0});if(r.data&&r.data[0]){var i=G.users.rows.findIndex(function(x){return x.id===G.u.id});if(i>=0)G.users.rows[i]=r.data[0];G.u=r.data[0]}await openUser(G.u.id)}
+var ONB_DEF={slides:[
+ {t:"Добро пожаловать в Want Watch!",x:"Спасибо, что открыл наше приложение. Сейчас вкратце, что ты в нём сможешь делать.",t_en:"Welcome to Want Watch!",x_en:"Thanks for opening our app. Here is a quick look at what you can do in it."},
+ {t:"Сохраняй и отмечай",x:"Сохраняй понравившиеся фильмы и сериалы, чтобы потом их посмотреть. Если не сможешь выбрать, что из списка посмотреть – в профиле есть рандомайзер, который сделает выбор за тебя. А также отмечай просмотренные фильмы или конкретные серии сериала.",t_en:"Save and mark",x_en:"Save the movies and series you like to watch them later. Can’t decide what to pick from your list? Your profile has a randomizer that will choose for you. You can also mark the movies you’ve watched or specific episodes of a series."},
+ {t:"Оценивай!",x:"Каждой картине ты можешь поставить оценку, отметить, что именно тебе понравилось в данном фильме, а затем обсудить просмотренное с другими. На страницах сериалов ты даже сможешь дать оценку каждой отдельной серии.",t_en:"Rate!",x_en:"Rate every title, note what exactly you liked about it, and then discuss it with others. On series pages you can even rate each individual episode."},
+ {t:"Ищи то, что ищешь",x:"В приложении ты можешь искать фильмы/сериалы по названию или по жанрам, а можешь по коду, который ты мог увидеть на наших видео в TikTok, YT Shorts или Instagram Reels.",t_en:"Find what you’re looking for",x_en:"Search movies and series by title or genre — or by the code you may have seen in our videos on TikTok, YT Shorts or Instagram Reels."},
+ {t:"Смотри вместе!",x:"Каждым фильмом или сериалом ты можешь поделиться со своим другом или знакомым. И порекомендовать ему посмотреть или договориться о совместном просмотре.",t_en:"Watch together!",x_en:"Share any movie or series with a friend — recommend it or agree to watch it together."},
+ {t:"Ещё больше",x:"Над приложением идёт ежедневная работа и развитие. Если хочешь стать ещё ближе к нашему сообществу, то подписывайся:",t_en:"Even more",x_en:"We work on the app every day. If you want to be closer to our community, follow us:"}],
+ btns:[{kind:"tg",label:"Новости фильмов и сериалов",label_en:"Movie & series news",url:"https://t.me/wantwatchnow"},{kind:"vk",label:"Группа ВК с новостями",label_en:"VK news group",url:""},{kind:"tg",label:"Блог разработчика",label_en:"Developer’s blog",url:""}],
+ soc:{yt:"",tt:"",ig:""}};
+function onbMerge(v){v=v||{};var d=JSON.parse(JSON.stringify(ONB_DEF));
+  d.slides.forEach(function(s,i){var c=(v.slides||[])[i]||{};["t","x","t_en","x_en"].forEach(function(k){if(c[k]!=null&&c[k]!=="")s[k]=c[k]})});
+  d.btns.forEach(function(b,i){var c=(v.btns||[])[i];if(c){["kind","label","label_en","url"].forEach(function(k){if(c[k]!=null)b[k]=c[k]})}});
+  if(v.soc)["yt","tt","ig"].forEach(function(k){if(v.soc[k]!=null)d.soc[k]=v.soc[k]});return d}
+function ofld(l,p,v,area){return'<label>'+l+(area?'<textarea data-o="'+p+'" style="min-height:84px">'+esc(v)+'</textarea>':'<input data-o="'+p+'" value="'+esc(v)+'">')+'</label>'}
+V.onb=function(){var o=G.onb;if(!o)return nav("onb")+'<div class="card mute">Загрузка…</div>';
+  var h=nav("onb")+'<div class="bar"><h1 style="margin:0">Приветственные слайды</h1><span class="sp"></span><button class="btn pri" data-a="onbsave">Сохранить</button></div>'+
+  '<div class="card mute">Показываются один раз, при первом запуске приложения. Картинки встроены в приложение, здесь меняются тексты и кнопки. Пустое английское поле — покажется русский текст. Пользователь может открыть слайды снова в профиле: «Как пользоваться приложением».</div>';
+  o.slides.forEach(function(sl,i){h+='<div class="card"><h2>Слайд '+(i+1)+'</h2><div class="row">'+ofld("Заголовок","slides."+i+".t",sl.t)+ofld("Заголовок по-английски","slides."+i+".t_en",sl.t_en)+'</div><div class="row">'+ofld("Текст","slides."+i+".x",sl.x,1)+ofld("Текст по-английски","slides."+i+".x_en",sl.x_en,1)+'</div></div>'});
+  h+='<div class="card"><h2>Кнопки на последнем слайде</h2><div class="mute" style="margin-bottom:10px">Кнопка без ссылки не показывается.</div>'+o.btns.map(function(b,i){return'<div class="sub"><div class="row"><label style="flex:0 0 150px">Значок<select data-o="btns.'+i+'.kind"><option value="tg"'+(b.kind==="tg"?" selected":"")+'>Telegram (голубая)</option><option value="vk"'+(b.kind==="vk"?" selected":"")+'>ВКонтакте (синяя)</option></select></label>'+ofld("Текст кнопки","btns."+i+".label",b.label)+ofld("По-английски","btns."+i+".label_en",b.label_en)+ofld("Ссылка","btns."+i+".url",b.url)+'</div></div>'}).join("")+
+  '<h2 style="margin-top:14px">Квадратные кнопки соцсетей</h2><div class="row">'+ofld("YouTube","soc.yt",o.soc.yt)+ofld("TikTok","soc.tt",o.soc.tt)+ofld("Instagram","soc.ig",o.soc.ig)+'</div></div>';
+  return h+'<div class="bar"><button class="btn pri" data-a="onbsave">Сохранить</button></div>'};
+async function loadOnb(){G.view="onb";render();var r=await sb.from("app_settings").select("*").eq("key","onboarding").maybeSingle();G.onb=onbMerge(r.data&&r.data.value);render()}
+async function saveOnb(){var bad=[].concat(G.onb.btns.map(function(b){return b.url}),[G.onb.soc.yt,G.onb.soc.tt,G.onb.soc.ig]).filter(function(u){return u&&!/^https?:\/\//.test(u.trim())});
+  if(bad.length)return toast("Ссылки должны начинаться с https://");
+  var r=await sb.from("app_settings").upsert({key:"onboarding",value:G.onb});if(r.error)return toast("Ошибка: "+r.error.message);toast("Сохранено ✓")}
+V.notif=function(){var n=G.nf||{};
+  var h=nav("notif")+'<div class="bar"><h1 style="margin:0">Уведомления</h1></div>'+
+  '<div class="card"><h2>Новое уведомление всем пользователям</h2><div class="mute" style="margin-bottom:10px">Появится в профиле приложения под колокольчиком. Когда сделаем приложения для Android и iOS, такие уведомления будут приходить и пушем.</div>'+
+  '<div class="row">'+'<label>Заголовок<input data-n2="title" value="'+esc(n.title||"")+'"></label><label>Заголовок по-английски<input data-n2="title_en" value="'+esc(n.title_en||"")+'"></label></div>'+
+  '<div class="row"><label>Текст<textarea data-n2="body">'+esc(n.body||"")+'</textarea></label><label>Текст по-английски<textarea data-n2="body_en">'+esc(n.body_en||"")+'</textarea></label></div>'+
+  '<label>Ссылка по нажатию (необязательно)<input data-n2="url" value="'+esc(n.url||"")+'" placeholder="https://t.me/…"></label>'+
+  (n.title_id?'<div class="item" style="cursor:default"><span><b>Откроет: '+esc((G.titles.find(function(t){return t.id===n.title_id})||{}).title||"")+'</b><small>по нажатию на уведомление</small></span><button class="btn red sm" style="margin-left:auto" data-a="nfrmt">✕</button></div>':'<label>Или привязать фильм/сериал: начните вводить название или код<input id="nq" autocomplete="off"></label><div id="nres"></div>')+
+  '<div class="bar" style="margin-top:12px"><button class="btn pri" data-a="nfsend">Отправить всем</button></div></div>';
+  h+='<div class="card"><h2>Ждут выхода</h2><div class="mute" style="margin-bottom:8px">Подписчики получат уведомление автоматически, когда вы снимете с тайтла галочку «Скоро выйдет».</div>'+((G.subs||[]).length?'<table class="tbl">'+G.subs.map(function(x){return'<tr><td>'+esc(x.title)+'</td><td class="n">'+x.n+' подписч.</td></tr>'}).join("")+'</table>':'<div class="mute">Пока никто не подписался</div>')+'</div>';
+  h+='<div class="card"><h2>Отправленные</h2>'+((G.nfl||[]).length?G.nfl.map(function(x){return'<div class="item" style="cursor:default"><span><b>'+esc(x.title)+'</b><small>'+esc(x.body||"")+' · '+fdt(x.created_at)+'</small></span><button class="btn red sm" style="margin-left:auto" data-a="nfdel:'+x.id+'">Удалить</button></div>'}).join(""):'<div class="mute">Пока ничего</div>')+'</div>';
+  return h};
+async function loadNotif(){G.view="notif";G.nf=G.nf||{};render();
+  var r=await Promise.all([sb.from("notifications").select("*").is("user_id",null).order("created_at",{ascending:false}).limit(50),sb.from("title_subscriptions").select("title_id")]);
+  G.nfl=r[0].data||[];var c={};(r[1].data||[]).forEach(function(x){c[x.title_id]=(c[x.title_id]||0)+1});
+  G.subs=Object.keys(c).map(function(k){var t=G.titles.find(function(x){return x.id===Number(k)})||{};return{title:t.title||"#"+k,n:c[k]}}).sort(function(a,b){return b.n-a.n});render()}
+function pickNf(raw){var q=raw.trim().toLowerCase(),box=document.getElementById("nres");if(!box)return;if(!q){box.innerHTML="";return}
+  var r=G.titles.filter(function(t){return pickMatch(t,q)}).slice(0,8);
+  box.innerHTML=r.length?r.map(function(t){return'<button class="item" data-a="nfpick:'+t.id+'"><span><b>'+esc(t.title)+'</b><small>'+(t.kind==="series"?"сериал":"фильм")+' · '+(t.year_start||"—")+'</small></span></button>'}).join(""):'<div class="mute">Ничего не найдено</div>'}
+async function sendNf(){var n=G.nf||{};if(!(n.title||"").trim())return toast("Введите заголовок");if(n.url&&!/^https?:\/\//.test(n.url.trim()))return toast("Ссылка должна начинаться с https://");
+  if(!confirm("Отправить уведомление «"+n.title.trim()+"» всем пользователям?"))return;
+  var r=await sb.from("notifications").insert({kind:"admin",title:n.title.trim(),body:(n.body||"").trim(),title_en:nz((n.title_en||"").trim()),body_en:nz((n.body_en||"").trim()),url:nz((n.url||"").trim()),title_id:n.title_id||null});
+  if(r.error)return toast("Ошибка: "+r.error.message);toast("Отправлено ✓");G.nf={};loadNotif()}
 /* ---------- сохранение ---------- */
 async function save(){
   try{
@@ -410,7 +457,7 @@ async function openEd(id){
 }
 
 /* ---------- события ---------- */
-app.addEventListener("input",function(e){var t=e.target,p=t.dataset.p;if(t.dataset.nt){G.nt=G.nt||{};G.nt[t.dataset.nt]=t.type==="checkbox"?t.checked:t.value;if(t.dataset.re||t.dataset.nt==="text"){var pv=document.querySelector(".ntprev");if(t.dataset.re||!pv)return render();pv.querySelector("span").textContent=t.value}return}if(t.id==="cq"){pickList(t.value);return}if(t.id==="aq"){pickAch(t.value);return}if(t.id==="uq"){G.uq=t.value;G.uqFocus=true;clearTimeout(G.uqT);G.uqT=setTimeout(function(){loadUsers(false)},350);return}if(!p)return;
+app.addEventListener("input",function(e){var t=e.target,p=t.dataset.p;if(t.dataset.nt){G.nt=G.nt||{};G.nt[t.dataset.nt]=t.type==="checkbox"?t.checked:t.value;if(t.dataset.re||t.dataset.nt==="text"){var pv=document.querySelector(".ntprev");if(t.dataset.re||!pv)return render();pv.querySelector("span").textContent=t.value}return}if(t.id==="cq"){pickList(t.value);return}if(t.id==="aq"){pickAch(t.value);return}if(t.id==="nq"){pickNf(t.value);return}if(t.dataset.o){setP(G.onb,t.dataset.o,t.value);return}if(t.dataset.n2){G.nf=G.nf||{};G.nf[t.dataset.n2]=t.value;return}if(t.id==="uq"){G.uq=t.value;G.uqFocus=true;clearTimeout(G.uqT);G.uqT=setTimeout(function(){loadUsers(false)},350);return}if(!p)return;
   var v=t.type==="checkbox"?t.checked:t.value;if(t.dataset.n)v=v===""?null:Number(String(v).replace(",","."));
   setP(E,p,v);if(p==="runtime_min"){var h=document.getElementById("rth");if(h)h.textContent=fmtRt(v)}if(t.dataset.re)render()});
 app.addEventListener("change",async function(e){var t=e.target;
@@ -453,7 +500,7 @@ app.addEventListener("click",async function(e){
       if(gi.error)return toast(/duplicate|unique/i.test(gi.error.message)?"Такой жанр уже есть":"Ошибка: "+gi.error.message);
       G.genres=(await sb.from("genres").select("*").order("sort")).data||[];
       gi.data.forEach(function(g){if(g.kind===E.kind&&E.genre_ids.indexOf(g.id)<0)E.genre_ids.push(g.id)});toast("Жанр добавлен и выбран");return render();
-    case"sec":G.view=a[1];if(a[1]==="dash")return loadDash();if(a[1]==="users"){G.uqFocus=false;return loadUsers(false)}if(a[1]==="home")return loadHome();if(a[1]==="ach")return loadAch();if(a[1]==="promo")return loadPromo();return render();
+    case"sec":G.view=a[1];if(a[1]==="onb")return loadOnb();if(a[1]==="notif")return loadNotif();if(a[1]==="dash")return loadDash();if(a[1]==="users"){G.uqFocus=false;return loadUsers(false)}if(a[1]==="home")return loadHome();if(a[1]==="ach")return loadAch();if(a[1]==="promo")return loadPromo();return render();
     case"newcoll":E={id:null,kind:G.tab,title:"",title_en:"",subtitle:"",emoji:"",mode:"manual",genre_id:null,is_active:true,sort:G.colls.reduce(function(m,c){return Math.max(m,c.sort||0)},0)+1,items:[]};G.view="colled";return render();
     case"editcoll":var cc=G.colls.find(function(x){return x.id===Number(a[1])});var cit=await sb.from("collection_items").select("title_id").eq("collection_id",cc.id).order("sort");
       E=Object.assign({},cc,{title_en:cc.title_en||"",subtitle:cc.subtitle||"",emoji:cc.emoji||"",mode:cc.genre_id?"genre":"manual",items:(cit.data||[]).map(function(x){return x.title_id})});G.view="colled";return render();
@@ -469,6 +516,11 @@ app.addEventListener("click",async function(e){
     case"hsave":return saveHome();
     case"unpin":var up2=await sb.from("titles").update({on_home:false}).eq("id",Number(a[1]));if(up2.error)return toast("Ошибка: "+up2.error.message);await loadAll();toast("Снято с главной");return render();
     case"psave":return savePromo();
+    case"onbsave":return saveOnb();
+    case"nfsend":return sendNf();
+    case"nfpick":G.nf.title_id=Number(a[1]);return render();
+    case"nfrmt":G.nf.title_id=null;return render();
+    case"nfdel":if(!confirm("Удалить это уведомление у всех?"))return;var nd=await sb.from("notifications").delete().eq("id",Number(a[1]));if(nd.error)return toast("Ошибка: "+nd.error.message);return loadNotif();
     case"ntsave":return saveNotice();
     case"uf":G.uf=a[1];G.uqFocus=false;return loadUsers(false);
     case"umore":return loadUsers(true);
