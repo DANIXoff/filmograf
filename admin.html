@@ -21,7 +21,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 .btn.pri{background:var(--acc);color:var(--accInk)}.btn.red{background:var(--red);color:#fff}.btn.sm{padding:6px 10px;font-size:13px}
 .row{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}.row>*{flex:1;min-width:120px}.row>.btn{flex:none}
 .bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}.bar .sp{flex:1}
-.tabs{display:inline-flex;background:var(--chip);border-radius:10px;padding:3px}.tabs button{border:0;background:none;color:var(--ink);padding:7px 16px;border-radius:8px;font:600 14px inherit;cursor:pointer}.tabs .on{background:var(--card)}
+.tabs{display:inline-flex;flex-wrap:wrap;background:var(--chip);border-radius:10px;padding:3px}.tabs button{border:0;background:none;color:var(--ink);padding:7px 16px;border-radius:8px;font:600 14px inherit;cursor:pointer}.tabs .on{background:var(--card)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}.chip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;font:600 13px inherit;cursor:pointer}.chip.on{background:var(--acc);color:var(--accInk);border-color:var(--acc)}
 .item{display:flex;gap:12px;align-items:center;width:100%;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:8px;margin-bottom:8px;cursor:pointer;font:inherit}
 .item img,.ph{width:42px;height:62px;border-radius:6px;object-fit:cover;background:var(--chip);flex:none}
@@ -31,6 +31,18 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 .prev{max-height:170px;border-radius:8px;margin-top:8px;display:block}
 .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:9}
 .mute{color:var(--mute);font-size:13px}
+.viz{--bar:#2a78d6}
+@media (prefers-color-scheme:dark){.viz{--bar:#3987e5}}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}.stat small{display:block;color:var(--mute);font-size:13px}.stat b{display:block;font-size:26px;margin-top:4px;font-variant-numeric:tabular-nums}.stat i{font-style:normal;color:var(--mute);font-size:12px}
+.chart{position:relative}.chart svg{display:block;width:100%;height:150px;overflow:visible}.chart .tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:5px 8px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-110%);display:none}
+.chart text{fill:var(--mute);font-size:11px}
+.tops{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}.tbl td{padding:7px 4px;border-top:1px solid var(--line)}.tbl tr:first-child td{border-top:0}.tbl td.n{text-align:right;font-variant-numeric:tabular-nums;color:var(--mute);white-space:nowrap}
+.uav{width:42px;height:42px;max-width:42px;min-width:0!important;border-radius:50%;object-fit:cover;background:var(--chip);flex:0 0 auto!important;display:grid;place-items:center;font-weight:700}
+.uav.big{width:72px;height:72px;max-width:72px;font-size:26px}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:6px 12px;font-size:14px}.kv span{color:var(--mute)}
+.badge.ban{background:var(--red);color:#fff}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 </head>
@@ -66,7 +78,7 @@ async function loadAll(){
 }
 async function boot(){
   var s=await sb.auth.getSession();
-  if(s.data.session){var a=await sb.rpc("is_admin");if(a.data===true){await loadAll();G.view="list";return render()}}
+  if(s.data.session){var a=await sb.rpc("is_admin");if(a.data===true){await loadAll();return loadDash()}}
   G.view="login";render();
 }
 
@@ -128,7 +140,7 @@ ed:function(){
 };
 
 /* ---------- подборки и главная ---------- */
-function nav(cur){var it=[["list","Контент"],["colls","Подборки"],["home","Главная"],["provcat","Кинотеатры"],["promo","Реклама"],["ach","Достижения"]];
+function nav(cur){var it=[["dash","Дашборд"],["list","Контент"],["colls","Подборки"],["home","Главная"],["provcat","Кинотеатры"],["promo","Реклама"],["ach","Достижения"],["users","Пользователи"]];
   return '<div class="bar"><div class="tabs">'+it.map(function(x){return '<button class="'+(cur===x[0]?"on":"")+'" data-a="sec:'+x[0]+'">'+x[1]+'</button>'}).join("")+'</div><span class="sp"></span><button class="btn sm" data-a="logout">Выйти</button></div>'}
 function kindTabs(){return '<div class="tabs">'+["movie","series"].map(function(k){return '<button class="'+(G.tab===k?"on":"")+'" data-a="tab:'+k+'">'+(k==="movie"?"Фильмы":"Сериалы")+'</button>'}).join("")+'</div>'}
 function tname(id){var t=G.titles.find(function(x){return x.id===id});return t?t.title+(t.status==="published"?"":" (черновик)"):"#"+id}
@@ -274,6 +286,57 @@ async function saveAch(){
     var id=r.data.id,x=await sb.from("achievement_titles").delete().eq("achievement_id",id);if(x.error)throw x.error;
     if(k==="watched_all_in_list"){x=await sb.from("achievement_titles").insert(E.items.map(function(t){return{achievement_id:id,title_id:t}}));if(x.error)throw x.error}
     toast("Сохранено ✓");await loadAch()}catch(e){toast("Ошибка: "+(e.message||e))}}
+function num(n){return Number(n||0).toLocaleString("ru-RU")}
+function fdt(v){if(!v)return"—";var d=new Date(v);return d.toLocaleDateString("ru-RU",{day:"numeric",month:"short",year:"numeric"})+", "+d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"})}
+function ago(v){if(!v)return"—";var m=Math.round((Date.now()-new Date(v))/60000);if(m<2)return"только что";if(m<60)return m+" мин назад";var h=Math.round(m/60);if(h<24)return h+" ч назад";var d=Math.round(h/24);return d+" дн назад"}
+function uname(u){return[u.first_name,u.last_name].filter(Boolean).join(" ")||(u.username?"@"+u.username:"id "+u.tg_id)}
+function uava(u,big){return u.photo_url?'<img class="uav'+(big?" big":"")+'" src="'+esc(u.photo_url)+'" alt="">':'<span class="uav'+(big?" big":"")+'">'+esc(uname(u).charAt(0))+'</span>'}
+/* Столбиковая диаграмма одной серии: тонкие столбики, скругление сверху, подсказка при наведении */
+function barChart(rows,key,label){
+  var W=600,H=150,pad=18,n=rows.length,mx=Math.max(1,Math.max.apply(null,rows.map(function(r){return r[key]||0}))),bw=(W-2)/n,h='';
+  rows.forEach(function(r,i){var v=r[key]||0,bh=v?Math.max(3,(H-pad-8)*v/mx):0,x=i*bw+1,y=H-pad-bh,w=Math.max(2,bw-2),d=r.d.slice(8,10)+"."+r.d.slice(5,7);
+    h+='<rect x="'+x.toFixed(1)+'" y="0" width="'+bw.toFixed(1)+'" height="'+(H-pad)+'" fill="transparent" data-tip="'+d+': '+v+' · '+label+'"/>';
+    if(bh)h+='<path d="M'+x.toFixed(1)+' '+(H-pad)+'V'+(y+Math.min(4,bh/2)).toFixed(1)+'q0 -'+Math.min(4,bh/2).toFixed(1)+' '+Math.min(4,w/2).toFixed(1)+' -'+Math.min(4,bh/2).toFixed(1)+'H'+(x+w-Math.min(4,w/2)).toFixed(1)+'q'+Math.min(4,w/2).toFixed(1)+' 0 '+Math.min(4,w/2).toFixed(1)+' '+Math.min(4,bh/2).toFixed(1)+'V'+(H-pad)+'Z" fill="var(--bar)" pointer-events="none"/>';
+    if(i%7===0||(i===n-1&&(n-1)%7>=4))h+='<text x="'+(x+w/2).toFixed(1)+'" y="'+(H-3)+'" text-anchor="middle">'+d+'</text>'});
+  h+='<line x1="0" x2="'+W+'" y1="'+(H-pad)+'" y2="'+(H-pad)+'" stroke="var(--line)"/><text x="0" y="10">макс. '+mx+'</text>';
+  return'<div class="chart"><svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+h+'</svg><div class="tip"></div></div>'}
+function tops(title,rows,fmt){return'<div class="card"><h2>'+title+'</h2>'+(rows&&rows.length?'<table class="tbl">'+rows.map(function(r,i){return'<tr><td>'+(i+1)+'. '+esc(r.title||r.name)+(r.kind?' <span class="mute">· '+(r.kind==="series"?"сериал":"фильм")+'</span>':"")+'</td><td class="n">'+fmt(r)+'</td></tr>'}).join("")+'</table>':'<div class="mute">Пока нет данных</div>')+'</div>'}
+V.dash=function(){var d=G.dash;if(!d)return nav("dash")+'<div class="card mute">Загрузка…</div>';
+  var st=function(l,v,x){return'<div class="stat"><small>'+l+'</small><b>'+num(v)+'</b>'+(x?'<i>'+x+'</i>':"")+'</div>'};
+  return nav("dash")+'<div class="bar"><h1 style="margin:0">Дашборд</h1><span class="sp"></span><button class="btn sm" data-a="sec:dash">Обновить</button></div>'+
+  '<div class="stats">'+st("Пользователей",d.users,"+"+num(d.users_7d)+" за 7 дней")+st("Заходили сегодня",d.active_1d,"за 24 часа")+st("За 7 дней",d.active_7d)+st("За 30 дней",d.active_30d)+st("Заблокированы",d.banned)+'</div>'+
+  '<div class="stats">'+st("Фильмов",d.movies)+st("Сериалов",d.series)+st("Оценок",d.ratings)+st("Сохранено",d.saved)+st("Смотрят сейчас",d.watching)+st("Отметок «Посмотрел»",d.watched)+st("Получено достижений",d.achievements)+'</div>'+
+  '<div class="viz"><div class="card"><h2>Активные пользователи по дням</h2><div class="mute" style="margin:-4px 0 10px;font-size:13px">Сколько разных людей открывали приложение. Считается с версии приложения v12.</div>'+barChart(d.daily||[],"active","активных")+'</div>'+
+  '<div class="card"><h2>Новые пользователи по дням</h2>'+barChart(d.daily||[],"new","новых")+'</div>'+
+  '<div class="card"><h2>Открытия страниц фильмов и сериалов</h2>'+barChart(d.daily||[],"opens","открытий")+'</div></div>'+
+  '<div class="tops">'+tops("Чаще открывают · 30 дней",d.top_opened,function(r){return num(r.n)})+tops("Лучшие оценки",d.top_rated,function(r){return"★ "+r.avg+" · "+r.n})+tops("Чаще сохраняют",d.top_saved,function(r){return num(r.n)})+
+    tops("Клики по кинотеатрам · 30 дней",d.providers,function(r){return num(r.n)})+tops("Клики по баннерам · 30 дней",d.banners,function(r){return num(r.n)})+'</div>'};
+async function loadDash(){G.view="dash";render();var r=await sb.rpc("admin_dashboard");if(r.error)return toast("Ошибка: "+r.error.message);G.dash=r.data;render()}
+V.users=function(){var U=G.users||{rows:[],total:0};
+  return nav("users")+'<div class="bar"><h1 style="margin:0">Пользователи</h1><span class="mute">'+num(U.total)+'</span><span class="sp"></span><div class="tabs">'+[["all","Все"],["new","Новые за 7 дней"],["banned","Заблокированные"]].map(function(f){return'<button class="'+(G.uf===f[0]?"on":"")+'" data-a="uf:'+f[0]+'">'+f[1]+'</button>'}).join("")+'</div></div>'+
+  '<label>Поиск: имя, @username или Telegram ID<input id="uq" value="'+esc(G.uq||"")+'" placeholder="Например, @petya" autocomplete="off"></label>'+
+  (U.rows.length?U.rows.map(function(u){return'<button class="item" data-a="user:'+u.id+'">'+uava(u)+'<span><b>'+esc(uname(u))+'</b><small>'+(u.username?"@"+esc(u.username)+" · ":"")+"ID "+u.tg_id+" · был(а) "+ago(u.last_seen_at)+'</small></span>'+(u.banned_at?'<span class="badge ban" style="margin-left:auto">бан</span>':"")+'<span class="badge" style="'+(u.banned_at?"margin-left:6px":"margin-left:auto")+'">👁 '+u.watched+' · ★ '+u.rated+' · 🏆 '+u.ach+'</span></button>'}).join(""):'<div class="card mute">Никого не найдено</div>')+
+  (U.rows.length<U.total?'<div class="bar"><button class="btn" data-a="umore">Показать ещё</button></div>':"")};
+async function loadUsers(more){var off=more?(G.users.rows.length):0;
+  var r=await sb.rpc("admin_users",{p_q:G.uq||"",p_filter:G.uf||"all",p_limit:50,p_offset:off});if(r.error)return toast("Ошибка: "+r.error.message);
+  var rows=r.data||[];G.users={rows:more?G.users.rows.concat(rows):rows,total:rows.length?Number(rows[0].total):(more?G.users.total:0)};G.view="users";render();
+  var q=document.getElementById("uq");if(q&&G.uqFocus){q.focus();q.setSelectionRange(q.value.length,q.value.length)}}
+V.user=function(){var u=G.u;if(!u)return nav("users");var A=G.uAll||[],got={};(G.uAch||[]).forEach(function(x){got[x.achievement_id]=x});
+  var tname=function(id){var t=G.titles.find(function(x){return x.id===id});return t?t.title:"#"+id};
+  var h=nav("users")+'<div class="bar"><button class="btn sm" data-a="sec:users">← Назад</button></div>';
+  h+='<div class="card"><div class="row" style="align-items:center">'+uava(u,true)+'<div style="flex:1"><h1 style="margin:0">'+esc(uname(u))+(u.banned_at?' <span class="badge ban">заблокирован</span>':"")+'</h1><div class="mute">'+(u.username?"@"+esc(u.username)+" · ":"")+'Telegram ID '+u.tg_id+'</div></div>'+(u.username?'<a class="btn sm" style="flex:none;text-decoration:none" href="https://t.me/'+encodeURIComponent(u.username)+'" target="_blank" rel="noopener">Написать в Telegram</a>':"")+'</div>'+
+    '<div class="kv" style="margin-top:14px"><span>Зарегистрирован</span><div>'+fdt(u.created_at)+'</div><span>Последний вход</span><div>'+fdt(u.last_seen_at)+' ('+ago(u.last_seen_at)+')</div><span>Язык Telegram</span><div>'+esc(u.language||"—")+'</div>'+(u.banned_at?'<span>Заблокирован</span><div>'+fdt(u.banned_at)+(u.ban_reason?' · «'+esc(u.ban_reason)+'»':"")+'</div>':"")+
+    '<span>Активность</span><div>Посмотрел: '+u.watched+' · Оценок: '+u.rated+' · Достижений: '+u.ach+'</div></div></div>';
+  h+='<div class="card"><h2>Последние оценки</h2>'+((G.uRat||[]).length?'<table class="tbl">'+G.uRat.map(function(r){return'<tr><td>'+esc(tname(r.title_id))+'</td><td class="n">★ '+r.score+' · '+fdt(r.updated_at)+'</td></tr>'}).join("")+'</table>':'<div class="mute">Оценок пока нет</div>')+'</div>';
+  h+='<div class="card"><h2>Достижения</h2>'+(A.filter(function(a){return got[a.id]}).map(function(a){var g=got[a.id];return'<div class="item" style="cursor:default"><span class="uav">'+esc(a.icon||"🏆")+'</span><span><b>'+esc(a.title)+'</b><small>'+(g.source==="manual"?"выдано вручную · ":"")+fdt(g.earned_at)+'</small></span><button class="btn red sm" style="margin-left:auto" data-a="urev:'+a.id+'">Забрать</button></div>'}).join("")||'<div class="mute" style="margin-bottom:10px">Пока нет</div>')+
+    '<div class="row" style="align-items:flex-end"><label style="margin:0">Выдать достижение<select id="ugrant"><option value="">выберите</option>'+A.filter(function(a){return!got[a.id]}).map(function(a){return'<option value="'+a.id+'">'+esc((a.icon||"🏆")+" "+a.title)+(a.rule_type==="manual"?" (ручное)":"")+'</option>'}).join("")+'</select></label><button class="btn pri" style="flex:none" data-a="ugrant">Выдать</button></div></div>';
+  h+='<div class="card"><h2>Управление</h2><div class="bar" style="margin:0">'+(u.banned_at?'<button class="btn" data-a="uban:0">Разблокировать</button>':'<button class="btn red" data-a="uban:1">Заблокировать</button>')+'<span class="sp"></span><button class="btn red" data-a="udel">Удалить аккаунт</button></div>'+
+    '<div class="mute" style="margin-top:10px;font-size:13px">Заблокированный не сможет войти в приложение, его отметки и оценки сохранятся. Удаление стирает аккаунт со всеми отметками без возможности восстановить; если человек зайдёт снова, создастся новый пустой аккаунт.</div></div>';
+  return h};
+async function openUser(id){var u=(G.users&&G.users.rows||[]).find(function(x){return x.id===id});if(!u)return;
+  var r=await Promise.all([sb.from("ratings").select("title_id,score,updated_at").eq("user_id",id).order("updated_at",{ascending:false}).limit(15),sb.from("user_achievements").select("achievement_id,earned_at,source").eq("user_id",id),sb.from("achievements").select("id,title,icon,rule_type").order("id")]);
+  G.u=u;G.uRat=r[0].data||[];G.uAch=r[1].data||[];G.uAll=r[2].data||[];G.view="user";render();window.scrollTo(0,0)}
+async function refreshUser(){var r=await sb.rpc("admin_users",{p_q:String(G.u.tg_id),p_filter:"all",p_limit:1,p_offset:0});if(r.data&&r.data[0]){var i=G.users.rows.findIndex(function(x){return x.id===G.u.id});if(i>=0)G.users.rows[i]=r.data[0];G.u=r.data[0]}await openUser(G.u.id)}
 /* ---------- сохранение ---------- */
 async function save(){
   try{
@@ -331,7 +394,7 @@ async function openEd(id){
 }
 
 /* ---------- события ---------- */
-app.addEventListener("input",function(e){var t=e.target,p=t.dataset.p;if(t.id==="cq"){pickList(t.value);return}if(t.id==="aq"){pickAch(t.value);return}if(!p)return;
+app.addEventListener("input",function(e){var t=e.target,p=t.dataset.p;if(t.id==="cq"){pickList(t.value);return}if(t.id==="aq"){pickAch(t.value);return}if(t.id==="uq"){G.uq=t.value;G.uqFocus=true;clearTimeout(G.uqT);G.uqT=setTimeout(function(){loadUsers(false)},350);return}if(!p)return;
   var v=t.type==="checkbox"?t.checked:t.value;if(t.dataset.n)v=v===""?null:Number(String(v).replace(",","."));
   setP(E,p,v);if(p==="runtime_min"){var h=document.getElementById("rth");if(h)h.textContent=fmtRt(v)}if(t.dataset.re)render()});
 app.addEventListener("change",async function(e){var t=e.target;
@@ -339,13 +402,14 @@ app.addEventListener("change",async function(e){var t=e.target;
   var bm=/^bn([re])-(\d+)$/.exec(t.id||"");if(bm&&t.files[0]){var url=await upload(t.files[0],"banners");E.bn[Number(bm[2])][bm[1]==="r"?"image_url":"image_url_en"]=url;render()}
   if(t.id==="achimg"&&t.files[0]){E.icon_url=await upload(t.files[0],"achievements");render()}
   if(t.id==="poster"&&t.files[0]){E.poster_url=await upload(await toJpeg(t.files[0]),"posters");render()}if(t.id==="promoimg"&&t.files[0]){E.image_url=await upload(t.files[0],"promo");render()}if(t.id==="tbg"&&t.files[0]){E.trailer_bg_url=await upload(t.files[0],"trailers");render()}if(t.id==="homeimg"&&t.files[0]){E.home_image_url=await upload(t.files[0],"slides");render()}}catch(err){toast("Не удалось загрузить: "+err.message)}});
+app.addEventListener("mousemove",function(e){var r=e.target.closest&&e.target.closest("rect[data-tip]"),c=e.target.closest&&e.target.closest(".chart");document.querySelectorAll(".chart .tip").forEach(function(tp){if(!c||tp.parentNode!==c)tp.style.display="none"});if(!r||!c)return;var tp=c.querySelector(".tip"),b=c.getBoundingClientRect();tp.textContent=r.getAttribute("data-tip");tp.style.display="block";tp.style.left=(e.clientX-b.left)+"px";tp.style.top=(e.clientY-b.top)+"px"});
 app.addEventListener("click",async function(e){
   var b=e.target.closest("[data-a]");if(!b)return;var a=b.dataset.a.split(":"),i,j;
   try{switch(a[0]){
     case"login":var r=await sb.auth.signInWithPassword({email:document.getElementById("em").value.trim(),password:document.getElementById("pw").value});
       if(r.error)return toast("Неверная почта или пароль");
       var ad=await sb.rpc("is_admin");if(ad.data!==true){await sb.auth.signOut();return toast("У этого аккаунта нет прав администратора")}
-      await loadAll();G.view="list";return render();
+      await loadAll();return loadDash();
     case"logout":await sb.auth.signOut();G.view="login";return render();
     case"tab":G.tab=a[1];if(G.view==="home")return loadHome();return render();
     case"new":return openEd(null);
@@ -373,7 +437,7 @@ app.addEventListener("click",async function(e){
       if(gi.error)return toast(/duplicate|unique/i.test(gi.error.message)?"Такой жанр уже есть":"Ошибка: "+gi.error.message);
       G.genres=(await sb.from("genres").select("*").order("sort")).data||[];
       gi.data.forEach(function(g){if(g.kind===E.kind&&E.genre_ids.indexOf(g.id)<0)E.genre_ids.push(g.id)});toast("Жанр добавлен и выбран");return render();
-    case"sec":G.view=a[1];if(a[1]==="home")return loadHome();if(a[1]==="ach")return loadAch();if(a[1]==="promo")return loadPromo();return render();
+    case"sec":G.view=a[1];if(a[1]==="dash")return loadDash();if(a[1]==="users"){G.uqFocus=false;return loadUsers(false)}if(a[1]==="home")return loadHome();if(a[1]==="ach")return loadAch();if(a[1]==="promo")return loadPromo();return render();
     case"newcoll":E={id:null,kind:G.tab,title:"",title_en:"",subtitle:"",emoji:"",mode:"manual",genre_id:null,is_active:true,sort:G.colls.reduce(function(m,c){return Math.max(m,c.sort||0)},0)+1,items:[]};G.view="colled";return render();
     case"editcoll":var cc=G.colls.find(function(x){return x.id===Number(a[1])});var cit=await sb.from("collection_items").select("title_id").eq("collection_id",cc.id).order("sort");
       E=Object.assign({},cc,{title_en:cc.title_en||"",subtitle:cc.subtitle||"",emoji:cc.emoji||"",mode:cc.genre_id?"genre":"manual",items:(cit.data||[]).map(function(x){return x.title_id})});G.view="colled";return render();
@@ -389,6 +453,16 @@ app.addEventListener("click",async function(e){
     case"hsave":return saveHome();
     case"unpin":var up2=await sb.from("titles").update({on_home:false}).eq("id",Number(a[1]));if(up2.error)return toast("Ошибка: "+up2.error.message);await loadAll();toast("Снято с главной");return render();
     case"psave":return savePromo();
+    case"uf":G.uf=a[1];G.uqFocus=false;return loadUsers(false);
+    case"umore":return loadUsers(true);
+    case"user":return openUser(a[1]+(a.length>2?":"+a.slice(2).join(":"):""));
+    case"uban":var ban=a[1]==="1",why=null;if(ban){why=prompt("Причина блокировки (видна только вам):","");if(why===null)return}
+      var bb=await sb.rpc("admin_set_ban",{p_user:G.u.id,p_ban:ban,p_reason:why||null});if(bb.error)return toast("Ошибка: "+bb.error.message);toast(ban?"Заблокирован":"Разблокирован");return refreshUser();
+    case"udel":if(!confirm("Удалить аккаунт «"+uname(G.u)+"» со всеми отметками и оценками? Это нельзя отменить."))return;
+      var ud=await sb.rpc("admin_delete_user",{p_user:G.u.id});if(ud.error)return toast("Ошибка: "+ud.error.message);toast("Аккаунт удалён");return loadUsers(false);
+    case"ugrant":var gi=Number((document.getElementById("ugrant")||{}).value);if(!gi)return toast("Выберите достижение");
+      var gg=await sb.rpc("admin_grant_achievement",{p_user:G.u.id,p_achievement:gi});if(gg.error)return toast("Ошибка: "+gg.error.message);toast("Выдано ✓");return refreshUser();
+    case"urev":if(!confirm("Забрать это достижение?"))return;var rv=await sb.rpc("admin_revoke_achievement",{p_user:G.u.id,p_achievement:Number(a[1])});if(rv.error)return toast("Ошибка: "+rv.error.message);toast("Забрано");return refreshUser();
     case"newach":return openAch(null);
     case"editach":return openAch(Number(a[1]));
     case"achsave":return saveAch();

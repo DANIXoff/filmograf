@@ -185,7 +185,7 @@ h1{font-size:22px;line-height:1.2;margin:0 0 6px}h2{font-size:18px;margin:22px 1
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 var SB_URL="https://rixjsfvweagsqrvoiymj.supabase.co",SB_KEY="sb_publishable_XlyUk5LlVt3Cdt20laz6fw_HyjKJH1y";
-var VER="11.0";
+var VER="12.0";
 var CFG={botApp:"wantwatch_bot/wwnow",inlineTrailer:false,prepShare:true}; /* inlineTrailer: true включает плеер YouTube внутри приложения; prepShare: красивое сообщение «Поделиться» через функцию share-message */ /* для ссылок «Поделиться»: имя бота и приложения, например "wantwatch_bot/app" */
 var tg0;function insets(){var tg=window.Telegram&&window.Telegram.WebApp;var a=(tg&&tg.safeAreaInset)||{},c=(tg&&tg.contentSafeAreaInset)||{},v=(a.top||0)+(c.top||0);if(tg&&tg.isFullscreen&&v<20)v=96;document.documentElement.style.setProperty("--tgt",v+"px")}
 insets();try{["safeAreaChanged","contentSafeAreaChanged","fullscreenChanged"].forEach(function(e){window.Telegram.WebApp.onEvent(e,insets)})}catch(e){}
@@ -463,8 +463,8 @@ function profilePage(){
   var photo=ME.photo_url||u.photo_url;
   return'<div class="top"><span class="ib ph"></span><div class="logo">'+t("profile").toUpperCase()+'</div><button class="ib" data-a="theme">'+ic(document.documentElement.dataset.theme==="dark"?I.sun:I.moon)+'</button></div>'+
   '<div class="center" style="padding:6px 0 18px">'+(photo?'<img class="av" src="'+esc(photo)+'" alt="">':'<div class="av">'+esc(name.charAt(0))+'</div>')+'<h1>'+esc(name)+'</h1><div class="mute">'+(ME.username||u.username?"@"+esc(ME.username||u.username):"")+'</div></div>'+plist()+
-  (tg&&tg.addToHomeScreen?'<div class="grp">'+R(I.plus,"addhome",t("home"),t("homeS"))+'</div>':"")+
-  achSection()+'<div class="cap">'+t("links")+'</div><div class="grp">'+(L.support?R(I.chat,"lnk:support",t("feedback"),t("feedbackS")):"")+(L.suggest?R(I.plus,"lnk:suggest",t("suggest"),t("suggestS")):"")+(L.donate?R(I.heart,"lnk:donate",t("donate"),t("donateS")):"")+(L.ads_bot?R(I.mega,"lnk:ads_bot",t("ads"),t("adsS")):"")+(L.channel?R(I.send,"lnk:channel",t("chan"),t("chanS")):"")+'</div>'+
+  achSection()+(tg&&tg.addToHomeScreen?'<div class="cap"></div><div class="grp">'+R(I.plus,"addhome",t("home"),t("homeS"))+'</div>':"")+
+  '<div class="cap">'+t("links")+'</div><div class="grp">'+(L.support?R(I.chat,"lnk:support",t("feedback"),t("feedbackS")):"")+(L.suggest?R(I.plus,"lnk:suggest",t("suggest"),t("suggestS")):"")+(L.donate?R(I.heart,"lnk:donate",t("donate"),t("donateS")):"")+(L.ads_bot?R(I.mega,"lnk:ads_bot",t("ads"),t("adsS")):"")+(L.channel?R(I.send,"lnk:channel",t("chan"),t("chanS")):"")+'</div>'+
   '<div class="cap">'+t("settings")+'</div><div class="grp">'+R(I.globe,"lang",t("lang"),LANG==="ru"?"Русский":"English")+R(I.sun,"theme",t("theme"),document.documentElement.dataset.theme==="dark"?t("dark"):t("light"))+'</div>'+
   '<div class="cap">'+t("account")+'</div><div class="grp">'+R(I.trash,"del",t("del"),t("delS"),"red")+'</div><div class="mute" style="text-align:center;font-size:12px;padding:18px 0 110px">Want Watch · v'+VER+'</div>'}
 function searchOv(){return'<div class="ov"><div class="sbar"><input id="q" value="'+esc(S.sq)+'" placeholder="'+t("ph")+'" autocomplete="off" autocapitalize="off" enterkeyhint="search"><button class="ib" data-a="sgo" aria-label="Go">'+ic(I.arrow)+'</button><button class="ib" data-a="sx" aria-label="Close">'+ic(I.x)+'</button></div><div id="sres" style="margin:10px -16px">'+sresHtml()+'</div></div>'}
@@ -552,7 +552,7 @@ app.addEventListener("click",async function(e){
     case"rl":return rateEdit(pg.id,function(r){var k=p[1],l=(r.liked||[]).slice();if(k==="nothing")l=l.indexOf("nothing")>=0?[]:["nothing"];else{l=l.filter(function(z){return z!=="nothing"});var i=l.indexOf(k);if(i>=0)l.splice(i,1);else l.push(k)}r.liked=l});
     case"ra":return rateEdit(pg.id,function(r){var k="act"+p[1],v=Number(p[2]);r[k]=r[k]===v?null:v});
     case"cast":S.cast=S.cast===pg.id?null:pg.id;hap();return render();
-    case"bn":var bnx=(D[pg.id]||{}).bn;if(bnx){track("click_banner",{title_id:pg.id});ext(bnx.link_url)}return;
+    case"bn":var bnx=(D[pg.id]||{}).bn;if(bnx){track("banner_click",{title_id:pg.id,banner_id:bnx.id});ext(bnx.link_url)}return;
     case"pt":S.pt=p[1];S.ps="new";hap();return render();
     case"pk":S.pk=p[1];hap();return render();
     case"ps":S.ps=p[1];hap();return render();
@@ -563,7 +563,7 @@ app.addEventListener("click",async function(e){
     case"rcom":return ext((D[pg.id]||{}).comments_url);
     case"unwatch":var uid0=pg.id;return ask(t("unwatchQ"),function(){unwatch(uid0)});
     case"trailer":var tx=D[pg.id]||T_(pg.id)||{};return p[1]==="alt"?askGo(tx.trailer_alt_kind,function(){ext(tx.trailer_alt_url)}):askGo("yt",function(){playTrailer(tx.trailer_url)});
-    case"share":return shareTitle(pg.id);
+    case"share":track("share",{title_id:pg.id});return shareTitle(pg.id);
     case"onl":S.sheet={n:"onl",id:pg.id};track("open_providers",{title_id:pg.id});return render();
     case"rsheet":S.sheet={n:"rat",id:pg.id};return render();
     case"sclose":S.sheet=null;return render();
@@ -590,7 +590,7 @@ async function boot(){
     var s=await sb.auth.getSession();if(!s.data.session)return fail("no_tg");
     UID=s.data.session.user.id;await load();
     var sp=(tg&&tg.initDataUnsafe&&tg.initDataUnsafe.start_param)||"",qp=new URLSearchParams(location.search).get("t"),tid=/^t(\d+)$/.exec(sp);tid=tid?Number(tid[1]):(qp?Number(qp):null);
-    render();hideSplash();if(tid&&T_(tid))openTitle(tid);
+    render();hideSplash();track("app_open");if(tid&&T_(tid))openTitle(tid);
     sb.rpc("evaluate_my_achievements").then(function(){setTimeout(function(){refreshAch(true)},2200)},function(){});
   }catch(err){console.error(err);fail(String(err&&err.message||err).slice(0,80))}
 }
