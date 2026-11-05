@@ -4,13 +4,15 @@
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@600;700&display=swap" media="print" onload="this.media='all'">
 <title>Want Watch</title>
 <style>
 :root{--bg:#fff;--s1:#f3f3f6;--s2:#e8e8ee;--ink:#111114;--mute:#7b7b86;--acc:#6f5cff;--accInk:#fff;--line:#e6e6ec;--glass:rgba(255,255,255,.72);--red:#e5484d;color-scheme:light}
 [data-theme=dark]{--bg:#0b0b0e;--s1:#17171c;--s2:#24242b;--ink:#f4f4f7;--mute:#8e8e99;--line:#26262d;--glass:rgba(40,40,48,.62);color-scheme:dark}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html:not([data-theme]){background:#000}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 -apple-system,"SF Pro Text","Segoe UI",system-ui,sans-serif}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 Gilroy,Manrope,-apple-system,"SF Pro Text","Segoe UI",system-ui,sans-serif}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;padding:0}
 #app{max-width:520px;margin:0 auto;min-height:100vh;padding:calc(env(safe-area-inset-top,0px) + 10px) 0 calc(env(safe-area-inset-bottom,0px) + 110px)}
 .pad{padding:0 16px}
@@ -233,6 +235,8 @@ h1{font-size:22px;line-height:1.2;margin:0 0 6px}h2{font-size:18px;margin:22px 1
 .nwo{display:flex;align-items:center;gap:4px;margin-top:12px;font-size:13.5px;font-weight:600;color:var(--mute)}
 .nwc.sk{height:240px;position:relative}.nwc.sk i,.nwc.sk b{display:block;border-radius:10px;background:var(--s2);animation:skp 1.2s ease-in-out infinite alternate}.nwc.sk i{height:140px;margin-bottom:12px}.nwc.sk b{height:14px;margin-bottom:8px;width:80%}
 @keyframes skp{from{opacity:.5}to{opacity:1}}
+.logo.wide{font-family:Unbounded,Gilroy,Manrope,system-ui,sans-serif;font-weight:700;letter-spacing:.01em;font-size:20px}
+button,input,textarea{font-family:inherit}
 </style>
 </head>
 <body>
@@ -243,7 +247,9 @@ h1{font-size:22px;line-height:1.2;margin:0 0 6px}h2{font-size:18px;margin:22px 1
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 var SB_URL="https://rixjsfvweagsqrvoiymj.supabase.co",SB_KEY="sb_publishable_XlyUk5LlVt3Cdt20laz6fw_HyjKJH1y";
-var VER="16.0";
+var VER="17.0";
+var GILROY=false; /* true — если в репозитории есть папка fonts с файлами Gilroy (см. инструкцию) */
+if(GILROY){var gst=document.createElement("style");gst.textContent=[[400,"Regular"],[500,"Medium"],[600,"SemiBold"],[700,"Bold"],[800,"ExtraBold"]].map(function(w){return"@font-face{font-family:Gilroy;font-weight:"+w[0]+";font-display:swap;src:url(fonts/Gilroy-"+w[1]+".woff2) format(\"woff2\")}"}).join("");document.head.appendChild(gst)}
 var CFG={botApp:"wantwatch_bot/wwnow",inlineTrailer:false,prepShare:true}; /* inlineTrailer: true включает плеер YouTube внутри приложения; prepShare: красивое сообщение «Поделиться» через функцию share-message */ /* для ссылок «Поделиться»: имя бота и приложения, например "wantwatch_bot/app" */
 var tg0;function insets(){var tg=window.Telegram&&window.Telegram.WebApp;var a=(tg&&tg.safeAreaInset)||{},c=(tg&&tg.contentSafeAreaInset)||{},v=(a.top||0)+(c.top||0);if(tg&&tg.isFullscreen&&v<20)v=96;document.documentElement.style.setProperty("--tgt",v+"px")}
 insets();try{["safeAreaChanged","contentSafeAreaChanged","fullscreenChanged"].forEach(function(e){window.Telegram.WebApp.onEvent(e,insets)})}catch(e){}
@@ -434,7 +440,7 @@ function fmtEnt(text,ents){if(!text)return"";ents=(ents||[]).filter(function(e){
       else if(tp==="blockquote"||tp==="expandable_blockquote")seg='<span class="bq">'+seg+'</span>'});
     h+=seg}
   return h}
-function newsPage(){var top='<div class="top"><span class="ib ph"></span><div class="logo">'+t("news").toUpperCase()+'</div>'+(DB.links&&DB.links.channel?'<button class="ib" data-a="lnk:channel" aria-label="Telegram">'+ic(I.send)+'</button>':'<span class="ib ph"></span>')+'</div>';
+function newsPage(){var top='<div class="top"><span class="ib ph"></span><div class="logo wide">'+t("news")+'</div>'+(DB.links&&DB.links.channel?'<button class="ib" data-a="lnk:channel" aria-label="Telegram">'+ic(I.send)+'</button>':'<span class="ib ph"></span>')+'</div>';
   if(!NEWS.loaded)return top+'<div class="nws">'+[0,1].map(function(){return'<div class="nwc sk"><i></i><b></b><b></b></div>'}).join("")+'</div>';
   var g=newsGroups();if(!g.length)return top+'<div class="pempty" style="margin-top:8px">'+t("newsEmpty")+'</div>';
   return top+'<div class="nws">'+g.map(function(p){var link=p.user?"https://t.me/"+p.user+"/"+p.message_id:"";
@@ -666,12 +672,12 @@ function profilePage(){
   var u=tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user||{},name=[ME.first_name||u.first_name,ME.last_name||u.last_name].filter(Boolean).join(" ")||"Want Watch",L=DB.links;
   function R(ico,a,tt,ss,cls){return'<button class="row '+(cls||"")+'" data-a="'+a+'"><span class="rb">'+ic(ico)+'</span><span class="grow">'+tt+(ss?'<small>'+ss+'</small>':"")+'</span>'+ic(I.chev,18)+'</button>'}
   var photo=ME.photo_url||u.photo_url;
-  return'<div class="top"><span class="ib ph"></span><div class="logo">'+t("profile").toUpperCase()+'</div><button class="ib bell" data-a="notif" aria-label="'+t("notif")+'">'+ic(I.bell)+(unread()?'<i class="bdg">'+(unread()>9?"9+":unread())+'</i>':"")+'</button></div>'+
+  return'<div class="top"><span class="ib ph"></span><div class="logo wide">'+t("profile")+'</div><button class="ib bell" data-a="notif" aria-label="'+t("notif")+'">'+ic(I.bell)+(unread()?'<i class="bdg">'+(unread()>9?"9+":unread())+'</i>':"")+'</button></div>'+
   '<div class="center" style="padding:6px 0 18px">'+(photo?'<img class="av" src="'+esc(photo)+'" alt="">':'<div class="av">'+esc(name.charAt(0))+'</div>')+'<h1>'+esc(name)+'</h1><div class="mute">'+(ME.username||u.username?"@"+esc(ME.username||u.username):"")+'</div></div>'+plist()+
   achSection()+'<div class="grp" style="margin-top:6px">'+R(I.chart,"stats",t("stats"),t("statsS"))+'</div>'+(tg&&tg.addToHomeScreen?'<div class="cap"></div><div class="grp">'+R(I.plus,"addhome",t("home"),t("homeS"))+'</div>':"")+
   '<div class="cap">'+t("links")+'</div><div class="grp">'+(L.support?R(I.chat,"lnk:support",t("feedback"),t("feedbackS")):"")+(L.suggest?R(I.plus,"lnk:suggest",t("suggest"),t("suggestS")):"")+(L.donate?R(I.heart,"lnk:donate",t("donate"),t("donateS")):"")+(L.ads_bot?R(I.mega,"lnk:ads_bot",t("ads"),t("adsS")):"")+(L.channel?R(I.send,"lnk:channel",t("chan"),t("chanS")):"")+'</div>'+
   '<div class="cap">'+t("settings")+'</div><div class="grp">'+R(I.play,"onb",t("howTo"),t("howToS"))+R(I.globe,"lang",t("lang"),LANG==="ru"?"Русский":"English")+R(I.sun,"theme",t("theme"),document.documentElement.dataset.theme==="dark"?t("dark"):t("light"))+'</div>'+
-  '<div class="cap">'+t("account")+'</div><div class="grp">'+R(I.trash,"del",t("del"),t("delS"),"red")+'</div><div class="mute" style="text-align:center;font-size:12px;padding:18px 0 110px">Want Watch · v'+VER+'</div>'}
+  '<div class="cap">'+t("account")+'</div><div class="grp">'+R(I.trash,"del",t("del"),t("delS"),"red")+'</div><div class="mute" style="text-align:center;font-size:12px;padding:18px 16px 110px">Want Watch · v'+VER+'<br><span style="font-size:11px;opacity:.8">'+(LANG==="en"?"Some movie data and images are provided by TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB.":"Часть данных о фильмах и изображений предоставлена TMDB. Этот продукт использует TMDB API, но не одобрен и не сертифицирован TMDB.")+'</span></div>'}
 function searchOv(){return'<div class="ov"><div class="sbar"><input id="q" value="'+esc(S.sq)+'" placeholder="'+t("ph")+'" autocomplete="off" autocapitalize="off" enterkeyhint="search"><button class="ib" data-a="sgo" aria-label="Go">'+ic(I.arrow)+'</button><button class="ib" data-a="sx" aria-label="Close">'+ic(I.x)+'</button></div><div id="sres" style="margin:10px -16px">'+sresHtml()+'</div></div>'}
 function sresHtml(){return S.sres.length?S.sres.map(function(r){return'<button class="row" data-a="open:'+r.id+'">'+poster(r,"ico")+'<span class="grow"><b>'+esc(nm(r))+'</b><small>'+(r.kind==="movie"?t("movies"):t("series"))+" · "+esc(when(r))+'</small></span></button>'}).join(""):""}
 function nav(){var T3=[["news",I.news],["movies",I.film],["series",I.tv],["profile",I.user]];
