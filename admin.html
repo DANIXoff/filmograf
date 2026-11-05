@@ -142,7 +142,7 @@ ed:function(){
 };
 
 /* ---------- подборки и главная ---------- */
-function nav(cur){var it=[["dash","Дашборд"],["list","Контент"],["colls","Подборки"],["home","Главная"],["provcat","Кинотеатры"],["promo","Реклама"],["ach","Достижения"],["users","Пользователи"],["notif","Уведомления"],["onb","Приветствие"]];
+function nav(cur){var it=[["dash","Дашборд"],["list","Контент"],["colls","Подборки"],["home","Главная"],["provcat","Кинотеатры"],["promo","Реклама"],["ach","Достижения"],["users","Пользователи"],["notif","Уведомления"],["onb","Приветствие"],["news","Новости"]];
   return '<div class="bar"><div class="tabs">'+it.map(function(x){return '<button class="'+(cur===x[0]?"on":"")+'" data-a="sec:'+x[0]+'">'+x[1]+'</button>'}).join("")+'</div><span class="sp"></span><button class="btn sm" data-a="logout">Выйти</button></div>'}
 function kindTabs(){return '<div class="tabs">'+["movie","series"].map(function(k){return '<button class="'+(G.tab===k?"on":"")+'" data-a="tab:'+k+'">'+(k==="movie"?"Фильмы":"Сериалы")+'</button>'}).join("")+'</div>'}
 function tname(id){var t=G.titles.find(function(x){return x.id===id});return t?t.title+(t.status==="published"?"":" (черновик)"):"#"+id}
@@ -400,6 +400,14 @@ async function sendNf(){var n=G.nf||{};if(!(n.title||"").trim())return toast("В
   if(!confirm("Отправить уведомление «"+n.title.trim()+"» всем пользователям?"))return;
   var r=await sb.from("notifications").insert({kind:"admin",title:n.title.trim(),body:(n.body||"").trim(),title_en:nz((n.title_en||"").trim()),body_en:nz((n.body_en||"").trim()),url:nz((n.url||"").trim()),title_id:n.title_id||null});
   if(r.error)return toast("Ошибка: "+r.error.message);toast("Отправлено ✓");G.nf={};loadNotif()}
+V.news=function(){var L=G.newsl;
+  var h=nav("news")+'<div class="bar"><h1 style="margin:0">Новости из канала</h1><span class="sp"></span><button class="btn sm" data-a="sec:news">Обновить</button></div>'+
+  '<div class="card mute">Посты появляются здесь сами, когда вы публикуете их в канале (бот должен быть администратором канала и подключён к функции tg-webhook). Telegram не сообщает ботам об удалении постов, поэтому удалённый в канале пост скройте здесь.</div>';
+  if(!L)return h+'<div class="card mute">Загрузка…</div>';
+  if(!L.length)return h+'<div class="card mute">Постов пока нет</div>';
+  return h+L.map(function(x){return'<div class="item" style="cursor:default'+(x.hidden?';opacity:.5':'')+'">'+(x.photo_url?'<img src="'+esc(x.photo_url)+'" alt="">':'<span class="ph"></span>')+'<span style="min-width:0"><b>'+esc((x.text||"(без текста)").slice(0,90))+((x.text||"").length>90?"…":"")+'</b><small>'+fdt(x.posted_at)+(x.has_video?" · видео":"")+(x.media_group_id?" · альбом":"")+(x.hidden?" · скрыт":"")+'</small></span>'+
+    '<button class="btn sm" style="margin-left:auto;flex:none" data-a="nwhide:'+x.id+':'+(x.hidden?0:1)+'">'+(x.hidden?"Показать":"Скрыть")+'</button><button class="btn red sm" style="flex:none" data-a="nwdel:'+x.id+'">Удалить</button></div>'}).join("")};
+async function loadNewsAdm(){G.view="news";G.newsl=null;render();var r=await sb.from("news_posts").select("*").order("posted_at",{ascending:false}).limit(80);if(r.error)return toast("Ошибка: "+r.error.message);G.newsl=r.data||[];render()}
 /* ---------- сохранение ---------- */
 async function save(){
   try{
@@ -500,7 +508,7 @@ app.addEventListener("click",async function(e){
       if(gi.error)return toast(/duplicate|unique/i.test(gi.error.message)?"Такой жанр уже есть":"Ошибка: "+gi.error.message);
       G.genres=(await sb.from("genres").select("*").order("sort")).data||[];
       gi.data.forEach(function(g){if(g.kind===E.kind&&E.genre_ids.indexOf(g.id)<0)E.genre_ids.push(g.id)});toast("Жанр добавлен и выбран");return render();
-    case"sec":G.view=a[1];if(a[1]==="onb")return loadOnb();if(a[1]==="notif")return loadNotif();if(a[1]==="dash")return loadDash();if(a[1]==="users"){G.uqFocus=false;return loadUsers(false)}if(a[1]==="home")return loadHome();if(a[1]==="ach")return loadAch();if(a[1]==="promo")return loadPromo();return render();
+    case"sec":G.view=a[1];if(a[1]==="news")return loadNewsAdm();if(a[1]==="onb")return loadOnb();if(a[1]==="notif")return loadNotif();if(a[1]==="dash")return loadDash();if(a[1]==="users"){G.uqFocus=false;return loadUsers(false)}if(a[1]==="home")return loadHome();if(a[1]==="ach")return loadAch();if(a[1]==="promo")return loadPromo();return render();
     case"newcoll":E={id:null,kind:G.tab,title:"",title_en:"",subtitle:"",emoji:"",mode:"manual",genre_id:null,is_active:true,sort:G.colls.reduce(function(m,c){return Math.max(m,c.sort||0)},0)+1,items:[]};G.view="colled";return render();
     case"editcoll":var cc=G.colls.find(function(x){return x.id===Number(a[1])});var cit=await sb.from("collection_items").select("title_id").eq("collection_id",cc.id).order("sort");
       E=Object.assign({},cc,{title_en:cc.title_en||"",subtitle:cc.subtitle||"",emoji:cc.emoji||"",mode:cc.genre_id?"genre":"manual",items:(cit.data||[]).map(function(x){return x.title_id})});G.view="colled";return render();
@@ -516,6 +524,8 @@ app.addEventListener("click",async function(e){
     case"hsave":return saveHome();
     case"unpin":var up2=await sb.from("titles").update({on_home:false}).eq("id",Number(a[1]));if(up2.error)return toast("Ошибка: "+up2.error.message);await loadAll();toast("Снято с главной");return render();
     case"psave":return savePromo();
+    case"nwhide":var nh=await sb.from("news_posts").update({hidden:a[2]==="1"}).eq("id",Number(a[1]));if(nh.error)return toast("Ошибка: "+nh.error.message);return loadNewsAdm();
+    case"nwdel":if(!confirm("Удалить пост из приложения? В канале он останется."))return;var nd2=await sb.from("news_posts").delete().eq("id",Number(a[1]));if(nd2.error)return toast("Ошибка: "+nd2.error.message);return loadNewsAdm();
     case"onbsave":return saveOnb();
     case"nfsend":return sendNf();
     case"nfpick":G.nf.title_id=Number(a[1]);return render();
