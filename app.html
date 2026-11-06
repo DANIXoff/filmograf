@@ -287,6 +287,8 @@ button,input,textarea,select{font-family:inherit}
 .rv{display:flex;align-items:baseline;font-variant-numeric:tabular-nums;flex:none}
 .rv b{min-width:30px;text-align:right;font-size:17px}.rv i{font-style:normal;font-weight:700;font-size:15px}.rvp{width:18px;text-align:right;padding-right:3px}.rvs{width:16px;text-align:left;padding-left:1px}
 .rch{width:16px;display:grid;place-items:center;flex:none;margin-left:6px}
+.avw{position:relative;display:inline-block}.avw .av{display:block}
+.ubdg{position:absolute;left:50%;top:-9px;transform:translateX(-50%);z-index:2;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.08em;white-space:nowrap;box-shadow:0 0 0 3px var(--bg),0 4px 12px rgba(0,0,0,.18)}
 </style>
 </head>
 <body>
@@ -297,7 +299,7 @@ button,input,textarea,select{font-family:inherit}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 var SB_URL="https://rixjsfvweagsqrvoiymj.supabase.co",SB_KEY="sb_publishable_XlyUk5LlVt3Cdt20laz6fw_HyjKJH1y";
-var VER="19.5";
+var VER="19.6";
 var GILROY=true; /* true — если в репозитории есть папка fonts с файлами Gilroy (см. инструкцию) */
 if(GILROY){(function(){var W=[[300,["Light"]],[400,["Regular","Book"]],[500,["Medium"]],[600,["SemiBold","Semibold"]],[700,["Bold"]],[800,["ExtraBold","Extrabold"]],[900,["Heavy","Black"]]],F=[["woff2","woff2"],["woff","woff"],["ttf","truetype"],["otf","opentype"]];
   var css=W.map(function(w){var src=[];w[1].forEach(function(n){F.forEach(function(f){src.push('url("fonts/Gilroy-'+n+'.'+f[0]+'") format("'+f[1]+'")')})});
@@ -521,6 +523,7 @@ function personPage(pg){var d=PER[pg.id];if(!d)return bar()+'<div class="center 
     '<div class="perq">'+t("perRel")+'</div><div class="seg"><button class="'+(k==="movie"?"on":"")+'" data-a="pk2:movie">'+t("movies")+' <i>'+mv.length+'</i></button><button class="'+(k==="series"?"on":"")+'" data-a="pk2:series">'+t("series")+' <i>'+sr.length+'</i></button></div>'+
     (all.length>1?'<button class="roulb" data-a="proul">🎲 <span>'+t("perRoul")+'</span></button>':"")+(list.length?'<div class="grid3 pgrid" style="padding:0 16px">'+list.map(function(o){var x=T_(o.id);return'<button class="pc" data-a="open:'+o.id+'">'+poster(x)+'<b>'+esc(nm(x))+'</b><span class="mute">'+esc(o.roles.filter(Boolean).join(", ")||when(x))+'</span></button>'}).join("")+'</div>':'<div class="pempty">—</div>')+'<div style="height:110px"></div>'}
 function setRow(label,opts,cur,act){return'<div class="row srow"><span class="grow">'+label+'</span><span class="seg sm st2">'+opts.map(function(o){return'<button class="'+(cur===o[0]?"on":"")+'" data-a="'+act+':'+o[0]+'">'+o[1]+'</button>'}).join("")+'</span></div>'}
+var BADGES={admin:["ADMIN","#0abab5","#fff"],moder:["MODER","#8b5cf6","#fff"],vip:["VIP","linear-gradient(135deg,#ffe27a,#e0a91b)","#3a2700"],sponsor:["SPONSOR","#ff8a00","#fff"],active:["ACTIVE","#22c55e","#fff"]};
 function pickBanner(){var n=Date.now(),a=(DB.banners||[]).filter(function(b){return(!b.starts_at||new Date(b.starts_at)<=n)&&(!b.ends_at||new Date(b.ends_at)>=n)});return a.length?a[Math.floor(Math.random()*a.length)]:null}
 function pname(p){return LANG==="en"&&p.name_original?p.name_original:p.name}
 var MYT={};
@@ -763,11 +766,11 @@ function roulette(list){
 function profilePage(){
   var u=tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user||{},name=[ME.first_name||u.first_name,ME.last_name||u.last_name].filter(Boolean).join(" ")||"Want Watch",L=DB.links;
   function R(ico,a,tt,ss,cls){return'<button class="row '+(cls||"")+'" data-a="'+a+'"><span class="rb">'+ic(ico)+'</span><span class="grow">'+tt+(ss?'<small>'+ss+'</small>':"")+'</span>'+ic(I.chev,18)+'</button>'}
-  var photo=ME.photo_url||u.photo_url;
+  var photo=ME.photo_url||u.photo_url,on=function(k){return!(L.off&&L.off[k])};
   return'<div class="top"><span class="ib ph"></span><div class="logo wide">'+t("profile")+'</div><button class="ib bell" data-a="notif" aria-label="'+t("notif")+'">'+ic(I.bell)+(unread()?'<i class="bdg">'+(unread()>9?"9+":unread())+'</i>':"")+'</button></div>'+
-  '<div class="center" style="padding:6px 0 18px">'+(photo?'<img class="av" src="'+esc(photo)+'" alt="">':'<div class="av">'+esc(name.charAt(0))+'</div>')+'<h1>'+esc(name)+'</h1><div class="mute">'+(ME.username||u.username?"@"+esc(ME.username||u.username):"")+'</div></div>'+plist()+
-  achSection()+'<div class="grp" style="margin-top:6px">'+R(I.chart,"stats",t("stats"),t("statsS"))+R(I.chat,"forum",t("forum"),t("forumS"))+'</div>'+(tg&&tg.addToHomeScreen?'<div class="cap"></div><div class="grp">'+R(I.plus,"addhome",t("home"),t("homeS"))+'</div>':"")+
-  '<div class="cap">'+t("links")+'</div><div class="grp">'+(L.support?R(I.chat,"lnk:support",t("feedback"),t("feedbackS")):"")+(L.suggest?R(I.plus,"lnk:suggest",t("suggest"),t("suggestS")):"")+(L.donate?R(I.heart,"lnk:donate",t("donate"),t("donateS")):"")+(L.ads_bot?R(I.mega,"lnk:ads_bot",t("ads"),t("adsS")):"")+(L.channel?R(I.send,"lnk:channel",t("chan"),t("chanS")):"")+'</div>'+
+  '<div class="center" style="padding:6px 0 18px"><div class="avw">'+(BADGES[ME.badge]?'<span class="ubdg" style="background:'+BADGES[ME.badge][1]+';color:'+BADGES[ME.badge][2]+'">'+BADGES[ME.badge][0]+'</span>':"")+(photo?'<img class="av" src="'+esc(photo)+'" alt="">':'<div class="av">'+esc(name.charAt(0))+'</div>')+'</div>'+'<h1>'+esc(name)+'</h1><div class="mute">'+(ME.username||u.username?"@"+esc(ME.username||u.username):"")+'</div></div>'+plist()+
+  achSection()+'<div class="grp" style="margin-top:6px">'+R(I.chart,"stats",t("stats"),t("statsS"))+(on("forum")&&(L.forum||CFG.forum)?R(I.chat,"forum",t("forum"),t("forumS")):"")+'</div>'+(tg&&tg.addToHomeScreen?'<div class="cap"></div><div class="grp">'+R(I.plus,"addhome",t("home"),t("homeS"))+'</div>':"")+
+  (function(){var g=(on("support")&&L.support?R(I.chat,"lnk:support",t("feedback"),t("feedbackS")):"")+(on("suggest")&&L.suggest?R(I.plus,"lnk:suggest",t("suggest"),t("suggestS")):"")+(on("donate")&&L.donate?R(I.heart,"lnk:donate",t("donate"),t("donateS")):"")+(on("ads_bot")&&L.ads_bot?R(I.mega,"lnk:ads_bot",t("ads"),t("adsS")):"")+(on("channel")&&L.channel?R(I.send,"lnk:channel",t("chan"),t("chanS")):"");return g?'<div class="cap">'+t("links")+'</div><div class="grp">'+g+'</div>':""})()+
   '<div class="cap">'+t("settings")+'</div><div class="grp">'+R(I.play,"onb",t("howTo"),t("howToS"))+setRow(t("theme"),[["dark",t("dark")],["light",t("light")]],document.documentElement.dataset.theme==="dark"?"dark":"light","setth")+setRow(t("lang"),[["ru","🇷🇺 RU"],["en","🇬🇧 EN"]],LANG,"setlg")+'</div>'+
   '<div class="cap">'+t("account")+'</div><div class="grp">'+R(I.trash,"del",t("del"),t("delS"),"red")+'</div><div class="abw"><button class="abt" data-a="about" aria-label="'+t("about")+'">'+ic(I.info,20)+'</button></div>'}
 function searchOv(){return'<div class="ov"><div class="sbar"><input id="q" value="'+esc(S.sq)+'" placeholder="'+t("ph")+'" autocomplete="off" autocapitalize="off" enterkeyhint="search"><button class="ib" data-a="sgo" aria-label="Go">'+ic(I.arrow)+'</button><button class="ib" data-a="sx" aria-label="Close">'+ic(I.x)+'</button></div><div id="sres" style="margin:10px -16px">'+sresHtml()+'</div></div>'}
@@ -881,7 +884,7 @@ app.addEventListener("click",async function(e){
     case"nmore":return loadNews(true);
     case"nref":hap();window.scrollTo(0,0);return loadNews(false,true);
     case"en":var ne=Number(p[1]);if(S.epn===ne){clearTimeout(ENT[ne]);saveNote(ne);S.epn=null}else S.epn=ne;hap();render();if(S.epn){var ta=document.querySelector('[data-en="'+S.epn+'"]');if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}}return;
-    case"forum":return ext(CFG.forum);
+    case"forum":return ext((DB.links&&DB.links.forum)||CFG.forum);
     case"person":return openPerson(Number(p[1]));
     case"pk2":pg.k=p[1];hap();return render();
     case"favp":return toggleFav(pg.id);

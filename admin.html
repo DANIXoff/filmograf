@@ -144,7 +144,7 @@ ed:function(){
 };
 
 /* ---------- подборки и главная ---------- */
-function nav(cur){var it=[["dash","Дашборд"],["list","Контент"],["colls","Подборки"],["home","Главная"],["provcat","Кинотеатры"],["promo","Реклама"],["ach","Достижения"],["users","Пользователи"],["notif","Уведомления"],["onb","Приветствие"],["news","Новости"]];
+function nav(cur){var it=[["dash","Дашборд"],["list","Контент"],["colls","Подборки"],["home","Главная"],["provcat","Кинотеатры"],["promo","Реклама"],["ach","Достижения"],["users","Пользователи"],["notif","Уведомления"],["onb","Приветствие"],["news","Новости"],["prof","Профиль"]];
   return '<div class="bar"><div class="tabs">'+it.map(function(x){return '<button class="'+(cur===x[0]?"on":"")+'" data-a="sec:'+x[0]+'">'+x[1]+'</button>'}).join("")+'</div><span class="sp"></span><button class="btn sm" data-a="logout">Выйти</button></div>'}
 function kindTabs(){return '<div class="tabs">'+["movie","series"].map(function(k){return '<button class="'+(G.tab===k?"on":"")+'" data-a="tab:'+k+'">'+(k==="movie"?"Фильмы":"Сериалы")+'</button>'}).join("")+'</div>'}
 function tname(id){var t=G.titles.find(function(x){return x.id===id});return t?t.title+(t.status==="published"?"":" (черновик)"):"#"+id}
@@ -331,9 +331,9 @@ V.dash=function(){var d=G.dash;if(!d)return nav("dash")+'<div class="card mute">
     tops("Клики по кинотеатрам · 30 дней",d.providers,function(r){return fmtNum(r.n)})+tops("Клики по баннерам · 30 дней",d.banners,function(r){return fmtNum(r.n)})+'</div>'};
 async function loadDash(){G.view="dash";render();var r=await sb.rpc("admin_dashboard");if(r.error)return toast("Ошибка: "+r.error.message);G.dash=r.data;render()}
 V.users=function(){var U=G.users||{rows:[],total:0};
-  return nav("users")+'<div class="bar"><h1 style="margin:0">Пользователи</h1><span class="mute">'+fmtNum(U.total)+'</span><span class="sp"></span><div class="tabs">'+[["all","Все"],["new","Новые за 7 дней"],["banned","Заблокированные"]].map(function(f){return'<button class="'+(G.uf===f[0]?"on":"")+'" data-a="uf:'+f[0]+'">'+f[1]+'</button>'}).join("")+'</div></div>'+
+  return nav("users")+'<div class="bar"><h1 style="margin:0">Пользователи</h1><span class="mute">'+fmtNum(U.total)+'</span><span class="sp"></span><div class="tabs">'+[["all","Все"],["new","Новые за 7 дней"],["badge","Со статусом"],["banned","Заблокированные"]].map(function(f){return'<button class="'+(G.uf===f[0]?"on":"")+'" data-a="uf:'+f[0]+'">'+f[1]+'</button>'}).join("")+'</div></div>'+
   '<label>Поиск: имя, @username или Telegram ID<input id="uq" value="'+esc(G.uq||"")+'" placeholder="Например, @petya" autocomplete="off"></label>'+
-  (U.rows.length?U.rows.map(function(u){return'<button class="item" data-a="user:'+u.id+'">'+uava(u)+'<span><b>'+esc(uname(u))+'</b><small>'+(u.username?"@"+esc(u.username)+" · ":"")+"ID "+u.tg_id+" · был(а) "+ago(u.last_seen_at)+'</small></span>'+(u.banned_at?'<span class="badge ban" style="margin-left:auto">бан</span>':"")+'<span class="badge" style="'+(u.banned_at?"margin-left:6px":"margin-left:auto")+'">👁 '+u.watched+' · ★ '+u.rated+' · 🏆 '+u.ach+'</span></button>'}).join(""):'<div class="card mute">Никого не найдено</div>')+
+  (U.rows.length?U.rows.map(function(u){return'<button class="item" data-a="user:'+u.id+'">'+uava(u)+'<span><b>'+esc(uname(u))+(u.badge?" "+bdg(u.badge):"")+'</b><small>'+(u.username?"@"+esc(u.username)+" · ":"")+"ID "+u.tg_id+" · был(а) "+ago(u.last_seen_at)+'</small></span>'+(u.banned_at?'<span class="badge ban" style="margin-left:auto">бан</span>':"")+'<span class="badge" style="'+(u.banned_at?"margin-left:6px":"margin-left:auto")+'">👁 '+u.watched+' · ★ '+u.rated+' · 🏆 '+u.ach+'</span></button>'}).join(""):'<div class="card mute">Никого не найдено</div>')+
   (U.rows.length<U.total?'<div class="bar"><button class="btn" data-a="umore">Показать ещё</button></div>':"")};
 async function loadUsers(more){var off=more?(G.users.rows.length):0;
   var r=await sb.rpc("admin_users",{p_q:G.uq||"",p_filter:G.uf||"all",p_limit:50,p_offset:off});if(r.error)return toast("Ошибка: "+r.error.message);
@@ -342,13 +342,14 @@ async function loadUsers(more){var off=more?(G.users.rows.length):0;
 V.user=function(){var u=G.u;if(!u)return nav("users");var A=G.uAll||[],got={};(G.uAch||[]).forEach(function(x){got[x.achievement_id]=x});
   var tname=function(id){var t=G.titles.find(function(x){return x.id===id});return t?t.title:"#"+id};
   var h=nav("users")+'<div class="bar"><button class="btn sm" data-a="sec:users">← Назад</button></div>';
-  h+='<div class="card"><div class="row" style="align-items:center">'+uava(u,true)+'<div style="flex:1"><h1 style="margin:0">'+esc(uname(u))+(u.banned_at?' <span class="badge ban">заблокирован</span>':"")+'</h1><div class="mute">'+(u.username?"@"+esc(u.username)+" · ":"")+'Telegram ID '+u.tg_id+'</div></div>'+(u.username?'<a class="btn sm" style="flex:none;text-decoration:none" href="https://t.me/'+encodeURIComponent(u.username)+'" target="_blank" rel="noopener">Написать в Telegram</a>':"")+'</div>'+
+  h+='<div class="card"><div class="row" style="align-items:center">'+uava(u,true)+'<div style="flex:1"><h1 style="margin:0">'+esc(uname(u))+(u.badge?" "+bdg(u.badge):"")+(u.banned_at?' <span class="badge ban">заблокирован</span>':"")+'</h1><div class="mute">'+(u.username?"@"+esc(u.username)+" · ":"")+'Telegram ID '+u.tg_id+'</div></div>'+(u.username?'<a class="btn sm" style="flex:none;text-decoration:none" href="https://t.me/'+encodeURIComponent(u.username)+'" target="_blank" rel="noopener">Написать в Telegram</a>':"")+'</div>'+
     '<div class="kv" style="margin-top:14px"><span>Зарегистрирован</span><div>'+fdt(u.created_at)+'</div><span>Последний вход</span><div>'+fdt(u.last_seen_at)+' ('+ago(u.last_seen_at)+')</div><span>Язык Telegram</span><div>'+esc(u.language||"—")+'</div>'+(u.banned_at?'<span>Заблокирован</span><div>'+fdt(u.banned_at)+(u.ban_reason?' · «'+esc(u.ban_reason)+'»':"")+'</div>':"")+
     '<span>Активность</span><div>Посмотрел: '+u.watched+' · Оценок: '+u.rated+' · Достижений: '+u.ach+'</div></div></div>';
   h+='<div class="card"><h2>Последние оценки</h2>'+((G.uRat||[]).length?'<table class="tbl">'+G.uRat.map(function(r){return'<tr><td>'+esc(tname(r.title_id))+'</td><td class="n">★ '+r.score+' · '+fdt(r.updated_at)+'</td></tr>'}).join("")+'</table>':'<div class="mute">Оценок пока нет</div>')+'</div>';
   h+='<div class="card"><h2>Достижения</h2>'+(A.filter(function(a){return got[a.id]}).map(function(a){var g=got[a.id];return'<div class="item" style="cursor:default"><span class="uav">'+esc(a.icon||"🏆")+'</span><span><b>'+esc(a.title)+'</b><small>'+(g.source==="manual"?"выдано вручную · ":"")+fdt(g.earned_at)+'</small></span><button class="btn red sm" style="margin-left:auto" data-a="urev:'+a.id+'">Забрать</button></div>'}).join("")||'<div class="mute" style="margin-bottom:10px">Пока нет</div>')+
     '<div class="row" style="align-items:flex-end"><label style="margin:0">Выдать достижение<select id="ugrant"><option value="">выберите</option>'+A.filter(function(a){return!got[a.id]}).map(function(a){return'<option value="'+a.id+'">'+esc((a.icon||"🏆")+" "+a.title)+(a.rule_type==="manual"?" (ручное)":"")+'</option>'}).join("")+'</select></label><button class="btn pri" style="flex:none" data-a="ugrant">Выдать</button></div></div>';
-  h+='<div class="card"><h2>Управление</h2><div class="bar" style="margin:0">'+(u.banned_at?'<button class="btn" data-a="uban:0">Разблокировать</button>':'<button class="btn red" data-a="uban:1">Заблокировать</button>')+'<span class="sp"></span><button class="btn red" data-a="udel">Удалить аккаунт</button></div>'+
+  h+='<div class="card"><h2>Статус</h2><div class="mute" style="margin-bottom:10px">Значок над аватаркой в профиле приложения. Никаких прав в управлении не даёт.</div><div class="bar" style="margin:0;flex-wrap:wrap">'+[["","Без статуса"]].concat(Object.keys(BADGES).map(function(k){return[k,BADGES[k][0]]})).map(function(o){var on=(u.badge||"")===o[0];return'<button class="btn sm'+(on?" pri":"")+'" data-a="ubadge:'+(o[0]||"none")+'">'+(o[0]?bdg(o[0]):o[1])+'</button>'}).join("")+'</div></div>'+
+    '<div class="card"><h2>Управление</h2><div class="bar" style="margin:0">'+(u.banned_at?'<button class="btn" data-a="uban:0">Разблокировать</button>':'<button class="btn red" data-a="uban:1">Заблокировать</button>')+'<span class="sp"></span><button class="btn red" data-a="udel">Удалить аккаунт</button></div>'+
     '<div class="mute" style="margin-top:10px;font-size:13px">Заблокированный не сможет войти в приложение, его отметки и оценки сохранятся. Удаление стирает аккаунт со всеми отметками без возможности восстановить; если человек зайдёт снова, создастся новый пустой аккаунт.</div></div>';
   return h};
 async function openUser(id){var u=(G.users&&G.users.rows||[]).find(function(x){return x.id===id});if(!u)return;
@@ -449,6 +450,18 @@ async function doTranslate(btn){var o=TRS[btn.dataset.att]();if(!o)return;var sr
   btn.textContent="Перевожу…";btn.disabled=true;
   try{var d=await fn("translate",{texts:[String(src)],from:"ru",to:"en"});setP(o,btn.dataset.dst,d.texts[0]||"");render();toast("Переведено ✓ Проверьте и при необходимости поправьте")}
   catch(e){btn.textContent="↻ Перевести с русского";btn.disabled=false;toast("Перевод: "+e.message)}}
+var BADGES={admin:["ADMIN","#0abab5","#fff"],moder:["MODER","#8b5cf6","#fff"],vip:["VIP","linear-gradient(135deg,#ffe27a,#e0a91b)","#3a2700"],sponsor:["SPONSOR","#ff8a00","#fff"],active:["ACTIVE","#22c55e","#fff"]};
+function bdg(k){var b=BADGES[k];if(!b)return"";return'<span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.06em;vertical-align:middle;background:'+b[1]+';color:'+b[2]+'">'+b[0]+'</span>'}
+/* ---------- кнопки профиля приложения ---------- */
+var PROF=[["forum","Форум","Обсуждение фильмов и сериалов","https://t.me/wanttalknow"],["support","Обратная связь","Вопросы и предложения",""],["suggest","Предложить фильм","Строка «Предложить фильм»",""],["donate","Поддержать проект","Ссылка на DonationAlerts и т.п.",""],["ads_bot","Реклама","Для рекламодателей",""],["channel","Telegram-канал","Также ведёт кнопка в «Новостях»",""]];
+V.prof=function(){var L=G.lk;if(!L)return nav("prof")+'<div class="card mute">Загрузка…</div>';var off=L.off||{};
+  return nav("prof")+'<div class="bar"><h1 style="margin:0">Профиль пользователей</h1><span class="sp"></span><button class="btn pri" data-a="lksave">Сохранить</button></div>'+
+  '<div class="card mute">Здесь включаются и выключаются кнопки в профиле приложения у всех пользователей и меняются их ссылки. Кнопка без ссылки не показывается.</div>'+
+  PROF.map(function(p){var k=p[0];return'<div class="card"><div class="bar" style="margin:0 0 8px"><h2 style="margin:0">'+p[1]+'</h2><span class="sp"></span><label style="display:flex;gap:8px;align-items:center;color:var(--ink);margin:0"><input type="checkbox" data-lkon="'+k+'" style="width:auto;margin:0"'+(off[k]?"":" checked")+'> Показывать</label></div><label style="margin:0">Ссылка<input data-lk="'+k+'" value="'+esc(L[k]||(k==="forum"?p[3]:""))+'" placeholder="https://t.me/…"></label><div class="mute" style="margin-top:6px;font-size:13px">'+p[2]+'</div></div>'}).join("")+
+  '<div class="bar"><button class="btn pri" data-a="lksave">Сохранить</button></div>'};
+async function loadProf(){G.view="prof";G.lk=null;render();var r=await sb.from("app_settings").select("*").eq("key","links").maybeSingle();G.lk=Object.assign({},(r.data&&r.data.value)||{});if(!G.lk.forum)G.lk.forum="https://t.me/wanttalknow";G.lk.off=Object.assign({},G.lk.off||{});render()}
+async function saveProf(){var L=G.lk,bad=PROF.filter(function(p){var u=(L[p[0]]||"").trim();return u&&!/^https?:\/\//.test(u)});if(bad.length)return toast("Ссылка «"+bad[0][1]+"» должна начинаться с https://");
+  PROF.forEach(function(p){L[p[0]]=(L[p[0]]||"").trim()});var r=await sb.from("app_settings").upsert({key:"links",value:L});if(r.error)return toast("Ошибка: "+r.error.message);toast("Сохранено ✓")}
 /* ---------- сохранение ---------- */
 async function save(){
   try{
@@ -506,7 +519,7 @@ async function openEd(id){
 }
 
 /* ---------- события ---------- */
-app.addEventListener("input",function(e){var t=e.target,p=t.dataset.p;if(t.dataset.nt){G.nt=G.nt||{};G.nt[t.dataset.nt]=t.type==="checkbox"?t.checked:t.value;if(t.dataset.re||t.dataset.nt==="text"){var pv=document.querySelector(".ntprev");if(t.dataset.re||!pv)return render();pv.querySelector("span").textContent=t.value}return}if(t.id==="cq"){pickList(t.value);return}if(t.id==="aq"){pickAch(t.value);return}if(t.id==="nq"){pickNf(t.value);return}if(t.dataset.o){setP(G.onb,t.dataset.o,t.value);return}if(t.dataset.n2){G.nf=G.nf||{};G.nf[t.dataset.n2]=t.value;return}if(t.id==="uq"){G.uq=t.value;G.uqFocus=true;clearTimeout(G.uqT);G.uqT=setTimeout(function(){loadUsers(false)},350);return}if(!p)return;
+app.addEventListener("input",function(e){var t=e.target,p=t.dataset.p;if(t.dataset.nt){G.nt=G.nt||{};G.nt[t.dataset.nt]=t.type==="checkbox"?t.checked:t.value;if(t.dataset.re||t.dataset.nt==="text"){var pv=document.querySelector(".ntprev");if(t.dataset.re||!pv)return render();pv.querySelector("span").textContent=t.value}return}if(t.id==="cq"){pickList(t.value);return}if(t.id==="aq"){pickAch(t.value);return}if(t.id==="nq"){pickNf(t.value);return}if(t.dataset.o){setP(G.onb,t.dataset.o,t.value);return}if(t.dataset.lk){G.lk[t.dataset.lk]=t.value;return}if(t.dataset.lkon){G.lk.off=G.lk.off||{};if(t.checked)delete G.lk.off[t.dataset.lkon];else G.lk.off[t.dataset.lkon]=true;return}if(t.dataset.n2){G.nf=G.nf||{};G.nf[t.dataset.n2]=t.value;return}if(t.id==="uq"){G.uq=t.value;G.uqFocus=true;clearTimeout(G.uqT);G.uqT=setTimeout(function(){loadUsers(false)},350);return}if(!p)return;
   var v=t.type==="checkbox"?t.checked:t.value;if(t.dataset.n)v=v===""?null:Number(String(v).replace(",","."));
   setP(E,p,v);if(p==="runtime_min"){var h=document.getElementById("rth");if(h)h.textContent=fmtRt(v)}if(t.dataset.re)render()});
 app.addEventListener("change",async function(e){var t=e.target;
@@ -549,7 +562,7 @@ app.addEventListener("click",async function(e){
       if(gi.error)return toast(/duplicate|unique/i.test(gi.error.message)?"Такой жанр уже есть":"Ошибка: "+gi.error.message);
       G.genres=(await sb.from("genres").select("*").order("sort")).data||[];
       gi.data.forEach(function(g){if(g.kind===E.kind&&E.genre_ids.indexOf(g.id)<0)E.genre_ids.push(g.id)});toast("Жанр добавлен и выбран");return render();
-    case"sec":G.view=a[1];if(a[1]==="news")return loadNewsAdm();if(a[1]==="onb")return loadOnb();if(a[1]==="notif")return loadNotif();if(a[1]==="dash")return loadDash();if(a[1]==="users"){G.uqFocus=false;return loadUsers(false)}if(a[1]==="home")return loadHome();if(a[1]==="ach")return loadAch();if(a[1]==="promo")return loadPromo();return render();
+    case"sec":G.view=a[1];if(a[1]==="prof")return loadProf();if(a[1]==="news")return loadNewsAdm();if(a[1]==="onb")return loadOnb();if(a[1]==="notif")return loadNotif();if(a[1]==="dash")return loadDash();if(a[1]==="users"){G.uqFocus=false;return loadUsers(false)}if(a[1]==="home")return loadHome();if(a[1]==="ach")return loadAch();if(a[1]==="promo")return loadPromo();return render();
     case"newcoll":E={id:null,kind:G.tab,title:"",title_en:"",subtitle:"",emoji:"",mode:"manual",genre_id:null,is_active:true,sort:G.colls.reduce(function(m,c){return Math.max(m,c.sort||0)},0)+1,items:[]};G.view="colled";return render();
     case"editcoll":var cc=G.colls.find(function(x){return x.id===Number(a[1])});var cit=await sb.from("collection_items").select("title_id").eq("collection_id",cc.id).order("sort");
       E=Object.assign({},cc,{title_en:cc.title_en||"",subtitle:cc.subtitle||"",emoji:cc.emoji||"",mode:cc.genre_id?"genre":"manual",items:(cit.data||[]).map(function(x){return x.title_id})});G.view="colled";return render();
@@ -565,6 +578,8 @@ app.addEventListener("click",async function(e){
     case"hsave":return saveHome();
     case"unpin":var up2=await sb.from("titles").update({on_home:false}).eq("id",Number(a[1]));if(up2.error)return toast("Ошибка: "+up2.error.message);await loadAll();toast("Снято с главной");return render();
     case"psave":return savePromo();
+    case"lksave":return saveProf();
+    case"ubadge":var bv=a[1]==="none"?"":a[1];var br=await sb.rpc("admin_set_badge",{p_user:G.u.id,p_badge:bv});if(br.error)return toast("Ошибка: "+br.error.message);toast(bv?"Статус выдан ✓":"Статус снят");return refreshUser();
     case"tmq":return tmdbSearch();
     case"tmpick":return tmdbPick(Number(a[1]));
     case"tr":return doTranslate(b);
