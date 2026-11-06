@@ -270,7 +270,7 @@ button,input,textarea,select{font-family:inherit}
 .seg.mini{display:inline-flex;margin:0;flex:none}.seg.mini button{flex:none;padding:0 13px;height:32px;font-size:13px}
 .srtb{height:38px;padding:0 14px;border-radius:999px;background:var(--s1);box-shadow:inset 0 0 0 1px var(--line);font-weight:600;font-size:13px;color:var(--ink);white-space:nowrap}
 .lgb{font-size:20px;letter-spacing:0}
-.srow{cursor:default;padding-top:10px;padding-bottom:10px}.srow .grow{font-weight:500}.st2{display:inline-flex;margin:0;flex:none}.st2 button{flex:none;padding:0 14px;height:34px;font-size:13.5px;white-space:nowrap}
+.srow{cursor:default;padding-top:12px;padding-bottom:12px}.srow .grow{font-weight:500}.st2{display:inline-flex;margin:0;flex:none;padding:4px}.seg.st2 button{flex:none;padding:0 18px;height:40px;font-size:15px;white-space:nowrap}
 .ntc{display:block;width:100%;text-align:left;position:relative;color:inherit;font:inherit}
 .ntb2{display:flex;gap:12px;align-items:flex-start}.ntb2 b{display:block;font-size:15.5px;margin-bottom:4px}.ntb2 .nwt{display:block}.ntc .nip{width:52px;height:76px;border-radius:10px;object-fit:cover;flex:none}
 .ntc .nwd .ndot{margin:0 6px 0 0}
@@ -281,6 +281,7 @@ button,input,textarea,select{font-family:inherit}
 .nc-blue{background:rgba(42,171,238,.08);box-shadow:inset 0 0 0 1px rgba(42,171,238,.28)}.nc-blue::before{background:#2aabee}
 .nc-black{background:#1b1b1e;color:#f2f2f2;box-shadow:inset 0 0 0 1px #000}.nc-black::before{background:#000}.nc-black .nwd,.nc-black .nwt{color:#b8b8bd}
 [data-theme=dark] .nc-black{background:#000;box-shadow:inset 0 0 0 1px #3a3a3e}[data-theme=dark] .nc-black::before{background:#5a5a60}
+.nwc.lk{cursor:pointer}.nwc.lk:active{transform:scale(.99)}
 </style>
 </head>
 <body>
@@ -291,7 +292,7 @@ button,input,textarea,select{font-family:inherit}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 var SB_URL="https://rixjsfvweagsqrvoiymj.supabase.co",SB_KEY="sb_publishable_XlyUk5LlVt3Cdt20laz6fw_HyjKJH1y";
-var VER="19.3";
+var VER="19.4";
 var GILROY=true; /* true — если в репозитории есть папка fonts с файлами Gilroy (см. инструкцию) */
 if(GILROY){(function(){var W=[[300,["Light"]],[400,["Regular","Book"]],[500,["Medium"]],[600,["SemiBold","Semibold"]],[700,["Bold"]],[800,["ExtraBold","Extrabold"]],[900,["Heavy","Black"]]],F=[["woff2","woff2"],["woff","woff"],["ttf","truetype"],["otf","opentype"]];
   var css=W.map(function(w){var src=[];w[1].forEach(function(n){F.forEach(function(f){src.push('url("fonts/Gilroy-'+n+'.'+f[0]+'") format("'+f[1]+'")')})});
@@ -471,7 +472,7 @@ function newsGroups(){var g=[],by={};NEWS.items.forEach(function(x){var k=x.medi
   if(!by[k]){by[k]={key:k,author:String(x.chat_username||"").toLowerCase()===CFG.authorCh,photos:[],text:"",entities:[],posted_at:x.posted_at,message_id:x.message_id,user:x.chat_username,video:false};g.push(by[k])}
   var b=by[k];if(x.photo_url)b.photos.push({u:x.photo_url,m:x.message_id,v:x.has_video});if(x.has_video)b.video=true;if(x.text&&!b.text){b.text=x.text;b.entities=x.entities||[]}
   if(x.message_id<b.message_id)b.message_id=x.message_id;if(x.posted_at<b.posted_at)b.posted_at=x.posted_at});
-  g.forEach(function(b){b.photos.sort(function(a,c){return a.m-c.m})});return g}
+  g.forEach(function(b){b.photos.sort(function(a,c){return a.m-c.m})});return g.filter(function(b){return b.text||b.photos.length})}
 /* Текст поста с форматированием Telegram: жирный, курсив, ссылки, цитаты */
 function fmtEnt(text,ents){if(!text)return"";ents=(ents||[]).filter(function(e){return e&&e.length>0});
   var cut={0:1};cut[text.length]=1;ents.forEach(function(e){cut[e.offset]=1;cut[e.offset+e.length]=1});
@@ -492,7 +493,7 @@ function newsPage(){var top='<div class="top"><button class="ib'+(NEWS.spin?" sp
   var g=newsGroups();if(!g.length)return top+'<div class="pempty" style="margin-top:8px">'+t("newsEmpty")+'</div>'+newsTgBtn();
   return top+'<div class="nws">'+g.map(function(p){var link=p.user?"https://t.me/"+p.user+"/"+p.message_id:"";
     var ph=p.photos.length?(p.photos.length>1?'<div class="nwph many">'+p.photos.map(function(f){return'<img src="'+esc(f.u)+'" alt="" loading="lazy">'}).join("")+'</div>':'<div class="nwph"'+(p.video&&link?' data-a="nl" data-u="'+esc(link)+'"':"")+'><img src="'+esc(p.photos[0].u)+'" alt="" loading="lazy">'+(p.video?'<span class="nwv">'+ic(I.play,26)+'</span>':"")+'</div>'):"";
-    return'<article class="nwc'+(ph&&!p.text?" po":"")+(p.author?" au":"")+'" data-k="'+p.key+'">'+ph+(p.text?'<div class="nwt">'+fmtEnt(p.text,p.entities)+'</div>':"")+'<div class="nwd">'+(p.author?'<span class="nwa">'+esc(CFG.authorName)+VERI+'</span><span class="dt">·</span>':"")+fmtDT(p.posted_at)+'</div></article>'}).join("")+
+    return'<article class="nwc'+(ph&&!p.text?" po":"")+(p.author?" au":"")+(link?" lk":"")+'" data-k="'+p.key+'"'+(link?' data-a="nl" data-u="'+esc(link)+'"':"")+'>'+ph+(p.text?'<div class="nwt">'+fmtEnt(p.text,p.entities)+'</div>':"")+'<div class="nwd">'+(p.author?'<span class="nwa">'+esc(CFG.authorName)+VERI+'</span><span class="dt">·</span>':"")+fmtDT(p.posted_at)+'</div></article>'}).join("")+
     (NEWS.more?'<button class="achmore" data-a="nmore">'+t("newsMore")+'</button>':"")+'</div>'+newsTgBtn()+'<div style="height:160px"></div>'}
 var VERI='<svg class="veri" viewBox="0 0 24 24" width="15" height="15"><path fill="#2aabee" d="M12 1.6l2.2 2.4 3.2-.6.8 3.1 3 1.3-1 3.1 1.6 2.8-2.6 1.9.1 3.2-3.2.4-1.6 2.8-2.9-1.4L12 22.4l-2.2-2.4-3.2.6-.8-3.1-3-1.3 1-3.1L2.2 10.3l2.6-1.9-.1-3.2 3.2-.4 1.6-2.8 2.9 1.4z"/><path d="M8.2 12.3l2.6 2.6 5-5.2" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 function newsTgBtn(){var m=NEWS.items.find(function(x){return x.chat_username&&String(x.chat_username).toLowerCase()!==CFG.authorCh}),u=(DB.links&&DB.links.channel)||(m?"https://t.me/"+m.chat_username:"");if(!u)return"";
