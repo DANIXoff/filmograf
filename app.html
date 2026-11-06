@@ -265,6 +265,22 @@ button,input,textarea,select{font-family:inherit}
 .ib.fav{color:var(--mute)}.ib.fav.on{color:#ff3b30}.ib.fav.on svg path{fill:#ff3b30}
 .nwd{display:flex;align-items:center;flex-wrap:wrap}.nwa{display:inline-flex;align-items:center;gap:3px;font-weight:700;color:var(--ink)}.nwd .dt{margin:0 5px}.veri{flex:none}
 .wwn{padding:0 16px 10px 72px;margin-top:-6px;font-size:12px;line-height:1.4;color:var(--mute)}
+.ptt{justify-content:center;text-align:center}
+.pfr{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 16px 14px}
+.seg.mini{display:inline-flex;margin:0;flex:none}.seg.mini button{flex:none;padding:0 13px;height:32px;font-size:13px}
+.srtb{height:38px;padding:0 14px;border-radius:999px;background:var(--s1);box-shadow:inset 0 0 0 1px var(--line);font-weight:600;font-size:13px;color:var(--ink);white-space:nowrap}
+.lgb{font-size:20px;letter-spacing:0}
+.srow{cursor:default;padding-top:10px;padding-bottom:10px}.srow .grow{font-weight:500}.st2{display:inline-flex;margin:0;flex:none}.st2 button{flex:none;padding:0 14px;height:34px;font-size:13.5px;white-space:nowrap}
+.ntc{display:block;width:100%;text-align:left;position:relative;color:inherit;font:inherit}
+.ntb2{display:flex;gap:12px;align-items:flex-start}.ntb2 b{display:block;font-size:15.5px;margin-bottom:4px}.ntb2 .nwt{display:block}.ntc .nip{width:52px;height:76px;border-radius:10px;object-fit:cover;flex:none}
+.ntc .nwd .ndot{margin:0 6px 0 0}
+.ntc.nc-red,.ntc.nc-yellow,.ntc.nc-blue,.ntc.nc-black{overflow:hidden}
+.ntc[class*=" nc-"]::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+.nc-red{background:rgba(255,59,48,.08);box-shadow:inset 0 0 0 1px rgba(255,59,48,.28)}.nc-red::before{background:#ff3b30}
+.nc-yellow{background:rgba(245,180,0,.10);box-shadow:inset 0 0 0 1px rgba(245,180,0,.32)}.nc-yellow::before{background:#f5b400}
+.nc-blue{background:rgba(42,171,238,.08);box-shadow:inset 0 0 0 1px rgba(42,171,238,.28)}.nc-blue::before{background:#2aabee}
+.nc-black{background:#1b1b1e;color:#f2f2f2;box-shadow:inset 0 0 0 1px #000}.nc-black::before{background:#000}.nc-black .nwd,.nc-black .nwt{color:#b8b8bd}
+[data-theme=dark] .nc-black{background:#000;box-shadow:inset 0 0 0 1px #3a3a3e}[data-theme=dark] .nc-black::before{background:#5a5a60}
 </style>
 </head>
 <body>
@@ -275,7 +291,7 @@ button,input,textarea,select{font-family:inherit}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 var SB_URL="https://rixjsfvweagsqrvoiymj.supabase.co",SB_KEY="sb_publishable_XlyUk5LlVt3Cdt20laz6fw_HyjKJH1y";
-var VER="19.2";
+var VER="19.3";
 var GILROY=true; /* true — если в репозитории есть папка fonts с файлами Gilroy (см. инструкцию) */
 if(GILROY){(function(){var W=[[300,["Light"]],[400,["Regular","Book"]],[500,["Medium"]],[600,["SemiBold","Semibold"]],[700,["Bold"]],[800,["ExtraBold","Extrabold"]],[900,["Heavy","Black"]]],F=[["woff2","woff2"],["woff","woff"],["ttf","truetype"],["otf","opentype"]];
   var css=W.map(function(w){var src=[];w[1].forEach(function(n){F.forEach(function(f){src.push('url("fonts/Gilroy-'+n+'.'+f[0]+'") format("'+f[1]+'")')})});
@@ -414,8 +430,8 @@ function noticeBar(kind){var n=DB.notice;if(!n||!n.enabled)return"";var tx=LANG=
 function unread(){var r=new Date(ME.notif_read_at||0);return NT.filter(function(n){return new Date(n.created_at)>r}).length}
 function ago(v){var m=Math.round((Date.now()-new Date(v))/60000);if(m<2)return t("justNow");if(m<60)return t("minAgo").replace("%s",m);var h=Math.round(m/60);if(h<24)return t("hAgo").replace("%s",h);var d=Math.round(h/24);if(d<8)return t("dAgo").replace("%s",d);return fmtD(v)}
 function notifPage(){var en=LANG==="en",rd=new Date(S.nrAt||0);
-  return bar('<b style="flex:1;text-align:center">'+t("notif")+'</b>')+(NT.length?'<div class="ntl">'+NT.map(function(n){var x=n.title_id&&T_(n.title_id),nw=new Date(n.created_at)>rd;
-    return'<button class="nti" data-a="nto:'+n.id+'">'+(x?poster(x,"nip"):'<span class="nic">'+ic(I.bell,20)+'</span>')+'<span class="grow"><b>'+esc(en&&n.title_en||n.title)+'</b>'+(n.body?'<small>'+esc(en&&n.body_en||n.body)+'</small>':"")+'<em>'+ago(n.created_at)+'</em></span>'+(nw?'<i class="ndot"></i>':"")+'</button>'}).join("")+'</div>':'<div class="pempty" style="margin-top:20px">'+t("notifEmpty")+'</div>')}
+  return bar('<b style="flex:1;text-align:center">'+t("notif")+'</b>')+(NT.length?'<div class="nws">'+NT.map(function(n){var x=n.title_id&&T_(n.title_id),nw=new Date(n.created_at)>rd,col=n.color&&/^(red|yellow|blue|black)$/.test(n.color)?" nc-"+n.color:"";
+    return'<button class="nwc ntc'+col+'" data-a="nto:'+n.id+'"><div class="ntb2"><span class="grow"><b>'+esc(en&&n.title_en||n.title)+'</b>'+(n.body?'<span class="nwt">'+esc(en&&n.body_en||n.body).replace(/\n/g,"<br>")+'</span>':"")+'</span>'+(x?poster(x,"nip"):"")+'</div><div class="nwd">'+(nw?'<i class="ndot"></i>':"")+fmtDT(n.created_at)+'</div></button>'}).join("")+'</div><div style="height:110px"></div>':'<div class="pempty" style="margin-top:20px">'+t("notifEmpty")+'</div>')}
 async function openNotif(){S.nrAt=ME.notif_read_at;push({n:"notif"});ME.notif_read_at=new Date().toISOString();try{await sb.rpc("mark_notifications_read")}catch(e){}}
 async function toggleSub(id){var on=!!SUBS[id];if(on)delete SUBS[id];else SUBS[id]=1;hap();render();
   var r=on?await sb.from("title_subscriptions").delete().eq("user_id",UID).eq("title_id",id):await sb.from("title_subscriptions").insert({user_id:UID,title_id:id});
@@ -498,6 +514,7 @@ function personPage(pg){var d=PER[pg.id];if(!d)return bar()+'<div class="center 
   var fav=!!FAVP[pg.id];return bar(null,'<button class="ib fav'+(fav?" on":"")+'" data-a="favp" aria-label="Favourite">'+ic(I.heart,22)+'</button>')+'<div class="perh">'+(p.photo_url?'<img src="'+esc(p.photo_url)+'" alt="">':'<span>'+esc(ini)+'</span>')+'<h1>'+esc(n)+'</h1>'+(p.name_original&&p.name_original!==n?'<div class="mute">'+esc(p.name_original)+'</div>':"")+'</div>'+
     '<div class="perq">'+t("perRel")+'</div><div class="seg"><button class="'+(k==="movie"?"on":"")+'" data-a="pk2:movie">'+t("movies")+' <i>'+mv.length+'</i></button><button class="'+(k==="series"?"on":"")+'" data-a="pk2:series">'+t("series")+' <i>'+sr.length+'</i></button></div>'+
     (all.length>1?'<button class="roulb" data-a="proul">🎲 <span>'+t("perRoul")+'</span></button>':"")+(list.length?'<div class="grid3 pgrid" style="padding:0 16px">'+list.map(function(o){var x=T_(o.id);return'<button class="pc" data-a="open:'+o.id+'">'+poster(x)+'<b>'+esc(nm(x))+'</b><span class="mute">'+esc(o.roles.filter(Boolean).join(", ")||when(x))+'</span></button>'}).join("")+'</div>':'<div class="pempty">—</div>')+'<div style="height:110px"></div>'}
+function setRow(label,opts,cur,act){return'<div class="row srow"><span class="grow">'+label+'</span><span class="seg sm st2">'+opts.map(function(o){return'<button class="'+(cur===o[0]?"on":"")+'" data-a="'+act+':'+o[0]+'">'+o[1]+'</button>'}).join("")+'</span></div>'}
 function pickBanner(){var n=Date.now(),a=(DB.banners||[]).filter(function(b){return(!b.starts_at||new Date(b.starts_at)<=n)&&(!b.ends_at||new Date(b.ends_at)>=n)});return a.length?a[Math.floor(Math.random()*a.length)]:null}
 function pname(p){return LANG==="en"&&p.name_original?p.name_original:p.name}
 var MYT={};
@@ -641,10 +658,10 @@ function tab(x){hap();S.sheet=null;S.search=false;if(x===S.tab){if(STK().length)
 if(tg&&tg.BackButton){try{tg.BackButton.onClick(pop)}catch(e){}}
 
 /* ---------- экраны ---------- */
-function topbar(){return'<div class="top"><button class="ib" data-a="chan" aria-label="Telegram">'+ic(I.send)+'</button><div class="logo"><img src="'+LOGO+'" alt="Want Watch"></div><button class="ib lgb" data-a="lang" aria-label="Language">'+(LANG==="ru"?"RU":"EN")+'</button></div>'}
+function topbar(){return'<div class="top"><button class="ib" data-a="chan" aria-label="Telegram">'+ic(I.send)+'</button><div class="logo"><img src="'+LOGO+'" alt="Want Watch"></div><button class="ib lgb" data-a="lang" aria-label="Language">'+(LANG==="ru"?"🇷🇺":"🇬🇧")+'</button></div>'}
 function bar(mid,right){return'<div class="top"><button class="ib" data-a="back" aria-label="Back">'+ic(I.back)+'</button>'+(mid||'<span class="ib ph"></span>')+(right||'<span class="ib ph"></span>')+'</div>'}
 function stkSvg(k){var hot=k==="hot",id="sg"+k;return'<svg class="stk'+(hot?" hot":"")+'" viewBox="0 0 52 52"><defs><linearGradient id="'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff4d4d"/><stop offset="1" stop-color="#a80000"/></linearGradient></defs><path d="M48.80 26.00L48.36 27.17L47.25 28.23L46.01 29.17L45.21 30.08L45.14 31.13L45.69 32.40L46.40 33.83L46.70 35.22L46.25 36.32L45.05 37.00L43.50 37.37L42.10 37.70L41.24 38.34L40.96 39.47L40.99 40.99L40.90 42.55L40.34 43.71L39.22 44.20L37.73 44.06L36.20 43.67L34.93 43.53L34.03 44.03L33.36 45.18L32.70 46.63L31.85 47.82L30.73 48.27L29.46 47.87L28.20 46.92L27.05 45.98L26.00 45.60L24.95 45.98L23.80 46.92L22.54 47.87L21.27 48.27L20.15 47.82L19.30 46.63L18.64 45.18L17.97 44.03L17.07 43.53L15.80 43.67L14.27 44.06L12.78 44.20L11.66 43.71L11.10 42.55L11.01 40.99L11.04 39.47L10.76 38.34L9.90 37.70L8.50 37.37L6.95 37.00L5.75 36.32L5.30 35.22L5.60 33.83L6.31 32.40L6.86 31.13L6.79 30.08L5.99 29.17L4.75 28.23L3.64 27.17L3.20 26.00L3.64 24.83L4.75 23.77L5.99 22.83L6.79 21.92L6.86 20.87L6.31 19.60L5.60 18.17L5.30 16.78L5.75 15.68L6.95 15.00L8.50 14.63L9.90 14.30L10.76 13.66L11.04 12.53L11.01 11.01L11.10 9.45L11.66 8.29L12.78 7.80L14.27 7.94L15.80 8.33L17.07 8.47L17.97 7.97L18.64 6.82L19.30 5.37L20.15 4.18L21.27 3.73L22.54 4.13L23.80 5.08L24.95 6.02L26.00 6.40L27.05 6.02L28.20 5.08L29.46 4.13L30.73 3.73L31.85 4.18L32.70 5.37L33.36 6.82L34.03 7.97L34.93 8.47L36.20 8.33L37.73 7.94L39.22 7.80L40.34 8.29L40.90 9.45L40.99 11.01L40.96 12.53L41.24 13.66L42.10 14.30L43.50 14.63L45.05 15.00L46.25 15.68L46.70 16.78L46.40 18.17L45.69 19.60L45.14 20.87L45.21 21.92L46.01 22.83L47.25 23.77L48.36 24.83L48.80 26.00Z" fill="url(#'+id+')" stroke="#ff8a8a" stroke-opacity=".35" stroke-width=".6" stroke-linejoin="round"/>'+
-  (hot?'<text x="26" y="24.3" text-anchor="middle" fill="#fff" font-size="7.6" font-weight="800">'+esc(t("stHot1").toUpperCase())+'</text><text x="26" y="32.6" text-anchor="middle" fill="#fff" font-size="7.6" font-weight="800">'+esc(t("stHot2").toUpperCase())+'</text>':'<text x="26" y="28.6" text-anchor="middle" fill="#fff" font-size="'+(LANG==="en"?10.5:8.4)+'" font-weight="800">'+esc(t("stNew").toUpperCase())+'</text>')+'</svg>'}
+  (hot?'<text x="26" y="24.4" text-anchor="middle" fill="#fff" font-size="7" font-weight="800" textLength="'+(LANG==="en"?33:34)+'" lengthAdjust="spacingAndGlyphs">'+esc(t("stHot1").toUpperCase())+'</text><text x="26" y="32.4" text-anchor="middle" fill="#fff" font-size="7" font-weight="800"'+(LANG==="en"?"":' textLength="25" lengthAdjust="spacingAndGlyphs"')+'>'+esc(t("stHot2").toUpperCase())+'</text>':'<text x="26" y="28.4" text-anchor="middle" fill="#fff" font-size="'+(LANG==="en"?10.5:7.6)+'" font-weight="800"'+(LANG==="en"?"":' textLength="32" lengthAdjust="spacingAndGlyphs"')+'>'+esc(t("stNew").toUpperCase())+'</text>')+'</svg>'}
 function slider(kind){
   var it=DB.titles.filter(function(x){return x.kind===kind&&x.on_home&&x.home_image_url}).sort(function(a,b){return new Date(b.home_pinned_at)-new Date(a.home_pinned_at)});
   if(!it.length)return"";
@@ -715,8 +732,8 @@ function plist(){
   var srt=S.pt==="rated"?["new","high","low"]:["new","az"];if(srt.indexOf(S.ps)<0)S.ps="new";
   ids.sort(function(a,b){if(S.ps==="az")return nm(T_(a)).localeCompare(nm(T_(b)));if(S.ps==="high")return sc(b)-sc(a)||(tm(b)>tm(a)?1:-1);if(S.ps==="low")return(sc(a)||99)-(sc(b)||99)||(tm(b)>tm(a)?1:-1);return tm(b)>tm(a)?1:tm(b)<tm(a)?-1:0});
   var total=DB.titles.filter(function(x){return has(x.id,st)}).length;
-  h+='<div class="ptt">'+t("ptT_"+S.pt)+' <i>'+total+'</i><button class="chip srt" data-a="ps:'+srt[(srt.indexOf(S.ps)+1)%srt.length]+'">⇅ '+t("s_"+S.ps)+'</button></div>';
-  h+='<div class="seg sm" style="margin-top:0">'+[["all","fAll"],["movie","movies"],["series","series"]].map(function(q){return'<button class="'+(S.pk===q[0]?"on":"")+'" data-a="pk:'+q[0]+'">'+t(q[1])+'</button>'}).join("")+'</div>';
+  h+='<div class="ptt">'+t("ptT_"+S.pt)+' <i>'+total+'</i></div>';
+  h+='<div class="pfr"><div class="seg sm mini">'+[["all","fAll"],["movie","movies"],["series","series"]].map(function(q){return'<button class="'+(S.pk===q[0]?"on":"")+'" data-a="pk:'+q[0]+'">'+t(q[1])+'</button>'}).join("")+'</div><button class="srtb" data-a="ps:'+srt[(srt.indexOf(S.ps)+1)%srt.length]+'">⇅ '+t("s_"+S.ps)+'</button></div>';
   if(S.pt==="saved"&&ids.length>1)h+='<button class="roulb" data-a="roul">🎲 <span>'+t("roul")+'</span></button>';
   if(!ids.length)return h+'<div class="pempty">'+t("em_"+S.pt)+'</div>';
   return h+'<div class="grid3 pgrid">'+ids.map(function(id){var x=T_(id),s3=sc(id);return'<button class="pc" data-a="open:'+id+'"><span class="pw">'+poster(x)+(S.pt==="rated"&&s3?'<i class="psc">★ '+s3+'</i>':"")+'</span><b>'+esc(nm(x))+'</b><span class="mute">'+(S.pt==="watching"&&PRG[id]&&PRG[id].last_season?esc(t("epShort").replace("%s",PRG[id].last_season).replace("%e",PRG[id].last_episode)):esc(when(x)))+'</span>'+(S.pt==="watching"&&PRG[id]&&PRG[id].total_count?'<span class="pbar"><span style="width:'+Math.round(PRG[id].watched_count/PRG[id].total_count*100)+'%"></span></span>':"")+'</button>'}).join("")+'</div>'}
@@ -744,7 +761,7 @@ function profilePage(){
   '<div class="center" style="padding:6px 0 18px">'+(photo?'<img class="av" src="'+esc(photo)+'" alt="">':'<div class="av">'+esc(name.charAt(0))+'</div>')+'<h1>'+esc(name)+'</h1><div class="mute">'+(ME.username||u.username?"@"+esc(ME.username||u.username):"")+'</div></div>'+plist()+
   achSection()+'<div class="grp" style="margin-top:6px">'+R(I.chart,"stats",t("stats"),t("statsS"))+R(I.chat,"forum",t("forum"),t("forumS"))+'</div>'+(tg&&tg.addToHomeScreen?'<div class="cap"></div><div class="grp">'+R(I.plus,"addhome",t("home"),t("homeS"))+'</div>':"")+
   '<div class="cap">'+t("links")+'</div><div class="grp">'+(L.support?R(I.chat,"lnk:support",t("feedback"),t("feedbackS")):"")+(L.suggest?R(I.plus,"lnk:suggest",t("suggest"),t("suggestS")):"")+(L.donate?R(I.heart,"lnk:donate",t("donate"),t("donateS")):"")+(L.ads_bot?R(I.mega,"lnk:ads_bot",t("ads"),t("adsS")):"")+(L.channel?R(I.send,"lnk:channel",t("chan"),t("chanS")):"")+'</div>'+
-  '<div class="cap">'+t("settings")+'</div><div class="grp">'+R(I.play,"onb",t("howTo"),t("howToS"))+R(I.globe,"lang",t("lang"),LANG==="ru"?"Русский":"English")+R(I.sun,"theme",t("theme"),document.documentElement.dataset.theme==="dark"?t("dark"):t("light"))+'</div>'+
+  '<div class="cap">'+t("settings")+'</div><div class="grp">'+R(I.play,"onb",t("howTo"),t("howToS"))+setRow(t("theme"),[["dark",t("dark")],["light",t("light")]],document.documentElement.dataset.theme==="dark"?"dark":"light","setth")+setRow(t("lang"),[["ru","🇷🇺 RU"],["en","🇬🇧 EN"]],LANG,"setlg")+'</div>'+
   '<div class="cap">'+t("account")+'</div><div class="grp">'+R(I.trash,"del",t("del"),t("delS"),"red")+'</div><div class="abw"><button class="abt" data-a="about" aria-label="'+t("about")+'">'+ic(I.info,20)+'</button></div>'}
 function searchOv(){return'<div class="ov"><div class="sbar"><input id="q" value="'+esc(S.sq)+'" placeholder="'+t("ph")+'" autocomplete="off" autocapitalize="off" enterkeyhint="search"><button class="ib" data-a="sgo" aria-label="Go">'+ic(I.arrow)+'</button><button class="ib" data-a="sx" aria-label="Close">'+ic(I.x)+'</button></div><div id="sres" style="margin:10px -16px">'+sresHtml()+'</div></div>'}
 function sresHtml(){return S.sres.length?S.sres.map(function(r){return'<button class="row" data-a="open:'+r.id+'">'+poster(r,"ico")+'<span class="grow"><b>'+esc(nm(r))+'</b><small>'+(r.kind==="movie"?t("movies"):t("series"))+" · "+esc(when(r))+'</small></span></button>'}).join(""):""}
@@ -820,6 +837,8 @@ app.addEventListener("click",async function(e){
     case"back":return pop();
     case"open":S.search=false;S.focused=0;return openTitle(Number(p[1]));
     case"chan":return ext(DB.links.channel);
+    case"setth":setTheme(p[1]);hap();return render();
+    case"setlg":if(LANG!==p[1]){LANG=p[1];lss("ww_lang",LANG)}hap();return render();
     case"theme":setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");return render();
     case"lang":LANG=LANG==="ru"?"en":"ru";lss("ww_lang",LANG);hap();return render();
     case"col":var c=DB.cols.find(function(x){return x.id===Number(p[1])});return push({n:"list",title:ctitle(c),ids:colIds(c)});
