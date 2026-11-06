@@ -289,6 +289,7 @@ button,input,textarea,select{font-family:inherit}
 .rch{width:16px;display:grid;place-items:center;flex:none;margin-left:6px}
 .avw{position:relative;display:inline-block}.avw .av{display:block}
 .ubdg{position:absolute;left:50%;top:-9px;transform:translateX(-50%);z-index:2;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.08em;white-space:nowrap;box-shadow:0 0 0 3px var(--bg),0 4px 12px rgba(0,0,0,.18)}
+.tbn.hbn{margin:0 16px 14px}
 </style>
 </head>
 <body>
@@ -299,7 +300,7 @@ button,input,textarea,select{font-family:inherit}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 var SB_URL="https://rixjsfvweagsqrvoiymj.supabase.co",SB_KEY="sb_publishable_XlyUk5LlVt3Cdt20laz6fw_HyjKJH1y";
-var VER="19.6";
+var VER="19.7";
 var GILROY=true; /* true — если в репозитории есть папка fonts с файлами Gilroy (см. инструкцию) */
 if(GILROY){(function(){var W=[[300,["Light"]],[400,["Regular","Book"]],[500,["Medium"]],[600,["SemiBold","Semibold"]],[700,["Bold"]],[800,["ExtraBold","Extrabold"]],[900,["Heavy","Black"]]],F=[["woff2","woff2"],["woff","woff"],["ttf","truetype"],["otf","opentype"]];
   var css=W.map(function(w){var src=[];w[1].forEach(function(n){F.forEach(function(f){src.push('url("fonts/Gilroy-'+n+'.'+f[0]+'") format("'+f[1]+'")')})});
@@ -432,6 +433,10 @@ function nextCeleb(){var id=ACHQ.shift();if(id==null)return;var a=(DB.ach||[]).f
   d.innerHTML='<div class="cc">'+aIcon(a,"aic big got")+'<small>'+t("achNew")+'</small><b>'+esc(aName(a))+'</b><p>'+esc(aDesc(a))+'</p><button>'+t("achCool")+'</button></div>';
   d.onclick=function(e){if(e.target===d||e.target.closest("button")){d.remove();setTimeout(nextCeleb,250)}};
   document.body.appendChild(d);try{tg&&tg.HapticFeedback&&tg.HapticFeedback.notificationOccurred("success")}catch(e){}}
+var HB={};
+/* Баннер сверху главной: выбирается один раз за запуск, чтобы не прыгал при перерисовке */
+function homeBanner(kind){if(!(kind in HB)||(HB[kind]&&!(DB.banners||[]).some(function(b){return b.id===HB[kind].id})))HB[kind]=pickBanner("home",kind);var b=HB[kind];if(!b)return"";
+  return'<button class="tbn hbn" data-a="hbn:'+kind+'" data-k="hb'+b.id+'"><img src="'+esc(LANG==="en"&&b.image_url_en||b.image_url)+'" alt=""></button>'}
 function noticeBar(kind){var n=DB.notice;if(!n||!n.enabled)return"";var tx=LANG==="en"&&n.text_en?n.text_en:n.text;if(!tx)return"";
   if(n.where&&n.where!=="both"&&n.where!==kind)return"";
   return'<'+(n.url?'button data-a="ntgo"':'div')+' class="ntb nt-'+esc(n.color||"blue")+'"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 7.2v6.2"/><path d="M12 16.9v.1"/></svg><span>'+esc(tx)+'</span></'+(n.url?"button":"div")+'>'}
@@ -524,7 +529,7 @@ function personPage(pg){var d=PER[pg.id];if(!d)return bar()+'<div class="center 
     (all.length>1?'<button class="roulb" data-a="proul">🎲 <span>'+t("perRoul")+'</span></button>':"")+(list.length?'<div class="grid3 pgrid" style="padding:0 16px">'+list.map(function(o){var x=T_(o.id);return'<button class="pc" data-a="open:'+o.id+'">'+poster(x)+'<b>'+esc(nm(x))+'</b><span class="mute">'+esc(o.roles.filter(Boolean).join(", ")||when(x))+'</span></button>'}).join("")+'</div>':'<div class="pempty">—</div>')+'<div style="height:110px"></div>'}
 function setRow(label,opts,cur,act){return'<div class="row srow"><span class="grow">'+label+'</span><span class="seg sm st2">'+opts.map(function(o){return'<button class="'+(cur===o[0]?"on":"")+'" data-a="'+act+':'+o[0]+'">'+o[1]+'</button>'}).join("")+'</span></div>'}
 var BADGES={admin:["ADMIN","#0abab5","#fff"],moder:["MODER","#8b5cf6","#fff"],vip:["VIP","linear-gradient(135deg,#ffe27a,#e0a91b)","#3a2700"],sponsor:["SPONSOR","#ff8a00","#fff"],active:["ACTIVE","#22c55e","#fff"]};
-function pickBanner(){var n=Date.now(),a=(DB.banners||[]).filter(function(b){return(!b.starts_at||new Date(b.starts_at)<=n)&&(!b.ends_at||new Date(b.ends_at)>=n)});return a.length?a[Math.floor(Math.random()*a.length)]:null}
+function pickBanner(place,kind){place=place||"title";var n=Date.now(),a=(DB.banners||[]).filter(function(b){return(b.placement||"title")===place&&(place!=="home"||!b.page||b.page==="both"||b.page===kind)&&(!b.starts_at||new Date(b.starts_at)<=n)&&(!b.ends_at||new Date(b.ends_at)>=n)});return a.length?a[Math.floor(Math.random()*a.length)]:null}
 function pname(p){return LANG==="en"&&p.name_original?p.name_original:p.name}
 var MYT={};
 function has(id,st){return!!(MY[id]&&MY[id][st])}
@@ -556,7 +561,7 @@ async function load(){
   var r=await Promise.all([sb.from("titles").select("id,kind,code,title,original_title,poster_url,year_start,year_end,runtime_min,series_status,coming_soon,release_day,release_month,release_year,on_home,home_image_url,home_pinned_at,trailer_url,trailer_bg_url,sticker,trailer_alt_url,trailer_alt_kind,rating_imdb,rating_kp,rating_rt").eq("status","published"),
     sb.from("genres").select("*").order("sort"),sb.from("title_genres").select("*"),sb.from("collections").select("*").eq("is_active",true).order("sort"),sb.from("collection_items").select("*").order("sort"),
     sb.from("home_blocks").select("*").eq("is_active",true).order("sort"),sb.from("title_stats").select("title_id,avg_score,ratings_count"),
-    sb.from("user_titles").select("title_id,status,updated_at"),sb.from("app_settings").select("*").eq("key","links").maybeSingle(),sb.from("profiles").select("*").eq("id",UID).maybeSingle(),sb.from("providers").select("name,icon_url"),sb.from("app_settings").select("*").eq("key","promo").maybeSingle(),sb.from("ratings").select("title_id,score,liked,act1,act2,act3,seasons").eq("user_id",UID),sb.from("banners").select("id,image_url,image_url_en,link_url,starts_at,ends_at").eq("placement","title").eq("is_active",true).order("sort"),sb.from("achievements").select("*").eq("is_active",true).order("id"),sb.from("user_achievements").select("achievement_id,earned_at").eq("user_id",UID),sb.from("achievement_titles").select("achievement_id,title_id"),sb.rpc("my_progress"),sb.from("app_settings").select("*").eq("key","notice").maybeSingle(),sb.from("notifications").select("*").order("created_at",{ascending:false}).limit(60),sb.from("title_subscriptions").select("title_id").eq("user_id",UID),sb.from("app_settings").select("*").eq("key","onboarding").maybeSingle(),sb.from("favorite_people").select("person_id,created_at,people(id,name,name_original,photo_url)").eq("user_id",UID)]);
+    sb.from("user_titles").select("title_id,status,updated_at"),sb.from("app_settings").select("*").eq("key","links").maybeSingle(),sb.from("profiles").select("*").eq("id",UID).maybeSingle(),sb.from("providers").select("name,icon_url"),sb.from("app_settings").select("*").eq("key","promo").maybeSingle(),sb.from("ratings").select("title_id,score,liked,act1,act2,act3,seasons").eq("user_id",UID),sb.from("banners").select("id,placement,page,image_url,image_url_en,link_url,starts_at,ends_at").eq("is_active",true).order("sort"),sb.from("achievements").select("*").eq("is_active",true).order("id"),sb.from("user_achievements").select("achievement_id,earned_at").eq("user_id",UID),sb.from("achievement_titles").select("achievement_id,title_id"),sb.rpc("my_progress"),sb.from("app_settings").select("*").eq("key","notice").maybeSingle(),sb.from("notifications").select("*").order("created_at",{ascending:false}).limit(60),sb.from("title_subscriptions").select("title_id").eq("user_id",UID),sb.from("app_settings").select("*").eq("key","onboarding").maybeSingle(),sb.from("favorite_people").select("person_id,created_at,people(id,name,name_original,photo_url)").eq("user_id",UID)]);
   if(r[0].error)throw r[0].error;
   DB.titles=r[0].data||[];DB.genres=r[1].data||[];DB.tg=r[2].data||[];DB.cols=r[3].data||[];DB.ci=r[4].data||[];DB.blocks=r[5].data||[];
   DB.stats={};(r[6].data||[]).forEach(function(s){DB.stats[s.title_id]=s});MY={};MYT={};(r[7].data||[]).forEach(function(u){(MY[u.title_id]||(MY[u.title_id]={}))[u.status]=true;(MYT[u.title_id]||(MYT[u.title_id]={}))[u.status]=u.updated_at});
@@ -686,7 +691,7 @@ function homePage(kind){
     if(b.block_type==="slider"){fl();parts.push(slider(kind))}
     else if(b.block_type==="random"){var ct=(b.title||"").trim(),isDef=!ct||/^Рандомный (фильм|сериал)$/.test(ct);tl.push(tile(b.emoji||"🎲",(LANG==="ru"&&!isDef)?ct:t(kind==="movie"?"rndM":"rndS"),"rnd:"+kind,true))}
     else{var c=DB.cols.find(function(x){return x.id===b.collection_id});if(c&&c.kind===kind)tl.push(tile(c.emoji||"📁",ctitle(c),"col:"+c.id))}});
-  fl();return topbar()+noticeBar(kind)+parts.join("")+(parts.length?"":'<div class="center mute">'+t("empty")+'</div>')}
+  fl();return topbar()+homeBanner(kind)+noticeBar(kind)+parts.join("")+(parts.length?"":'<div class="center mute">'+t("empty")+'</div>')}
 function colIds(c){var ids=c.genre_id?DB.tg.filter(function(g){return g.genre_id===c.genre_id}).map(function(g){return g.title_id}):DB.ci.filter(function(x){return x.collection_id===c.id}).map(function(x){return x.title_id});
   return ids.filter(function(id){return T_(id)})}
 function grid(ids){return ids.length?'<div class="grid3">'+ids.map(function(id){var x=T_(id);return'<button class="pc" data-a="open:'+id+'">'+poster(x)+'<b>'+esc(nm(x))+'</b><span class="mute">'+esc(when(x))+'</span></button>'}).join("")+'</div>':'<div class="center mute">'+t("empty")+'</div>'}
@@ -881,6 +886,7 @@ app.addEventListener("click",async function(e){
     case"onb":return showOnb(true);
     case"er":return epReact(Number(p[1]),Number(p[2]));
     case"nl":return ext(b.dataset.u);
+    case"hbn":var hb=HB[p[1]];if(hb){track("banner_click",{banner_id:hb.id});if(hb.link_url)ext(hb.link_url)}return;
     case"nmore":return loadNews(true);
     case"nref":hap();window.scrollTo(0,0);return loadNews(false,true);
     case"en":var ne=Number(p[1]);if(S.epn===ne){clearTimeout(ENT[ne]);saveNote(ne);S.epn=null}else S.epn=ne;hap();render();if(S.epn){var ta=document.querySelector('[data-en="'+S.epn+'"]');if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}}return;

@@ -221,9 +221,9 @@ V.promo=function(){
   '<label style="margin-top:10px">Фоновая картинка (кликабельная, на весь экран)<input id="promoimg" type="file" accept="image/*"></label>'+
   (P.image_url?'<img class="prev" src="'+esc(P.image_url)+'" alt="Реклама" style="max-height:340px;width:auto"><div class="bar" style="margin-top:8px"><button class="btn red sm" data-a="rmpromo">Убрать картинку</button></div>':'<div class="mute">Без картинки покажется стандартное окно с логотипом и кнопкой.</div>')+
   '<div class="mute" style="margin-top:8px">Лучше всего вертикальная картинка 9:16 (например, 1080×1920). Нажатие на неё откроет ссылку, крестик закрывает окно.</div></div>'+
-  '<div class="bar" style="margin-top:22px"><h1 style="margin:0">Баннеры на странице фильма</h1><span class="sp"></span><button class="btn pri" data-a="bsave">Сохранить баннеры</button></div>'+
-  '<div class="card mute">Показываются на странице фильма или сериала над «Похожими». Если активных несколько, каждый раз выбирается случайный. Лучше всего горизонтальная картинка 3:1 (например, 1200×400). Для английского интерфейса можно загрузить свою картинку, иначе покажется русская.</div>'+
-  (P.bn||[]).map(function(b,i){return '<div class="card"><div class="row">'+fld("Название (видно только вам)","bn."+i+".name",b.name).replace("<label>",'<label style="margin:0">')+fld("Ссылка","bn."+i+".link_url",b.link_url,'placeholder="https://t.me/…"').replace("<label>",'<label style="margin:0">')+'</div>'+
+  '<div class="bar" style="margin-top:22px"><h1 style="margin:0">Рекламные баннеры</h1><span class="sp"></span><button class="btn pri" data-a="bsave">Сохранить баннеры</button></div>'+
+  '<div class="card mute">Для каждого баннера выберите, где он показывается: сверху на главной фильмов, сверху на главной сериалов, на обеих главных или на странице фильма/сериала (над «Похожими»). Если в одном месте активных несколько, каждый раз выбирается случайный. Лучше всего горизонтальная картинка 3:1 (например, 1200×400). Для английского интерфейса можно загрузить свою картинку, иначе покажется русская.</div>'+
+  (P.bn||[]).map(function(b,i){return '<div class="card"><div class="row">'+fld("Название (видно только вам)","bn."+i+".name",b.name).replace("<label>",'<label style="margin:0">')+fld("Ссылка","bn."+i+".link_url",b.link_url,'placeholder="https://t.me/…"').replace("<label>",'<label style="margin:0">')+'<label style="margin:0;flex:0 0 230px">Где показывать<select data-p="bn.'+i+'.where">'+[["home_both","Главные: фильмы и сериалы"],["home_movie","Главная фильмов"],["home_series","Главная сериалов"],["title","Страница фильма/сериала"]].map(function(o){return'<option value="'+o[0]+'"'+(b.where===o[0]?" selected":"")+'>'+o[1]+'</option>'}).join("")+'</select></label></div>'+
     '<div class="row" style="margin-top:10px"><label style="margin:0">Картинка (рус.)<input id="bnr-'+i+'" type="file" accept="image/*"></label><label style="margin:0">Картинка (англ.)<input id="bne-'+i+'" type="file" accept="image/*"></label></div>'+
     '<div class="row" style="margin-top:8px">'+(b.image_url?'<img class="prev" src="'+esc(b.image_url)+'" alt="" style="max-height:120px;width:auto">':"")+(b.image_url_en?'<img class="prev" src="'+esc(b.image_url_en)+'" alt="" style="max-height:120px;width:auto">':"")+'</div>'+
     '<div class="row" style="margin-top:10px;align-items:center"><label style="display:flex;gap:8px;align-items:center;color:var(--ink);margin:0"><input type="checkbox" data-p="bn.'+i+'.is_active" style="width:auto;margin:0"'+(b.is_active?" checked":"")+'> Показывать</label><span class="sp"></span><button class="btn red sm" data-a="bdel:'+i+'">Удалить</button></div></div>'}).join("")+
@@ -231,11 +231,11 @@ V.promo=function(){
 async function loadPromo(){
   var r=await sb.from("app_settings").select("*").eq("key","promo").maybeSingle();
   var v=(r.data&&r.data.value)||{};E={enabled:v.enabled!==false,url:v.url||"https://t.me/wantwatchnow",image_url:v.image_url||null,bn:[],bdel:[]};
-  var b=await sb.from("banners").select("*").eq("placement","title").order("sort").order("id");E.bn=(b.data||[]).map(function(x){return{id:x.id,name:x.name||"",link_url:x.link_url||"",image_url:x.image_url,image_url_en:x.image_url_en||null,is_active:x.is_active}});render()}
+  var b=await sb.from("banners").select("*").order("sort").order("id");E.bn=(b.data||[]).map(function(x){return{where:x.placement==="title"?"title":"home_"+(x.page||"both"),id:x.id,name:x.name||"",link_url:x.link_url||"",image_url:x.image_url,image_url_en:x.image_url_en||null,is_active:x.is_active}});render()}
 async function saveBanners(){
   for(var i=0;i<E.bn.length;i++)if(!E.bn[i].image_url)return toast("У баннера "+(i+1)+" нет русской картинки");
   try{for(var k=0;k<E.bdel.length;k++){var d=await sb.from("banners").delete().eq("id",E.bdel[k]);if(d.error)throw d.error}E.bdel=[];
-    for(i=0;i<E.bn.length;i++){var b=E.bn[i],row={name:(b.name||"").trim()||("Баннер "+(i+1)),placement:"title",image_url:b.image_url,image_url_en:b.image_url_en||null,link_url:nz((b.link_url||"").trim()),is_active:!!b.is_active,sort:i};
+    for(i=0;i<E.bn.length;i++){var b=E.bn[i],w=b.where||"title",row={name:(b.name||"").trim()||("Баннер "+(i+1)),placement:w==="title"?"title":"home",page:w==="title"?"both":w.slice(5),image_url:b.image_url,image_url_en:b.image_url_en||null,link_url:nz((b.link_url||"").trim()),is_active:!!b.is_active,sort:i};
       var r=b.id?await sb.from("banners").update(row).eq("id",b.id):await sb.from("banners").insert(row).select("id").single();if(r.error)throw r.error;if(!b.id)b.id=r.data.id}
     toast("Баннеры сохранены ✓");render()}catch(e){toast("Ошибка: "+(e.message||e))}}
 async function savePromo(){
@@ -609,7 +609,7 @@ app.addEventListener("click",async function(e){
     case"arm":E.items.splice(Number(a[1]),1);return render();
     case"rmachimg":E.icon_url=null;return render();
     case"bsave":return saveBanners();
-    case"badd":E.bn.push({id:null,name:"",link_url:"",image_url:null,image_url_en:null,is_active:true});return render();
+    case"badd":E.bn.push({id:null,name:"",link_url:"",image_url:null,image_url_en:null,is_active:true,where:"home_both"});return render();
     case"bdel":var bx=E.bn.splice(Number(a[1]),1)[0];if(bx&&bx.id)E.bdel.push(bx.id);return render();
     case"rmpromo":E.image_url=null;return render();
     case"rmtbg":E.trailer_bg_url=null;return render();
