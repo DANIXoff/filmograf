@@ -151,7 +151,7 @@ function tname(id){var t=G.titles.find(function(x){return x.id===id});return t?t
 V.colls=function(){
   var rows=G.colls.filter(function(c){return c.kind===G.tab});
   return nav("colls")+'<div class="bar">'+kindTabs()+'<span class="sp"></span><button class="btn pri" data-a="newcoll">+ Подборка</button></div>'+
-  (rows.length?rows.map(function(c){return '<button class="item" data-a="editcoll:'+c.id+'"><span class="ph" style="display:grid;place-items:center;font-size:22px;height:42px">'+esc(c.emoji||"📁")+'</span><span><b>'+esc(c.title)+'</b><small>'+(c.genre_id?"по жанру, автоматически":"вручную")+'</small></span><span class="badge '+(c.is_active?"pub":"")+'">'+(c.is_active?"активна":"скрыта")+'</span></button>'}).join(""):'<div class="card mute">Подборок пока нет. Нажмите «+ Подборка».</div>')};
+  (rows.length?'<div class="card mute">Галочка слева включает или выключает подборку в приложении, стрелки меняют порядок. Всё сохраняется сразу. На главной подборки идут в этом же порядке.</div>'+rows.map(function(c,i){return '<div class="item" style="cursor:default"><input type="checkbox" data-a="ctog:'+c.id+'" title="Показывать в приложении"'+(c.is_active?" checked":"")+' style="width:22px;height:22px;margin:0 4px;flex:none;cursor:pointer"><span class="ph" style="display:grid;place-items:center;font-size:22px;height:42px">'+esc(c.emoji||"📁")+'</span><span style="flex:1;min-width:0;cursor:pointer" data-a="editcoll:'+c.id+'"><b>'+esc(c.title)+'</b><small>'+(c.genre_id?"по жанру, автоматически":"вручную")+' · нажмите, чтобы изменить</small></span><span class="badge '+(c.is_active?"pub":"")+'">'+(c.is_active?"включена":"выключена")+'</span><button class="btn sm" data-a="cord:'+i+':-1"'+(i?"":" disabled")+'>↑</button><button class="btn sm" data-a="cord:'+i+':1"'+(i<rows.length-1?"":" disabled")+'>↓</button></div>'}).join(""):'<div class="card mute">Подборок пока нет. Нажмите «+ Подборка».</div>')};
 V.colled=function(){
   var k=E.kind,gs=G.genres.filter(function(g){return g.kind===k}),h='<div class="bar"><button class="btn sm" data-a="sec:colls">← Назад</button><h1 style="margin:0">'+(E.id?"Подборка":"Новая подборка")+(k==="movie"?" · фильмы":" · сериалы")+'</h1></div>';
   h+='<div class="card"><div class="row">'+fld("Название","title",E.title)+fld("Эмодзи на плитке","emoji",E.emoji,'maxlength="4" placeholder="🎃"')+'</div>'+fld("English title","title_en",E.title_en)+fld("Подзаголовок (необязательно)","subtitle",E.subtitle)+
@@ -164,15 +164,15 @@ V.colled=function(){
   h+='</div><div class="bar"><button class="btn pri" data-a="csave">Сохранить</button><button class="btn" data-a="sec:colls">Отмена</button><span class="sp"></span>'+(E.id?'<button class="btn red" data-a="cdel">Удалить</button>':"")+'</div>';
   return h};
 V.home=function(){
-  var cs=G.colls.filter(function(c){return c.kind===G.tab}),L={slider:"Слайдер",collection:"Плитка-подборка",random:"Плитка «Рандом»"};
+  var cs=G.colls.filter(function(c){return c.kind===G.tab}),L={slider:"Слайдер",collection:"Подборки",random:"Плитка «Рандом»"};
   return nav("home")+ntCard()+'<div class="bar">'+kindTabs()+'<span class="sp"></span><button class="btn pri" data-a="hsave">Сохранить</button></div><div class="card mute">Блоки идут на главной сверху вниз. Слайдер сам собирается из тайтлов с галочкой «На главную».</div>'+
   (E.blocks.length?E.blocks.map(function(b,i){
     return '<div class="card"><div class="row"><b style="flex:none;align-self:center">'+(i+1)+'. '+L[b.block_type]+'</b>'+
     (b.block_type==="slider"?'<span class="mute" style="align-self:center">Автоматически: тайтлы с галочкой «На главную» (до 10)</span>':b.block_type==="random"?'<label style="margin:0;flex:0 0 70px">Эмодзи<input data-p="blocks.'+i+'.emoji" value="'+esc(b.emoji)+'" maxlength="4"></label>'+fld("Название","blocks."+i+".title",b.title).replace("<label>",'<label style="margin:0">'):
-     '<label style="margin:0">Подборка<select data-p="blocks.'+i+'.collection_id" data-n="1"><option value="">выберите</option>'+cs.map(function(c){return '<option value="'+c.id+'"'+(b.collection_id===c.id?" selected":"")+'>'+esc((c.emoji||"")+" "+c.title)+(c.is_active?"":" (скрыта)")+'</option>'}).join("")+'</select></label>')+
+     '<span class="mute" style="align-self:center;flex:1">Здесь встанут все включённые подборки ('+cs.filter(function(c){return c.is_active}).length+' шт.) в порядке из раздела «Подборки»</span>')+
     '<button class="btn sm" data-a="hmv:'+i+':-1">↑</button><button class="btn sm" data-a="hmv:'+i+':1">↓</button><button class="btn red sm" data-a="hrm:'+i+'">✕</button></div>'+
     '<label style="display:flex;gap:8px;align-items:center;color:var(--ink);margin:10px 0 0"><input type="checkbox" data-p="blocks.'+i+'.is_active" style="width:auto;margin:0"'+(b.is_active?" checked":"")+'> Показывать</label></div>'}).join(""):'<div class="card mute">На главной пока ничего нет.</div>')+
-  '<div class="bar"><button class="btn sm" data-a="hadd:slider">+ Слайдер</button><button class="btn sm" data-a="hadd:collection">+ Плитка-подборка</button><button class="btn sm" data-a="hadd:random">+ Плитка «Рандом»</button></div>'};
+  '<div class="bar"><button class="btn sm" data-a="hadd:slider">+ Слайдер</button><button class="btn sm" data-a="hadd:collection">+ Место для подборок</button><button class="btn sm" data-a="hadd:random">+ Плитка «Рандом»</button></div>'};
 function ntCard(){var n=G.nt||{};
   return'<div class="card"><div class="bar" style="margin-bottom:6px"><h2 style="margin:0">Плашка-уведомление</h2><span class="sp"></span><button class="btn pri sm" data-a="ntsave">Сохранить плашку</button></div>'+
   '<div class="mute" style="margin-bottom:10px">Текстовая плашка под логотипом на главной. Например: «Сегодня ночью — технические работы».</div>'+
@@ -191,9 +191,8 @@ async function loadHome(){if(!G.nt)await loadNotice();
   var r=await sb.from("home_blocks").select("*").eq("page",G.tab).order("sort");
   E={blocks:(r.data||[]).map(function(b){return{block_type:b.block_type,collection_id:b.collection_id,title:b.title||"",emoji:b.emoji||"",is_active:b.is_active}})};render()}
 async function saveHome(){
-  for(var i=0;i<E.blocks.length;i++){var b=E.blocks[i];if(b.block_type==="collection"&&!b.collection_id)return toast("В блоке "+(i+1)+" выберите подборку")}
   var d=await sb.from("home_blocks").delete().eq("page",G.tab);if(d.error)return toast("Ошибка: "+d.error.message);
-  if(E.blocks.length){var x=await sb.from("home_blocks").insert(E.blocks.map(function(b,i){return{page:G.tab,block_type:b.block_type,collection_id:b.block_type==="collection"?b.collection_id:null,title:nz(b.title),emoji:nz(b.emoji),is_active:b.is_active,sort:i}}));if(x.error)return toast("Ошибка: "+x.error.message)}
+  if(E.blocks.length){var x=await sb.from("home_blocks").insert(E.blocks.map(function(b,i){return{page:G.tab,block_type:b.block_type,collection_id:null,title:nz(b.title),emoji:nz(b.emoji),is_active:b.is_active,sort:i}}));if(x.error)return toast("Ошибка: "+x.error.message)}
   toast("Главная сохранена ✓")}
 async function saveColl(){
   if(!E.title.trim())return toast("Укажите название");
@@ -574,6 +573,12 @@ app.addEventListener("click",async function(e){
     case"cdel":if(!confirm("Удалить подборку «"+E.title+"»? Она пропадёт и с главной."))return;
       var cd=await sb.from("collections").delete().eq("id",E.id);if(cd.error)return toast("Не удалось удалить");await loadAll();G.view="colls";toast("Удалено");return render();
     case"hadd":E.blocks.push({block_type:a[1],collection_id:null,title:a[1]==="random"?(G.tab==="movie"?"Рандомный фильм":"Рандомный сериал"):"",emoji:a[1]==="random"?"🎲":"",is_active:true});return render();
+    case"ctog":var tc=G.colls.find(function(x){return x.id===Number(a[1])}),on=b.checked;var tu=await sb.from("collections").update({is_active:on}).eq("id",tc.id);
+      if(tu.error){b.checked=!on;return toast("Ошибка: "+tu.error.message)}tc.is_active=on;toast(on?"Подборка включена ✓":"Подборка выключена");return render();
+    case"cord":var cr=G.colls.filter(function(x){return x.kind===G.tab});i=Number(a[1]);j=i+Number(a[2]);if(j<0||j>=cr.length)return;var ct=cr[i];cr[i]=cr[j];cr[j]=ct;
+      var ups=[];cr.forEach(function(x,k){if(x.sort!==k+1){x.sort=k+1;ups.push(sb.from("collections").update({sort:k+1}).eq("id",x.id))}});
+      var ur=await Promise.all(ups);if(ur.some(function(q){return q.error})){await loadAll();render();return toast("Не удалось сохранить порядок")}
+      G.colls.sort(function(p,q){return(p.sort||0)-(q.sort||0)||p.id-q.id});return render();
     case"hmv":swap(E.blocks,Number(a[1]),Number(a[2]));return render();
     case"hrm":E.blocks.splice(Number(a[1]),1);return render();
     case"hsave":return saveHome();
