@@ -132,7 +132,7 @@ ed:function(){
     '<label style="margin:0;flex:0 0 150px">Кто<select data-p="credits.'+i+'.kind" data-re="1">'+[["director","Режиссёр"],["actor","Актёр"],["crew","Съёмочная группа"]].map(function(o){return'<option value="'+o[0]+'"'+(c.kind===o[0]?" selected":"")+'>'+o[1]+'</option>'}).join("")+'</select></label>'+
     fld("Имя и фамилия","credits."+i+".name",c.name).replace("<label>",'<label style="margin:0">')+fld("Имя по-английски","credits."+i+".name_en",c.name_en).replace("<label>",'<label style="margin:0">')+
     (c.kind!=="director"?fld(c.kind==="actor"?"Роль":"Должность (Оператор, Композитор…)","credits."+i+".character",c.character).replace("<label>",'<label style="margin:0">'):"")+'</div>'+
-    '<div class="row" style="margin-top:8px;align-items:center"><label style="margin:0">Фото (лучше квадратное)<input id="cph-'+i+'" type="file" accept="image/*"></label><span class="sp"></span><button class="btn sm" style="flex:none" data-a="cmv:'+i+':-1">↑</button><button class="btn sm" style="flex:none" data-a="cmv:'+i+':1">↓</button><button class="btn red sm" style="flex:none" data-a="cdel:'+i+'">✕</button></div></div>'}).join("")+
+    '<div class="row" style="margin-top:8px;align-items:center"><label style="margin:0">Фото (лучше квадратное)<input id="cph-'+i+'" type="file" accept="image/*"></label><span class="sp"></span><button class="btn sm" style="flex:none" data-a="crmv:'+i+':-1">↑</button><button class="btn sm" style="flex:none" data-a="crmv:'+i+':1">↓</button><button class="btn red sm" style="flex:none" data-a="crdel:'+i+'">✕</button></div></div>'}).join("")+
     '<button class="btn sm" data-a="addcr">+ Человек</button></div>';
   if(k==="series"){
     h+='<div class="card"><h2>Сезоны и серии</h2>'+E.seasons.map(function(s,i){
@@ -145,7 +145,7 @@ ed:function(){
 };
 
 /* ---------- подборки и главная ---------- */
-function nav(cur){var it=[["dash","Дашборд"],["list","Контент"],["colls","Подборки"],["home","Главная"],["provcat","Кинотеатры"],["promo","Реклама"],["ach","Достижения"],["users","Пользователи"],["notif","Уведомления"],["onb","Приветствие"],["news","Новости"],["prof","Профиль"]];
+function nav(cur){var it=[["dash","Дашборд"],["list","Контент"],["colls","Подборки"],["home","Главная"],["provcat","Кинотеатры"],["promo","Реклама"],["ach","Достижения"],["users","Пользователи"],["notif","Уведомления"],["onb","Приветствие"],["news","Новости"],["bot","Бот"],["prof","Профиль"]];
   return '<div class="bar"><div class="tabs">'+it.map(function(x){return '<button class="'+(cur===x[0]?"on":"")+'" data-a="sec:'+x[0]+'">'+x[1]+'</button>'}).join("")+'</div><span class="sp"></span><button class="btn sm" data-a="logout">Выйти</button></div>'}
 function kindTabs(){return '<div class="tabs">'+["movie","series"].map(function(k){return '<button class="'+(G.tab===k?"on":"")+'" data-a="tab:'+k+'">'+(k==="movie"?"Фильмы":"Сериалы")+'</button>'}).join("")+'</div>'}
 function tname(id){var t=G.titles.find(function(x){return x.id===id});return t?t.title+(t.status==="published"?"":" (черновик)"):"#"+id}
@@ -155,7 +155,7 @@ V.colls=function(){
   (rows.length?'<div class="card mute">Галочка слева включает или выключает подборку в приложении, стрелки меняют порядок. Всё сохраняется сразу. На главной подборки идут в этом же порядке.</div>'+rows.map(function(c,i){return '<div class="item" style="cursor:default"><input type="checkbox" data-a="ctog:'+c.id+'" title="Показывать в приложении"'+(c.is_active?" checked":"")+' style="width:22px;height:22px;margin:0 4px;flex:none;cursor:pointer"><span class="ph" style="display:grid;place-items:center;font-size:22px;height:42px">'+esc(c.emoji||"📁")+'</span><span style="flex:1;min-width:0;cursor:pointer" data-a="editcoll:'+c.id+'"><b>'+esc(c.title)+'</b><small>'+(c.genre_id?"по жанру, автоматически":"вручную")+' · нажмите, чтобы изменить</small></span><span class="badge '+(c.is_active?"pub":"")+'">'+(c.is_active?"включена":"выключена")+'</span><button class="btn sm" data-a="cord:'+i+':-1"'+(i?"":" disabled")+'>↑</button><button class="btn sm" data-a="cord:'+i+':1"'+(i<rows.length-1?"":" disabled")+'>↓</button></div>'}).join(""):'<div class="card mute">Подборок пока нет. Нажмите «+ Подборка».</div>')};
 V.colled=function(){
   var k=E.kind,gs=G.genres.filter(function(g){return g.kind===k}),h='<div class="bar"><button class="btn sm" data-a="sec:colls">← Назад</button><h1 style="margin:0">'+(E.id?"Подборка":"Новая подборка")+(k==="movie"?" · фильмы":" · сериалы")+'</h1></div>';
-  h+='<div class="card"><div class="row">'+fld("Название","title",E.title)+fld("Эмодзи на плитке","emoji",E.emoji,'maxlength="4" placeholder="🎃"')+'</div>'+fld("English title","title_en",E.title_en)+fld("Подзаголовок (необязательно)","subtitle",E.subtitle)+
+  h+='<div class="card"><div class="row">'+fld("Название","title",E.title)+fld("Эмодзи на плитке","emoji",E.emoji,'maxlength="4" placeholder="🎃"')+'</div>'+fld("English title","title_en",E.title_en)+fld("Подзаголовок (необязательно)","subtitle",E.subtitle)+fld("Subtitle (English)","subtitle_en",E.subtitle_en)+
    '<label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" data-p="is_active" style="width:auto;margin:0"'+(E.is_active?" checked":"")+'> Показывать в приложении</label></div>';
   h+='<div class="card"><h2>Состав</h2><label>Как собирать<select data-p="mode" data-re="1"><option value="manual"'+(E.mode==="manual"?" selected":"")+'>Вручную: я выбираю '+(k==="movie"?"фильмы":"сериалы")+'</option><option value="genre"'+(E.mode==="genre"?" selected":"")+'>Автоматически по жанру</option></select></label>';
   if(E.mode==="genre"){h+='<label>Жанр<select data-p="genre_id" data-n="1"><option value="">выберите</option>'+gs.map(function(g){return '<option value="'+g.id+'"'+(E.genre_id===g.id?" selected":"")+'>'+esc(g.emoji)+" "+esc(g.name)+'</option>'}).join("")+'</select></label><div class="mute">В подборку попадут все опубликованные тайтлы с этим жанром.</div>'}
@@ -202,7 +202,7 @@ async function saveHome(){
 async function saveColl(){
   if(!E.title.trim())return toast("Укажите название");
   if(E.mode==="genre"&&!E.genre_id)return toast("Выберите жанр");
-  var row={kind:E.kind,title:E.title.trim(),title_en:nz(E.title_en),subtitle:nz(E.subtitle),emoji:nz(E.emoji),genre_id:E.mode==="genre"?E.genre_id:null,is_active:E.is_active,sort:E.sort||0};
+  var row={kind:E.kind,title:E.title.trim(),title_en:nz(E.title_en),subtitle:nz(E.subtitle),subtitle_en:nz(E.subtitle_en),emoji:nz(E.emoji),genre_id:E.mode==="genre"?E.genre_id:null,is_active:E.is_active,sort:E.sort||0};
   var r=E.id?await sb.from("collections").update(row).eq("id",E.id).select("id").single():await sb.from("collections").insert(row).select("id").single();
   if(r.error)return toast("Ошибка: "+r.error.message);
   var d=await sb.from("collection_items").delete().eq("collection_id",r.data.id);if(d.error)return toast("Ошибка: "+d.error.message);
@@ -411,6 +411,34 @@ async function sendNf(){var n=G.nf||{};if(!(n.title||"").trim())return toast("В
   if(!confirm("Отправить уведомление «"+n.title.trim()+"» всем пользователям?"))return;
   var r=await sb.from("notifications").insert({kind:"admin",title:n.title.trim(),body:(n.body||"").trim(),title_en:nz((n.title_en||"").trim()),body_en:nz((n.body_en||"").trim()),url:nz((n.url||"").trim()),title_id:n.title_id||null,color:n.color||null});
   if(r.error)return toast("Ошибка: "+r.error.message);toast("Отправлено ✓");G.nf={};loadNotif()}
+/* ---------- Бот: приветствие на /start и рассылки ---------- */
+var APP_LINK="https://t.me/wantwatch_bot/wwnow";
+function btnRows(path,list){return(list||[]).map(function(b,i){return'<div class="row" style="align-items:flex-end">'+fld("Текст кнопки",path+"."+i+".text",b.text,'placeholder="🎬 Открыть Want Watch"')+fld("Ссылка",path+"."+i+".url",b.url,'placeholder="https://t.me/…"')+'<button class="btn red sm" style="flex:0 0 44px;width:44px;margin-bottom:6px" data-a="bbdel:'+path+':'+i+'">✕</button></div>'}).join("")+
+  ((list||[]).length<4?'<button class="btn sm" data-a="bbadd:'+path+'">+ Кнопка</button> <button class="btn sm" data-a="bbapp:'+path+'">+ Кнопка «Открыть приложение»</button>':"")}
+function postEditor(k,p,imgId){var cap=p.image_url?1024:4096,len=(p.text||"").length;
+  return(p.image_url?'<img src="'+esc(p.image_url)+'" alt="" style="max-width:100%;max-height:220px;border-radius:12px;display:block;margin-bottom:8px"><button class="btn sm" data-a="bbimgrm:'+k+'">Убрать картинку</button>':'<label>Картинка (необязательно)<input id="'+imgId+'" type="file" accept="image/*"></label>')+
+   '<label>Текст<textarea data-p="'+k+'.text" rows="7" placeholder="Можно выделять: &lt;b&gt;жирный&lt;/b&gt;, &lt;i&gt;курсив&lt;/i&gt;, &lt;blockquote&gt;цитата&lt;/blockquote&gt;, &lt;a href=&quot;https://…&quot;&gt;ссылка&lt;/a&gt;">'+esc(p.text||"")+'</textarea></label>'+
+   '<div class="mute" style="margin:-4px 0 10px">Не длиннее '+cap+' символов'+(p.image_url?' — с картинкой Telegram разрешает не больше 1024':'')+'. Сейчас: '+len+' (обновится после сохранения или отправки себе)</div>'+btnRows(k+".buttons",p.buttons)}
+async function loadBot(){G.view="bot";G.botl=null;render();
+  var r=await Promise.all([sb.from("app_settings").select("value").eq("key","bot_welcome").maybeSingle(),sb.from("bot_users").select("tg_id",{count:"exact",head:true}).eq("blocked",false),sb.from("bot_users").select("tg_id",{count:"exact",head:true}).eq("blocked",true),sb.from("broadcasts").select("*").order("id",{ascending:false}).limit(10)]);
+  if(r[1].error)return toast("Сначала запустите migration_26.sql: "+r[1].error.message);
+  var w=(r[0].data&&r[0].data.value)||{text:"<b>Want Watch</b> — каталог фильмов и сериалов прямо в Telegram 🍿\n\nОтмечай, что смотришь, ставь оценки и находи, что посмотреть вечером 👇",image_url:null,buttons:[{text:"🎬 Открыть Want Watch",url:APP_LINK},{text:"📣 Наш канал",url:"https://t.me/wantwatchnow"}]};
+  E={w:{text:w.text||"",image_url:w.image_url||null,buttons:(w.buttons||[]).slice()},b:(E&&E.b&&G.view==="bot")?E.b:{text:"",image_url:null,buttons:[{text:"🎬 Открыть Want Watch",url:APP_LINK}]}};
+  G.botl={active:r[1].count||0,blocked:r[2].count||0,hist:r[3].data||[]};render()}
+function cleanPost(p){return{text:(p.text||"").trim(),image_url:p.image_url||null,buttons:(p.buttons||[]).filter(function(b){return(b.text||"").trim()&&/^https?:\/\//.test((b.url||"").trim())}).map(function(b){return{text:b.text.trim(),url:b.url.trim()}})}}
+async function runBroadcast(id){G.bsend=id;render();
+  try{for(;;){var d=await fn("broadcast",{action:"send",id:id});var h=(G.botl&&G.botl.hist||[]).find(function(x){return x.id===id});if(h){h.sent=d.sent;h.failed=d.failed;h.status=d.done?"done":"sending"}render();if(d.done)break}
+    toast("Рассылка завершена ✓")}catch(e){toast("Рассылка на паузе: "+e.message+". Нажмите «Продолжить».")}
+  G.bsend=null;loadBot()}
+V.bot=function(){var L=G.botl;var h=nav("bot")+'<h1>Бот</h1>';
+  if(!L)return h+'<div class="card">Загрузка…</div>';
+  h+='<div class="card"><div class="row"><div><div class="mute">Запустили бота и не остановили</div><div style="font-size:28px;font-weight:800">'+L.active+'</div></div><div><div class="mute">Остановили бота</div><div style="font-size:28px;font-weight:800">'+L.blocked+'</div></div></div><p class="mute" style="margin:8px 0 0">Считаются те, кто написал боту /start после подключения. Если число не растёт — проверьте настройку webhook (инструкция в чате).</p></div>';
+  h+='<div class="card"><h2>Приветствие на /start</h2><p class="mute" style="margin-top:-4px">Это сообщение бот отправит человеку, когда тот нажмёт «Запустить» или напишет /start.</p>'+postEditor("w",E.w,"bwimg")+
+    '<div class="bar" style="margin-top:12px"><button class="btn pri" data-a="bwsave">Сохранить приветствие</button><button class="btn" data-a="btest:w">Отправить себе</button></div></div>';
+  h+='<div class="card"><h2>Новая рассылка</h2><p class="mute" style="margin-top:-4px">Уйдёт всем, кто запустил бота и не остановил его ('+L.active+' чел.). Сначала отправьте себе и проверьте, как выглядит.</p>'+postEditor("b",E.b,"bbimg")+
+    '<div class="bar" style="margin-top:12px"><button class="btn" data-a="btest:b">Отправить себе</button><span class="sp"></span><button class="btn pri" data-a="bsendall"'+(G.bsend?" disabled":"")+'>'+(G.bsend?"Отправляю…":"Отправить всем")+'</button></div></div>';
+  if(L.hist.length)h+='<div class="card"><h2>История рассылок</h2>'+L.hist.map(function(x){return'<div class="item" style="cursor:default"><span style="flex:1;min-width:0"><b style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc((x.text||"").replace(/<[^>]+>/g,"").slice(0,90)||"(картинка)")+'</b><small>'+new Date(x.created_at).toLocaleString("ru-RU")+' · доставлено '+x.sent+' из '+x.total+(x.failed?' · не доставлено '+x.failed:"")+'</small></span>'+(x.status==="done"?'<span class="badge pub">готово</span>':G.bsend===x.id?'<span class="badge">идёт…</span>':'<button class="btn sm" data-a="bresume:'+x.id+'">Продолжить</button>')+'</div>'}).join("")+'</div>';
+  return h};
 V.news=function(){var L=G.newsl;
   var h=nav("news")+'<div class="bar"><h1 style="margin:0">Новости из канала</h1><span class="sp"></span><button class="btn sm" data-a="sec:news">Обновить</button></div>'+
   '<div class="card mute">Посты появляются здесь сами, когда вы публикуете их в канале (бот должен быть администратором канала и подключён к функции tg-webhook). Telegram не сообщает ботам об удалении постов, поэтому удалённый в канале пост скройте здесь.</div>';
@@ -515,11 +543,12 @@ async function save(){
     await loadAll();G.tab=E.kind;G.view="list";toast("Сохранено ✓");render();
   }catch(e){console.error(e);toast("Ошибка: "+(e.message||e))}
 }
-var RELN={prequel:"Приквел",sequel:"Сиквел",spinoff:"Спин-офф"};
+var RELN={prequel:"Приквел",sequel:"Сиквел",spinoff:"Спин-офф",origin:"Оригинал"},RELINV={prequel:"sequel",sequel:"prequel",spinoff:"spinoff",origin:"spinoff"};
 function relCard(){var rs=E.rels||[];
-  return'<div class="card"><h2>'+(E.kind==="series"?"Спин-оффы":"Приквелы и сиквелы")+'</h2><p class="mute" style="margin-top:-4px">Выберите фильмы или сериалы из каталога. На странице выбранного тайтла связь покажется сама в обратную сторону: у сиквела появится приквел, у спин-оффа — «Оригинал».</p>'+
+  return'<div class="card"><h2>'+(E.kind==="series"?"Спин-оффы":"Приквелы и сиквелы")+'</h2><p class="mute" style="margin-top:-4px">Выберите фильмы или сериалы из каталога. У выбранного тайтла связь появится сама в обратную сторону: у сиквела — приквел, у приквела — сиквел, у спин-оффа — этот тайтл тоже как спин-офф, у оригинала — этот тайтл как спин-офф.</p>'+
     rs.map(function(r,i){var t=G.titles.find(function(x){return x.id===r.related_id})||{title:"#"+r.related_id};return'<div class="item" style="cursor:default;margin-bottom:6px">'+(t.poster_url?'<img src="'+esc(t.poster_url)+'" alt="">':'<span class="ph"></span>')+'<b style="flex:1">'+esc(t.title)+' <small style="display:inline">'+(t.year_start||"")+(t.kind==="series"?" · сериал":" · фильм")+'</small></b>'+
-      '<select data-p="rels.'+i+'.kind" style="width:auto">'+["prequel","sequel","spinoff"].map(function(k){return'<option value="'+k+'"'+(r.kind===k?" selected":"")+'>'+RELN[k]+'</option>'}).join("")+'</select><button class="btn red sm" data-a="reldel:'+i+'">✕</button></div>'}).join("")+
+      '<select data-p="rels.'+i+'.kind" style="width:auto">'+["prequel","sequel","spinoff","origin"].map(function(k){return'<option value="'+k+'"'+(r.kind===k?" selected":"")+'>'+RELN[k]+'</option>'}).join("")+'</select><button class="btn red sm" data-a="reldel:'+i+'">✕</button></div>'}).join("")+
+    (E.relsIn||[]).filter(function(r){return!rs.some(function(q){return q.related_id===r.title_id})}).map(function(r){var t=G.titles.find(function(x){return x.id===r.title_id})||{title:"#"+r.title_id};return'<div class="item" style="cursor:default;margin-bottom:6px;opacity:.75">'+(t.poster_url?'<img src="'+esc(t.poster_url)+'" alt="">':'<span class="ph"></span>')+'<span style="flex:1"><b>'+esc(t.title)+'</b><small>'+RELN[RELINV[r.kind]]+' · указано в карточке «'+esc(t.title)+'», меняется там</small></span></div>'}).join("")+
     '<input id="relq" placeholder="Начните вводить название…" autocomplete="off" oninput="relSearch(this.value)"><div id="relres"></div></div>'}
 function relSearch(q){var box=document.getElementById("relres");if(!box)return;q=(q||"").trim().toLowerCase();if(q.length<2){box.innerHTML="";return}
   var used={};(E.rels||[]).forEach(function(r){used[r.related_id]=1});
@@ -528,11 +557,11 @@ function relSearch(q){var box=document.getElementById("relres");if(!box)return;q
 async function openEd(id){
   if(!id){E=blank(G.tab);G.view="ed";return render()}
   var r=await Promise.all([sb.from("titles").select("*").eq("id",id).single(),sb.from("title_genres").select("genre_id").eq("title_id",id),
-    sb.from("title_providers").select("*").eq("title_id",id).order("sort"),sb.from("seasons").select("*, episodes(*)").eq("title_id",id).order("number"),sb.from("credits").select("kind,character,sort,people(id,name,name_original,photo_url)").eq("title_id",id).order("sort"),sb.from("title_relations").select("related_id,kind,sort").eq("title_id",id).order("sort")]);
+    sb.from("title_providers").select("*").eq("title_id",id).order("sort"),sb.from("seasons").select("*, episodes(*)").eq("title_id",id).order("number"),sb.from("credits").select("kind,character,sort,people(id,name,name_original,photo_url)").eq("title_id",id).order("sort"),sb.from("title_relations").select("related_id,kind,sort").eq("title_id",id).order("sort"),sb.from("title_relations").select("title_id,kind").eq("related_id",id)]);
   if(r[0].error)return toast("Не удалось открыть");
   E=Object.assign(blank(r[0].data.kind),r[0].data,{
     genre_ids:(r[1].data||[]).map(function(x){return x.genre_id}),
-    rels:(r[5]&&r[5].data||[]).map(function(x){return{related_id:x.related_id,kind:x.kind}}),
+    rels:(r[5]&&r[5].data||[]).map(function(x){return{related_id:x.related_id,kind:x.kind}}),relsIn:(r[6]&&r[6].data)||[],
     providers:(r[2].data||[]).map(function(x){return{provider_id:x.provider_id,url:x.url,promo:x.promo||""}}),
     credits:(r[4].data||[]).map(function(c){var p=c.people||{};return{kind:c.kind,character:c.character||"",name:p.name||"",name_en:p.name_original||"",photo_url:p.photo_url||null,person_id:p.id||null,orig:p.name||""}}),
     seasons:(r[3].data||[]).map(function(s){return{name:s.name||"",episodes:(s.episodes||[]).sort(function(a,b){return a.number-b.number}).map(function(e){return{name:e.name,description:e.description}})}})});
@@ -548,6 +577,7 @@ app.addEventListener("change",async function(e){var t=e.target;
   try{var cm=/^cph-(\d+)$/.exec(t.id||"");if(cm&&t.files[0]){E.credits[Number(cm[1])].photo_url=await upload(await toJpeg(t.files[0]),"people");render()}
   var bm=/^bn([re])-(\d+)$/.exec(t.id||"");if(bm&&t.files[0]){var url=await upload(t.files[0],"banners");E.bn[Number(bm[2])][bm[1]==="r"?"image_url":"image_url_en"]=url;render()}
   if(t.id==="achimg"&&t.files[0]){E.icon_url=await upload(t.files[0],"achievements");render()}
+  if((t.id==="bwimg"||t.id==="bbimg")&&t.files[0]){E[t.id==="bwimg"?"w":"b"].image_url=await upload(await toJpeg(t.files[0]),"bot");render()}
   if(t.id==="poster"&&t.files[0]){E.poster_url=await upload(await toJpeg(t.files[0]),"posters");render()}if(t.id==="promoimg"&&t.files[0]){E.image_url=await upload(t.files[0],"promo");render()}if(t.id==="tbg"&&t.files[0]){E.trailer_bg_url=await upload(t.files[0],"trailers");render()}if(t.id==="homeimg"&&t.files[0]){E.home_image_url=await upload(t.files[0],"slides");render()}}catch(err){toast("Не удалось загрузить: "+err.message)}});
 app.addEventListener("mousemove",function(e){var r=e.target.closest&&e.target.closest("rect[data-tip]"),c=e.target.closest&&e.target.closest(".chart");document.querySelectorAll(".chart .tip").forEach(function(tp){if(!c||tp.parentNode!==c)tp.style.display="none"});if(!r||!c)return;var tp=c.querySelector(".tip"),b=c.getBoundingClientRect();tp.textContent=r.getAttribute("data-tip");tp.style.display="block";tp.style.left=(e.clientX-b.left)+"px";tp.style.top=(e.clientY-b.top)+"px"});
 app.addEventListener("click",async function(e){
@@ -569,8 +599,8 @@ app.addEventListener("click",async function(e){
       var mx=0;G.titles.forEach(function(t){if(t.code&&t.code.charAt(0)===l)mx=Math.max(mx,parseInt(t.code.slice(1),10))});
       E.code=l+String(mx+1).padStart(4,"0");return render();
     case"addcr":E.credits.push({kind:"actor",name:"",name_en:"",character:"",photo_url:null,person_id:null,orig:""});return render();
-    case"cdel":E.credits.splice(Number(a[1]),1);return render();
-    case"cmv":i=Number(a[1]);j=i+Number(a[2]);if(j<0||j>=E.credits.length)return;var tmp=E.credits[i];E.credits[i]=E.credits[j];E.credits[j]=tmp;return render();
+    case"crdel":E.credits.splice(Number(a[1]),1);return render();
+    case"crmv":i=Number(a[1]);j=i+Number(a[2]);if(j<0||j>=E.credits.length)return;var tmp=E.credits[i];E.credits[i]=E.credits[j];E.credits[j]=tmp;return render();
     case"addpv":E.providers.push({provider_id:null,url:"",promo:""});return render();
     case"delpv":E.providers.splice(Number(a[1]),1);return render();
     case"addseason":E.seasons.push({name:"",episodes:[]});return render();
@@ -584,10 +614,10 @@ app.addEventListener("click",async function(e){
       if(gi.error)return toast(/duplicate|unique/i.test(gi.error.message)?"Такой жанр уже есть":"Ошибка: "+gi.error.message);
       G.genres=(await sb.from("genres").select("*").order("sort")).data||[];
       gi.data.forEach(function(g){if(g.kind===E.kind&&E.genre_ids.indexOf(g.id)<0)E.genre_ids.push(g.id)});toast("Жанр добавлен и выбран");return render();
-    case"sec":G.view=a[1];if(a[1]==="prof")return loadProf();if(a[1]==="news")return loadNewsAdm();if(a[1]==="onb")return loadOnb();if(a[1]==="notif")return loadNotif();if(a[1]==="dash")return loadDash();if(a[1]==="users"){G.uqFocus=false;return loadUsers(false)}if(a[1]==="home")return loadHome();if(a[1]==="ach")return loadAch();if(a[1]==="promo")return loadPromo();return render();
-    case"newcoll":E={id:null,kind:G.tab,title:"",title_en:"",subtitle:"",emoji:"",mode:"manual",genre_id:null,is_active:true,sort:G.colls.reduce(function(m,c){return Math.max(m,c.sort||0)},0)+1,items:[]};G.view="colled";return render();
+    case"sec":G.view=a[1];if(a[1]==="prof")return loadProf();if(a[1]==="news")return loadNewsAdm();if(a[1]==="bot")return loadBot();if(a[1]==="onb")return loadOnb();if(a[1]==="notif")return loadNotif();if(a[1]==="dash")return loadDash();if(a[1]==="users"){G.uqFocus=false;return loadUsers(false)}if(a[1]==="home")return loadHome();if(a[1]==="ach")return loadAch();if(a[1]==="promo")return loadPromo();return render();
+    case"newcoll":E={id:null,kind:G.tab,title:"",title_en:"",subtitle:"",subtitle_en:"",emoji:"",mode:"manual",genre_id:null,is_active:true,sort:G.colls.reduce(function(m,c){return Math.max(m,c.sort||0)},0)+1,items:[]};G.view="colled";return render();
     case"editcoll":var cc=G.colls.find(function(x){return x.id===Number(a[1])});var cit=await sb.from("collection_items").select("title_id").eq("collection_id",cc.id).order("sort");
-      E=Object.assign({},cc,{title_en:cc.title_en||"",subtitle:cc.subtitle||"",emoji:cc.emoji||"",mode:cc.genre_id?"genre":"manual",items:(cit.data||[]).map(function(x){return x.title_id})});G.view="colled";return render();
+      E=Object.assign({},cc,{title_en:cc.title_en||"",subtitle:cc.subtitle||"",subtitle_en:cc.subtitle_en||"",emoji:cc.emoji||"",mode:cc.genre_id?"genre":"manual",items:(cit.data||[]).map(function(x){return x.title_id})});G.view="colled";return render();
     case"cadd":var civ=Number(a[1]);if(E.items.indexOf(civ)<0){E.items.push(civ);render();var cqi=document.getElementById("cq");if(cqi)cqi.focus()}return;
     case"cmv":swap(E.items,Number(a[1]),Number(a[2]));return render();
     case"crm":E.items.splice(Number(a[1]),1);return render();
@@ -603,6 +633,18 @@ app.addEventListener("click",async function(e){
       G.colls.sort(function(p,q){return(p.sort||0)-(q.sort||0)||p.id-q.id});return render();
     case"reladd":(E.rels||(E.rels=[])).push({related_id:Number(a[1]),kind:E.kind==="series"?"spinoff":"sequel"});return render();
     case"reldel":E.rels.splice(Number(a[1]),1);return render();
+    case"bbadd":(getP(E,a[1])||setP(E,a[1],[])||getP(E,a[1])).push({text:"",url:""});return render();
+    case"bbapp":(getP(E,a[1])||setP(E,a[1],[])||getP(E,a[1])).push({text:"🎬 Открыть Want Watch",url:APP_LINK});return render();
+    case"bbdel":getP(E,a[1]).splice(Number(a[2]),1);return render();
+    case"bbimgrm":E[a[1]].image_url=null;return render();
+    case"bwsave":var wp=cleanPost(E.w);if(!wp.text&&!wp.image_url)return toast("Напишите текст или добавьте картинку");if(wp.image_url&&wp.text.length>1024)return toast("С картинкой текст не длиннее 1024 символов");
+      var ws=await sb.from("app_settings").upsert({key:"bot_welcome",value:wp});if(ws.error)return toast("Ошибка: "+ws.error.message);return toast("Приветствие сохранено ✓");
+    case"btest":var tp=cleanPost(E[a[1]]);if(!tp.text&&!tp.image_url)return toast("Пост пустой");b.disabled=true;try{await fn("broadcast",{action:"test",post:tp});toast("Отправлено вам в Telegram ✓")}catch(er){toast("Не отправилось: "+er.message)}b.disabled=false;return;
+    case"bsendall":var bp=cleanPost(E.b);if(!bp.text&&!bp.image_url)return toast("Напишите текст или добавьте картинку");if(bp.image_url&&bp.text.length>1024)return toast("С картинкой текст не длиннее 1024 символов");if(bp.text.length>4096)return toast("Текст длиннее 4096 символов");
+      if(!confirm("Отправить рассылку "+G.botl.active+" подписчикам бота? Отменить отправленное будет нельзя."))return;
+      var me=await sb.auth.getUser();var ins=await sb.from("broadcasts").insert({text:bp.text,image_url:bp.image_url,buttons:bp.buttons,total:G.botl.active,created_by:me.data.user&&me.data.user.id}).select("*").single();if(ins.error)return toast("Ошибка: "+ins.error.message);
+      G.botl.hist.unshift(ins.data);E.b={text:"",image_url:null,buttons:[{text:"🎬 Открыть Want Watch",url:APP_LINK}]};return runBroadcast(ins.data.id);
+    case"bresume":return runBroadcast(Number(a[1]));
     case"hpm":var hl=homeList();i=Number(a[1]);j=i+Number(a[2]);if(j<0||j>=hl.length)return;var hx=hl[i];hl[i]=hl[j];hl[j]=hx;
       var base=Date.now(),hu=[];hl.forEach(function(t,k){var v=new Date(base-k*60000).toISOString();t.home_pinned_at=v;hu.push(sb.from("titles").update({home_pinned_at:v}).eq("id",t.id))});
       var hr=await Promise.all(hu);if(hr.some(function(q){return q.error})){await loadAll();render();return toast("Не удалось сохранить порядок")}toast("Порядок слайдера сохранён ✓");return render();

@@ -32,7 +32,7 @@ h1{font-size:22px;line-height:1.2;margin:0 0 6px}h2{font-size:18px;margin:22px 1
 .dots{display:flex;justify-content:center;gap:6px;margin:10px 0 4px}.dots i{width:6px;height:6px;border-radius:50%;background:var(--s2)}.dots i.on{background:var(--ink)}
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 16px}
 .tile{background:var(--s1);border-radius:20px;aspect-ratio:1/1.05;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:12px;font-weight:600}
-.tile .em{font-size:44px;line-height:1}
+.tile .em{font-size:44px;line-height:1}.tsub{display:block;font-size:12.5px;font-weight:500;color:var(--mute);line-height:1.25;margin-top:-4px;padding:0 6px}.lsub{margin:-4px 20px 14px;text-align:center;color:var(--mute);font-size:14.5px;line-height:1.4}
 .htw{padding:14px 16px 4px}.htseg{margin:0;display:flex}.htseg button{flex:1 1 0;min-width:0;padding:7px 4px;font-size:13.5px;line-height:1.15;text-wrap:balance}
 .hlist{margin-top:10px;display:flex;flex-direction:column}.hrow{display:flex;align-items:center;gap:12px;padding:7px 2px;text-align:left;width:100%}.hrow+.hrow{border-top:1px solid var(--line)}
 .hn{font-style:normal;font-weight:800;font-size:15px;width:16px;text-align:center;color:var(--mute);flex:none}.hpo{width:38px;height:56px;border-radius:8px;object-fit:cover;flex:none}
@@ -315,7 +315,7 @@ button,input,textarea,select{font-family:inherit}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 var SB_URL="https://rixjsfvweagsqrvoiymj.supabase.co",SB_KEY="sb_publishable_XlyUk5LlVt3Cdt20laz6fw_HyjKJH1y";
-var VER="20.7";
+var VER="20.8";
 var GILROY=true; /* true — если в репозитории есть папка fonts с файлами Gilroy (см. инструкцию) */
 if(GILROY){(function(){var W=[[300,["Light"]],[400,["Regular","Book"]],[500,["Medium"]],[600,["SemiBold","Semibold"]],[700,["Bold"]],[800,["ExtraBold","Extrabold"]],[900,["Heavy","Black"]]],F=[["woff2","woff2"],["woff","woff"],["ttf","truetype"],["otf","opentype"]];
   function mk(x){return W.map(function(w){var src=[];w[1].forEach(function(n){F.forEach(function(f){src.push('url("fonts/Gilroy-'+n+'.'+f[0]+'") format("'+f[1]+'")')})});
@@ -577,7 +577,7 @@ var DB={titles:[],genres:[],tg:[],cols:[],ci:[],blocks:[],stats:{},links:{},kpIc
 var S={pt:"saved",pk:"all",ps:"new",tab:"movies",stacks:{news:[],movies:[],series:[],profile:[]},sc:{},search:false,sheet:null,full:false,sq:"",sres:[],res:null};
 function T_(id){return DB.titles.find(function(x){return x.id===id})}
 function gname(g){return LANG==="en"&&g.name_en?g.name_en:g.name}
-function relBlock(x){var id=x.id,out=[],seen={},inv={prequel:"sequel",sequel:"prequel",spinoff:"origin"};
+function relBlock(x){var id=x.id,out=[],seen={},inv={prequel:"sequel",sequel:"prequel",spinoff:"spinoff",origin:"spinoff"};
   (DB.rel||[]).forEach(function(r){var o=r.title_id===id?[r.related_id,r.kind]:r.related_id===id?[r.title_id,inv[r.kind]]:null;if(!o||seen[o[0]]||!T_(o[0]))return;seen[o[0]]=1;out.push(o)});
   if(!out.length)return"";var ord={prequel:0,sequel:1,spinoff:2,origin:3};
   out.sort(function(a,b){return ord[a[1]]-ord[b[1]]||((T_(a[0]).year_start||0)-(T_(b[0]).year_start||0))});
@@ -585,6 +585,7 @@ function relBlock(x){var id=x.id,out=[],seen={},inv={prequel:"sequel",sequel:"pr
   return'<h2>'+t(pq?"relPS":sp?"relSp":"relAll")+'</h2><div class="hs">'+out.map(function(o){var q=T_(o[0]);return'<button class="pc" data-a="open:'+o[0]+'">'+poster(q)+'<i class="rlb">'+t("rel_"+o[1])+'</i><b>'+esc(nm(q))+'</b></button>'}).join("")+'</div>'}
 function inCols(id){var cs=DB.cols.filter(function(c){return c.is_active!==false&&colIds(c).indexOf(id)>=0});if(!cs.length)return"";var n=cs.length;
   return'<h2>'+t("inCols")+'</h2><div class="icg c'+(n>=4?2:n)+'">'+cs.map(function(c){return'<button class="ict" data-a="col:'+c.id+'"><span class="em">'+esc(c.emoji||"📁")+'</span><span>'+esc(ctitle(c))+'</span></button>'}).join("")+'</div>'}
+function csub(c){return(LANG==="en"&&c.subtitle_en)||(LANG==="en"?"":c.subtitle)||""}
 function ctitle(c){return LANG==="en"&&c.title_en?c.title_en:c.title}
 function dShort(x){return LANG==="en"&&x.description_short_en?x.description_short_en:(x.description_short||"")}
 function dFull(x){return LANG==="en"&&x.description_full_en?x.description_full_en:(x.description_full||"")}
@@ -755,7 +756,7 @@ function slider(kind){
   return'<div class="slider" id="sl">'+lp.map(function(x){var g=genresOf(x.id).slice(0,2).map(gname).join(", "),r=stat(x.id);
     return'<div class="slide'+(it.length===1?" one":"")+'" data-a="open:'+x.id+'"><img src="'+esc(x.home_image_url)+'" alt="">'+(function(){var k=x.sticker||(x.coming_soon?"soon":"");return k&&STKC[k]?stkSvg(k):""})()+'<div class="sov"><b>'+esc(nm(x))+'</b><span>'+[r?"★ "+r:"",when(x),g].filter(Boolean).join(" · ")+'</span></div></div>'}).join("")+'</div>'+
     (it.length>1?'<div class="dots">'+it.map(function(_,i){return'<i class="'+(i?"":"on")+'"></i>'}).join("")+'</div>':"")}
-function tile(em,tx,a,br){var h=esc(tx);if(br)h=h.replace(' ','<br>');return'<button class="tile" data-a="'+a+'"><span class="em">'+esc(em)+'</span><span>'+h+'</span></button>'}
+function tile(em,tx,a,br,sub){var h=esc(tx);if(br)h=h.replace(' ','<br>');return'<button class="tile" data-a="'+a+'"><span class="em">'+esc(em)+'</span><span>'+h+'</span>'+(sub?'<small class="tsub">'+esc(sub)+'</small>':"")+'</button>'}
 /* Три списка под слайдером: считаются на лету из уже загруженных данных, «Сейчас смотрят» — с сервера */
 function hList(kind,tb){var pub=DB.titles.filter(function(x){return x.kind===kind});
   if(tb==="now")return(DB.nw||[]).filter(function(q){return q.kind===kind&&T_(q.title_id)}).map(function(q){return q.title_id}).slice(0,5);
@@ -768,7 +769,7 @@ function homePage(kind){
   var bl=DB.blocks.filter(function(b){return b.page===kind}),parts=[],tl=[];
   if(!bl.length)bl=[{block_type:"slider"}].concat(DB.cols.filter(function(c){return c.kind===kind}).map(function(c){return{block_type:"collection",collection_id:c.id}}));
   function fl(){if(tl.length){parts.push('<div class="tiles">'+tl.join("")+'</div>');tl=[]}}
-  var cd=false;function cols(){if(cd)return;cd=true;DB.cols.filter(function(c){return c.kind===kind&&c.is_active!==false}).forEach(function(c){tl.push(tile(c.emoji||"📁",ctitle(c),"col:"+c.id))})}
+  var cd=false;function cols(){if(cd)return;cd=true;DB.cols.filter(function(c){return c.kind===kind&&c.is_active!==false}).forEach(function(c){tl.push(tile(c.emoji||"📁",ctitle(c),"col:"+c.id,false,csub(c)))})}
   bl.forEach(function(b){
     if(b.block_type==="slider"){fl();parts.push(slider(kind)+homeTabs(kind))}
     else if(b.block_type==="random"){var ct=(b.title||"").trim(),isDef=!ct||/^Рандомный (фильм|сериал)$/.test(ct);tl.push(tile(b.emoji||"🎲",(LANG==="ru"&&!isDef)?ct:t(kind==="movie"?"rndM":"rndS"),"rnd:"+kind,true))}
@@ -777,7 +778,7 @@ function homePage(kind){
 function colIds(c){var ids=c.genre_id?DB.tg.filter(function(g){return g.genre_id===c.genre_id}).map(function(g){return g.title_id}):DB.ci.filter(function(x){return x.collection_id===c.id}).map(function(x){return x.title_id});
   return ids.filter(function(id){return T_(id)})}
 function grid(ids){return ids.length?'<div class="grid3">'+ids.map(function(id){var x=T_(id);return'<button class="pc" data-a="open:'+id+'">'+poster(x)+'<b>'+esc(nm(x))+'</b><span class="mute">'+esc(when(x))+'</span></button>'}).join("")+'</div>':'<div class="center mute">'+t("empty")+'</div>'}
-function listPage(p){return bar('<b style="flex:1;text-align:center">'+esc(p.title)+'</b>')+grid(p.ids)}
+function listPage(p){return bar('<b style="flex:1;text-align:center">'+esc(p.title)+'</b>')+(p.sub?'<p class="lsub">'+esc(p.sub)+'</p>':"")+grid(p.ids)}
 function rows(ids){return ids.map(function(id){var x=T_(id);return x?'<button class="row" data-a="open:'+id+'">'+poster(x,"ico")+'<span class="grow"><b>'+esc(nm(x))+'</b><small>'+esc(when(x))+'</small></span></button>':""}).join("")}
 function resultsPage(p){var k=p.tab,ids=(k==="movie"?p.movies:p.series);
   return bar('<b style="flex:1;text-align:center">'+esc(p.q)+'</b>')+'<div class="pad"><div class="tabs"><button class="'+(k==="movie"?"on":"")+'" data-a="rt:movie">'+t("movies")+' · '+p.movies.length+'</button><button class="'+(k==="series"?"on":"")+'" data-a="rt:series">'+t("series")+' · '+p.series.length+'</button></div></div>'+(ids.length?rows(ids):'<div class="center mute">'+t("noRes")+'</div>')}
@@ -955,7 +956,7 @@ app.addEventListener("click",async function(e){
     case"setlg":if(LANG!==p[1]){LANG=p[1];lss("ww_lang",LANG)}hap();return render();
     case"theme":setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");return render();
     case"lang":LANG=LANG==="ru"?"en":"ru";lss("ww_lang",LANG);hap();return render();
-    case"col":var c=DB.cols.find(function(x){return x.id===Number(p[1])});return push({n:"list",title:ctitle(c),ids:colIds(c)});
+    case"col":var c=DB.cols.find(function(x){return x.id===Number(p[1])});return push({n:"list",title:ctitle(c),sub:csub(c),ids:colIds(c)});
     case"rnd":var k=DB.titles.filter(function(x){return x.kind===p[1]});if(!k.length)return toast(t("empty"));return openTitle(k[Math.floor(Math.random()*k.length)].id);
     case"gen":var g=DB.genres.find(function(x){return x.id===Number(p[1])});return push({n:"list",title:g.emoji+" "+gname(g),ids:DB.tg.filter(function(q){return q.genre_id===g.id}).map(function(q){return q.title_id}).filter(function(i){return T_(i)})});
     case"full":S.full=true;return render();case"short":S.full=false;return render();
