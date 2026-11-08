@@ -315,7 +315,7 @@ button,input,textarea,select{font-family:inherit}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 var SB_URL="https://rixjsfvweagsqrvoiymj.supabase.co",SB_KEY="sb_publishable_XlyUk5LlVt3Cdt20laz6fw_HyjKJH1y";
-var VER="20.8";
+var VER="20.9";
 var GILROY=true; /* true — если в репозитории есть папка fonts с файлами Gilroy (см. инструкцию) */
 if(GILROY){(function(){var W=[[300,["Light"]],[400,["Regular","Book"]],[500,["Medium"]],[600,["SemiBold","Semibold"]],[700,["Bold"]],[800,["ExtraBold","Extrabold"]],[900,["Heavy","Black"]]],F=[["woff2","woff2"],["woff","woff"],["ttf","truetype"],["otf","opentype"]];
   function mk(x){return W.map(function(w){var src=[];w[1].forEach(function(n){F.forEach(function(f){src.push('url("fonts/Gilroy-'+n+'.'+f[0]+'") format("'+f[1]+'")')})});
@@ -769,7 +769,7 @@ function homePage(kind){
   var bl=DB.blocks.filter(function(b){return b.page===kind}),parts=[],tl=[];
   if(!bl.length)bl=[{block_type:"slider"}].concat(DB.cols.filter(function(c){return c.kind===kind}).map(function(c){return{block_type:"collection",collection_id:c.id}}));
   function fl(){if(tl.length){parts.push('<div class="tiles">'+tl.join("")+'</div>');tl=[]}}
-  var cd=false;function cols(){if(cd)return;cd=true;DB.cols.filter(function(c){return c.kind===kind&&c.is_active!==false}).forEach(function(c){tl.push(tile(c.emoji||"📁",ctitle(c),"col:"+c.id,false,csub(c)))})}
+  var cd=false;function cols(){if(cd)return;cd=true;DB.cols.filter(function(c){return c.kind===kind&&c.is_active!==false}).forEach(function(c){tl.push(tile(c.emoji||"📁",ctitle(c),"col:"+c.id))})}
   bl.forEach(function(b){
     if(b.block_type==="slider"){fl();parts.push(slider(kind)+homeTabs(kind))}
     else if(b.block_type==="random"){var ct=(b.title||"").trim(),isDef=!ct||/^Рандомный (фильм|сериал)$/.test(ct);tl.push(tile(b.emoji||"🎲",(LANG==="ru"&&!isDef)?ct:t(kind==="movie"?"rndM":"rndS"),"rnd:"+kind,true))}
