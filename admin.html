@@ -63,7 +63,7 @@ function setP(o,p,v){var k=p.split(".");for(var i=0;i<k.length-1;i++)o=o[k[i]];o
 var MON=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"],STAT=[["airing","Выходит"],["ended","Завершён"],["canceled","Закрыт"],["ended_canceled","Завершён/Закрыт"],["pending","Решается судьба"]];
 function sel(p,o,v,bl){return '<select data-p="'+p+'" data-n="1"><option value="">'+bl+'</option>'+o.map(function(x){return '<option value="'+x[0]+'"'+(v===x[0]?" selected":"")+'>'+x[1]+'</option>'}).join("")+'</select>'}
 function fmtRt(m){if(!m)return"";var h=Math.floor(m/60),r=m%60;return"В приложении: "+(h?h+" ч ":"")+(r?r+" мин":"")}
-function blank(kind){return{id:null,kind:kind,code:"",title:"",original_title:"",description_short:"",description_full:"",description_short_en:"",description_full_en:"",trailer_bg_url:null,sticker:null,trailer_alt_kind:"",trailer_alt_url:"",credits:[],tmdb_id:null,year_start:null,year_end:null,runtime_min:null,poster_url:null,trailer_url:"",comments_url:"",kp_url:"",imdb_url:"",rt_url:"",rating_kp:null,rating_imdb:null,rating_rt:null,has_watch:false,status:"draft",coming_soon:false,release_day:null,release_month:null,release_year:null,series_status:"airing",on_home:false,home_image_url:null,genre_ids:[],providers:[],seasons:[]}}
+function blank(kind){return{id:null,rels:[],kind:kind,code:"",title:"",original_title:"",description_short:"",description_full:"",description_short_en:"",description_full_en:"",trailer_bg_url:null,sticker:null,trailer_alt_kind:"",trailer_alt_url:"",credits:[],tmdb_id:null,year_start:null,year_end:null,runtime_min:null,poster_url:null,trailer_url:"",comments_url:"",kp_url:"",imdb_url:"",rt_url:"",rating_kp:null,rating_imdb:null,rating_rt:null,has_watch:false,status:"draft",coming_soon:false,release_day:null,release_month:null,release_year:null,series_status:"airing",on_home:false,home_image_url:null,genre_ids:[],providers:[],seasons:[]}}
 
 async function toJpeg(f){try{var b=await createImageBitmap(f),c=document.createElement("canvas");c.width=b.width;c.height=b.height;var g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(b,0,0);
   var bl=await new Promise(function(r){c.toBlob(r,"image/jpeg",.9)});return bl?new File([bl],"poster.jpg",{type:"image/jpeg"}):f}catch(e){return f}}
@@ -76,7 +76,7 @@ async function upload(file,dir){
 }
 async function loadAll(){
   var r=await Promise.all([sb.from("genres").select("*").order("sort"),sb.from("providers").select("*").order("name"),
-    sb.from("titles").select("id,kind,code,title,status,poster_url,year_start,year_end,on_home,home_pinned_at").order("id",{ascending:false}),sb.from("collections").select("*").order("sort").order("id")]);
+    sb.from("titles").select("id,kind,code,title,original_title,status,poster_url,year_start,year_end,on_home,home_pinned_at").order("id",{ascending:false}),sb.from("collections").select("*").order("sort").order("id")]);
   G.genres=r[0].data||[];G.providers=r[1].data||[];G.titles=r[2].data||[];G.colls=r[3].data||[];
 }
 async function boot(){
@@ -122,6 +122,7 @@ ed:function(){
    (k==="movie"?fld("Ссылка на комментарии под постом в канале","comments_url",E.comments_url):"")+'</div>';
   h+='<div class="card"><h2>Рейтинги и ссылки</h2><div class="row">'+fld("КиноПоиск, ссылка","kp_url",E.kp_url)+num("Рейтинг КП","rating_kp",E.rating_kp)+'</div><div class="row">'+fld("IMDb, ссылка","imdb_url",E.imdb_url)+num("Рейтинг IMDb","rating_imdb",E.rating_imdb)+'</div><div class="row">'+fld("Rotten Tomatoes, ссылка","rt_url",E.rt_url)+num("RT, %","rating_rt",E.rating_rt)+'</div></div>';
   h+='<div class="card"><h2>На главную</h2><label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" data-p="on_home" data-re="1" style="width:auto;margin:0"'+(E.on_home?" checked":"")+'> Показывать в слайдере на главной ('+(k==="movie"?"фильмы":"сериалы")+', не больше 10)</label>'+(E.on_home?'<label style="margin-top:10px">Горизонтальная картинка для слайдера<input id="homeimg" type="file" accept="image/*"></label>'+(E.home_image_url?'<img class="prev" src="'+esc(E.home_image_url)+'" alt="Картинка слайдера">':'<div class="mute">Лучше всего подходит 16:9.</div>')+'<label style="margin-top:10px">Стикер в углу обложки'+'<select data-p="sticker"><option value="">Без стикера</option><option value="new"'+(E.sticker==="new"?" selected":"")+'>«Новинка» (красный)</option><option value="hot"'+(E.sticker==="hot"?" selected":"")+'>«Популярно сейчас» (золотой)</option><option value="soon"'+(E.sticker==="soon"?" selected":"")+'>«Скоро выйдет» (синий)</option><option value="seq_soon"'+(E.sticker==="seq_soon"?" selected":"")+'>«Скоро продолжение» (синий)</option><option value="seq_out"'+(E.sticker==="seq_out"?" selected":"")+'>«Вышло продолжение» (розовый)</option></select>'+'</label>':"")+'</div>';
+  h+=relCard();
   h+='<div class="card"><h2>Смотреть онлайн</h2><label style="display:flex;gap:8px;align-items:center;color:var(--ink)"><input type="checkbox" data-p="has_watch" data-re="1" style="width:auto;margin:0"'+(E.has_watch?" checked":"")+'> Показывать кнопку «Смотреть онлайн»</label>';
   if(E.has_watch){h+=E.providers.map(function(p,i){return '<div class="row" style="margin-bottom:8px"><label style="margin:0">Кинотеатр<select data-p="providers.'+i+'.provider_id" data-n="1"><option value="">выберите</option>'+G.providers.map(function(x){return '<option value="'+x.id+'"'+(p.provider_id===x.id?" selected":"")+'>'+esc(x.name)+'</option>'}).join("")+'</select></label>'+fld("Ссылка","providers."+i+".url",p.url).replace("<label>",'<label style="margin:0">')+fld("Промокод","providers."+i+".promo",p.promo,'placeholder="необязательно"').replace("<label>",'<label style="margin:0">')+'<button class="btn red sm" data-a="delpv:'+i+'">✕</button></div>'}).join("")+
    '<button class="btn sm" data-a="addpv">+ Кинотеатр</button>'+(G.providers.length?"":' <span class="mute">Сначала добавьте кинотеатры в каталоге.</span>')}
@@ -488,6 +489,9 @@ async function save(){
     x=await sb.from("title_providers").delete().eq("title_id",id);if(x.error)throw x.error;
     var seen={},pv=E.has_watch?E.providers.filter(function(p){if(!p.provider_id||!p.url||seen[p.provider_id])return false;seen[p.provider_id]=1;return true}).map(function(p,i){return{title_id:id,provider_id:p.provider_id,url:p.url,promo:nz((p.promo||'').trim()),sort:i}}):[];
     if(pv.length){x=await sb.from("title_providers").insert(pv);if(x.error)throw x.error}
+    x=await sb.from("title_relations").delete().eq("title_id",id);if(x.error)throw x.error;
+    var rl=(E.rels||[]).filter(function(q){return q.related_id&&q.related_id!==id}).map(function(q,k){return{title_id:id,related_id:q.related_id,kind:q.kind,sort:k}});
+    if(rl.length){x=await sb.from("title_relations").insert(rl);if(x.error)throw x.error}
     // Команда: человек ищется по имени, чтобы фото и имя были общими для всех фильмов
     x=await sb.from("credits").delete().eq("title_id",id);if(x.error)throw x.error;
     var cr=[],ci=0;
@@ -511,13 +515,24 @@ async function save(){
     await loadAll();G.tab=E.kind;G.view="list";toast("Сохранено ✓");render();
   }catch(e){console.error(e);toast("Ошибка: "+(e.message||e))}
 }
+var RELN={prequel:"Приквел",sequel:"Сиквел",spinoff:"Спин-офф"};
+function relCard(){var rs=E.rels||[];
+  return'<div class="card"><h2>'+(E.kind==="series"?"Спин-оффы":"Приквелы и сиквелы")+'</h2><p class="mute" style="margin-top:-4px">Выберите фильмы или сериалы из каталога. На странице выбранного тайтла связь покажется сама в обратную сторону: у сиквела появится приквел, у спин-оффа — «Оригинал».</p>'+
+    rs.map(function(r,i){var t=G.titles.find(function(x){return x.id===r.related_id})||{title:"#"+r.related_id};return'<div class="item" style="cursor:default;margin-bottom:6px">'+(t.poster_url?'<img src="'+esc(t.poster_url)+'" alt="">':'<span class="ph"></span>')+'<b style="flex:1">'+esc(t.title)+' <small style="display:inline">'+(t.year_start||"")+(t.kind==="series"?" · сериал":" · фильм")+'</small></b>'+
+      '<select data-p="rels.'+i+'.kind" style="width:auto">'+["prequel","sequel","spinoff"].map(function(k){return'<option value="'+k+'"'+(r.kind===k?" selected":"")+'>'+RELN[k]+'</option>'}).join("")+'</select><button class="btn red sm" data-a="reldel:'+i+'">✕</button></div>'}).join("")+
+    '<input id="relq" placeholder="Начните вводить название…" autocomplete="off" oninput="relSearch(this.value)"><div id="relres"></div></div>'}
+function relSearch(q){var box=document.getElementById("relres");if(!box)return;q=(q||"").trim().toLowerCase();if(q.length<2){box.innerHTML="";return}
+  var used={};(E.rels||[]).forEach(function(r){used[r.related_id]=1});
+  var L=G.titles.filter(function(t){return t.id!==E.id&&!used[t.id]&&((t.title||"").toLowerCase().indexOf(q)>=0||(t.original_title||"").toLowerCase().indexOf(q)>=0)}).slice(0,8);
+  box.innerHTML=L.length?L.map(function(t){return'<button class="item" data-a="reladd:'+t.id+'" style="margin-top:6px">'+(t.poster_url?'<img src="'+esc(t.poster_url)+'" alt="">':'<span class="ph"></span>')+'<span><b>'+esc(t.title)+'</b><small>'+(t.year_start||"")+(t.kind==="series"?" · сериал":" · фильм")+'</small></span><span class="badge">+ добавить</span></button>'}).join(""):'<div class="mute" style="margin-top:8px">Ничего не найдено</div>'}
 async function openEd(id){
   if(!id){E=blank(G.tab);G.view="ed";return render()}
   var r=await Promise.all([sb.from("titles").select("*").eq("id",id).single(),sb.from("title_genres").select("genre_id").eq("title_id",id),
-    sb.from("title_providers").select("*").eq("title_id",id).order("sort"),sb.from("seasons").select("*, episodes(*)").eq("title_id",id).order("number"),sb.from("credits").select("kind,character,sort,people(id,name,name_original,photo_url)").eq("title_id",id).order("sort")]);
+    sb.from("title_providers").select("*").eq("title_id",id).order("sort"),sb.from("seasons").select("*, episodes(*)").eq("title_id",id).order("number"),sb.from("credits").select("kind,character,sort,people(id,name,name_original,photo_url)").eq("title_id",id).order("sort"),sb.from("title_relations").select("related_id,kind,sort").eq("title_id",id).order("sort")]);
   if(r[0].error)return toast("Не удалось открыть");
   E=Object.assign(blank(r[0].data.kind),r[0].data,{
     genre_ids:(r[1].data||[]).map(function(x){return x.genre_id}),
+    rels:(r[5]&&r[5].data||[]).map(function(x){return{related_id:x.related_id,kind:x.kind}}),
     providers:(r[2].data||[]).map(function(x){return{provider_id:x.provider_id,url:x.url,promo:x.promo||""}}),
     credits:(r[4].data||[]).map(function(c){var p=c.people||{};return{kind:c.kind,character:c.character||"",name:p.name||"",name_en:p.name_original||"",photo_url:p.photo_url||null,person_id:p.id||null,orig:p.name||""}}),
     seasons:(r[3].data||[]).map(function(s){return{name:s.name||"",episodes:(s.episodes||[]).sort(function(a,b){return a.number-b.number}).map(function(e){return{name:e.name,description:e.description}})}})});
@@ -586,6 +601,8 @@ app.addEventListener("click",async function(e){
       var ups=[];cr.forEach(function(x,k){if(x.sort!==k+1){x.sort=k+1;ups.push(sb.from("collections").update({sort:k+1}).eq("id",x.id))}});
       var ur=await Promise.all(ups);if(ur.some(function(q){return q.error})){await loadAll();render();return toast("Не удалось сохранить порядок")}
       G.colls.sort(function(p,q){return(p.sort||0)-(q.sort||0)||p.id-q.id});return render();
+    case"reladd":(E.rels||(E.rels=[])).push({related_id:Number(a[1]),kind:E.kind==="series"?"spinoff":"sequel"});return render();
+    case"reldel":E.rels.splice(Number(a[1]),1);return render();
     case"hpm":var hl=homeList();i=Number(a[1]);j=i+Number(a[2]);if(j<0||j>=hl.length)return;var hx=hl[i];hl[i]=hl[j];hl[j]=hx;
       var base=Date.now(),hu=[];hl.forEach(function(t,k){var v=new Date(base-k*60000).toISOString();t.home_pinned_at=v;hu.push(sb.from("titles").update({home_pinned_at:v}).eq("id",t.id))});
       var hr=await Promise.all(hu);if(hr.some(function(q){return q.error})){await loadAll();render();return toast("Не удалось сохранить порядок")}toast("Порядок слайдера сохранён ✓");return render();
